@@ -29,63 +29,15 @@ Aplikasi pencatat keuangan dan patungan (*split bill*) modern yang dirancang den
 
 ---
 
-## 📐 Skema Database (Ledger-Based Model)
-
-Aplikasi ini menggunakan struktur tabel relasional berikut untuk memastikan konsistensi data:
-
-```sql
--- User Management
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(150) UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  avatar_url TEXT,
-  created_at TIMESTAMP DEFAULT now()
-);
-
--- Circle / Group
-CREATE TABLE groups (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  created_by UUID REFERENCES users(id),
-  created_at TIMESTAMP DEFAULT now()
-);
-
-CREATE TABLE group_members (
-  group_id UUID REFERENCES groups(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  role VARCHAR(20) DEFAULT 'member',
-  joined_at TIMESTAMP DEFAULT now(),
-  PRIMARY KEY (group_id, user_id)
-);
-
--- Expenses (Induk Transaksi Belanja)
-CREATE TABLE expenses (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  group_id UUID REFERENCES groups(id) ON DELETE CASCADE,
-  paid_by UUID REFERENCES users(id),
-  description TEXT,
-  total_amount NUMERIC(14,2) NOT NULL,
-  expense_date DATE NOT NULL,
-  created_at TIMESTAMP DEFAULT now()
-);
-
--- Expense Shares (Pembagian Porsi per User)
-CREATE TABLE expense_shares (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  expense_id UUID REFERENCES expenses(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id),
-  share_amount NUMERIC(14,2) NOT NULL
-);
-
--- Payments (Transaksi Pelunasan / Settle Up)
-CREATE TABLE payments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  group_id UUID REFERENCES groups(id),
-  from_user UUID REFERENCES users(id),
-  to_user UUID REFERENCES users(id),
-  amount NUMERIC(14,2) NOT NULL,
-  note TEXT,
-  paid_at TIMESTAMP DEFAULT now()
-);
+## 🗒️ Keputusan Desain yang Sudah Final
+Topik |	Keputusan
+--- | ---
+Auth	| Email + password (Google OAuth bisa ditambah nanti)
+Join grup	| Kode publik, host bisa toggle perlu approval
+Role grup	| host dan member
+Arsip grup |	Skip untuk MVP
+Notifikasi |	In-app only (no push notification)
+Urutan timeline |	Berdasarkan expenseDate, grouped per hari
+Payment |	PR-style: 1 payment per 1 ExpenseShare
+Reject & resubmit |	Payment lama tetap rejected, buat Payment baru
+Integrasi pembayaran |	Tidak ada — pakai app luar, cukup klaim manual

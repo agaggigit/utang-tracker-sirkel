@@ -7,90 +7,119 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid 
-  name          String   @db.VarChar(100)
-  email         String   @unique @db.VarChar(150)
-  passwordHash  String   @map("password_hash") 
-  avatarUrl     String?  @map("avatar_url")    
-  createdAt     DateTime @default(now()) @map("created_at")
-  
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(150)
+  passwordHash String   @map("password_hash")
+  avatarUrl    String?  @map("avatar_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+
   groupsCreated Group[]        @relation("GroupCreator")
   memberships   GroupMember[]  @relation("GroupMember")
   expensesPaid  Expense[]      @relation("ExpensePaid")
   expenseShares ExpenseShare[] @relation("ExpenseShare")
   paymentsSent  Payment[]      @relation("PaymentFromUser")
   paymentsRecv  Payment[]      @relation("PaymentToUser")
-  
-  @@map("users") 
+  joinRequests  GroupJoinRequest[]
+
+  @@map("users")
 }
 
 model Group {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name          String    @db.VarChar(100)
-  createdById   String    @map("created_by") @db.Uuid
-  createdAt     DateTime  @default(now()) @map("created_at")
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String   @db.VarChar(100)
+  createdById          String   @map("created_by") @db.Uuid
+  createdAt            DateTime @default(now()) @map("created_at")
+  joinApprovalRequired Boolean  @default(false) @map("join_approval_required")
+  inviteCode           String   @unique @map("invite_code") // kode unik per grup
 
-  creator       User          @relation("GroupCreator", fields: [createdById], references: [id])
-  members       GroupMember[] 
-  expenses      Expense[]
-  groupPayment  Payment[]     @relation("InterGroupPayment")
+  creator      User          @relation("GroupCreator", fields: [createdById], references: [id])
+  
+  groupPayment Payment[]     @relation("InterGroupPayment")
+  members      GroupMember[]
+  expenses     Expense[]
+  joinRequests GroupJoinRequest[]
 
   @@map("groups")
 }
 
 model GroupMember {
-  groupId       String    @map("group_id") @db.Uuid
-  userId        String    @map("user_id") @db.Uuid
-  role          String    @db.VarChar(20) @default("member")
-  joinedAt      DateTime  @default(now()) @map("joined_at")
+  groupId  String   @map("group_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  role     String   @default("member") @db.VarChar(20)
+  joinedAt DateTime @default(now()) @map("joined_at")
 
-  group         Group     @relation(fields: [groupId], references: [id])
-  user          User      @relation("GroupMember", fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
+  user  User  @relation("GroupMember", fields: [userId], references: [id])
 
-  @@map("group_members")
   @@id([groupId, userId])
+  @@map("group_members")
 }
 
 model Expense {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  groupId       String    @map("group_id") @db.Uuid
-  paidBy        String    @map("paid_by") @db.Uuid
-  description   String
-  totalAmount   Decimal   @db.Decimal(14,2)
-  expenseDate   DateTime  @map("expense_date")
-  createdAt     DateTime  @default(now()) @map("created_at")
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId     String   @map("group_id") @db.Uuid
+  paidBy      String   @map("paid_by") @db.Uuid
+  description String
+  totalAmount Decimal  @db.Decimal(14, 2)
+  expenseDate DateTime @map("expense_date")
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  group         Group          @relation(fields: [groupId], references: [id])
-  paidByUser    User           @relation("ExpensePaid", fields: [paidBy], references: [id])
-  shares        ExpenseShare[]
+  group      Group          @relation(fields: [groupId], references: [id])
+  paidByUser User           @relation("ExpensePaid", fields: [paidBy], references: [id])
+  
+  shares     ExpenseShare[]
 
   @@map("expenses")
 }
 
 model ExpenseShare {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  expenseId     String    @map("expense_id") @db.Uuid
-  userId        String    @map("user_id") @db.Uuid
-  shareAmount   Decimal   @map("share_amount") @db.Decimal(14,2)
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  expenseId   String    @map("expense_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  shareAmount Decimal   @map("share_amount") @db.Decimal(14, 2)
+  isPaid      Boolean   @default(false) @map("is_paid")
+  paidAt      DateTime? @map("paid_at")
+
+  expense    Expense @relation(fields: [expenseId], references: [id])
+  user       User    @relation("ExpenseShare", fields: [userId], references: [id])
   
-  expense       Expense   @relation(fields: [expenseId], references: [id])
-  user          User      @relation("ExpenseShare", fields: [userId], references: [id])
-  
+  payments   Payment[]
+
   @@map("expense_shares")
 }
 
 model Payment {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  groupId       String?   @map("group_id") @db.Uuid // Saya buat opsional (ada ?) jika suatu saat ada pelunasan di luar grup
-  fromUser      String    @map("from_user") @db.Uuid
-  toUser        String    @map("to_user") @db.Uuid
-  amount        Decimal   @db.Decimal(14,2)
-  note          String
-  paidAt        DateTime  @default(now()) @map("paid_at")
-  
-  from          User      @relation("PaymentFromUser", fields: [fromUser], references: [id])
-  to            User      @relation("PaymentToUser", fields: [toUser], references: [id])
-  groupActivity Group?    @relation("InterGroupPayment", fields: [groupId], references: [id])      
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  expenseShareId String    @map("expense_share_id") @db.Uuid
+  groupId        String?   @map("group_id") @db.Uuid // Saya buat opsional (ada ?) jika suatu saat ada pelunasan di luar grup
+  fromUser       String    @map("from_user") @db.Uuid
+  toUser         String    @map("to_user") @db.Uuid
+  amount         Decimal   @db.Decimal(14, 2)
+  note           String
+  status         String    @default("pending") @db.VarChar(20) // pending | approved | rejected
+  submittedAt    DateTime  @default(now()) @map("submitted_at")
+  reviewedAt     DateTime? @map("reviewed_at") // null sampai di-acc/tolak
+  rejectionNote  String?   @map("rejection_note") // alasan kalau ditolak
+
+  from          User         @relation("PaymentFromUser", fields: [fromUser], references: [id])
+  to            User         @relation("PaymentToUser", fields: [toUser], references: [id])
+  groupActivity Group?       @relation("InterGroupPayment", fields: [groupId], references: [id])
+  expenseShare  ExpenseShare @relation(fields: [expenseShareId], references: [id])
 
   @@map("payments")
+}
+
+model GroupJoinRequest {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId     String    @map("group_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  status      String    @default("pending") @db.VarChar(20) // pending | approved | rejected
+  requestedAt DateTime  @default(now()) @map("requested_at")
+  reviewedAt  DateTime? @map("reviewed_at")
+  
+  group       Group     @relation(fields: [groupId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  
+  @@map("group_join_requests")
 }
