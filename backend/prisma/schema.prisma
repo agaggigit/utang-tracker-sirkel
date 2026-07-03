@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid 
+  name          String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(150)
+  passwordHash  String   @map("password_hash") 
+  avatarUrl     String?  @map("avatar_url")    
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  groupsCreated Group[]        @relation("GroupCreator")
+  memberships   GroupMember[]  @relation("GroupMember")
+  expensesPaid  Expense[]      @relation("ExpensePaid")
+  expenseShares ExpenseShare[] @relation("ExpenseShare")
+  paymentsSent  Payment[]      @relation("PaymentFromUser")
+  paymentsRecv  Payment[]      @relation("PaymentToUser")
+  
+  @@map("users") 
+}
+
+model Group {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String    @db.VarChar(100)
+  createdById   String    @map("created_by") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  creator       User          @relation("GroupCreator", fields: [createdById], references: [id])
+  members       GroupMember[] 
+  expenses      Expense[]
+  groupPayment  Payment[]     @relation("InterGroupPayment")
+
+  @@map("groups")
+}
+
+model GroupMember {
+  groupId       String    @map("group_id") @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  role          String    @db.VarChar(20) @default("member")
+  joinedAt      DateTime  @default(now()) @map("joined_at")
+
+  group         Group     @relation(fields: [groupId], references: [id])
+  user          User      @relation("GroupMember", fields: [userId], references: [id])
+
+  @@map("group_members")
+  @@id([groupId, userId])
+}
+
+model Expense {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId       String    @map("group_id") @db.Uuid
+  paidBy        String    @map("paid_by") @db.Uuid
+  description   String
+  totalAmount   Decimal   @db.Decimal(14,2)
+  expenseDate   DateTime  @map("expense_date")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  group         Group          @relation(fields: [groupId], references: [id])
+  paidByUser    User           @relation("ExpensePaid", fields: [paidBy], references: [id])
+  shares        ExpenseShare[]
+
+  @@map("expenses")
+}
+
+model ExpenseShare {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  expenseId     String    @map("expense_id") @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  shareAmount   Decimal   @map("share_amount") @db.Decimal(14,2)
+  
+  expense       Expense   @relation(fields: [expenseId], references: [id])
+  user          User      @relation("ExpenseShare", fields: [userId], references: [id])
+  
+  @@map("expense_shares")
+}
+
+model Payment {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId       String?   @map("group_id") @db.Uuid // Saya buat opsional (ada ?) jika suatu saat ada pelunasan di luar grup
+  fromUser      String    @map("from_user") @db.Uuid
+  toUser        String    @map("to_user") @db.Uuid
+  amount        Decimal   @db.Decimal(14,2)
+  note          String
+  paidAt        DateTime  @default(now()) @map("paid_at")
+  
+  from          User      @relation("PaymentFromUser", fields: [fromUser], references: [id])
+  to            User      @relation("PaymentToUser", fields: [toUser], references: [id])
+  groupActivity Group?    @relation("InterGroupPayment", fields: [groupId], references: [id])      
+
+  @@map("payments")
+}
