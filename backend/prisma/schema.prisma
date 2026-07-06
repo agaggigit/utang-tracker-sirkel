@@ -8,11 +8,13 @@ datasource db {
 
 model User {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  googleId     String?  @unique @map("google_id")
   name         String   @db.VarChar(100)
   email        String   @unique @db.VarChar(150)
-  passwordHash String   @map("password_hash")
+  passwordHash String?  @map("password_hash")
   avatarUrl    String?  @map("avatar_url")
   createdAt    DateTime @default(now()) @map("created_at")
+  authProvider String   @default("local") @map("auth_provider")
 
   groupsCreated Group[]        @relation("GroupCreator")
   memberships   GroupMember[]  @relation("GroupMember")

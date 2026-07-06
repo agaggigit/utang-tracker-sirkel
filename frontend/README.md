@@ -73,3 +73,20 @@ export default defineConfig([
 ])
 
 ```
+
+
+
+
+
+
+dev-dist
+- jujur gatau buat apa
+
+node_modules
+- isinya library
+
+src
+- kode frontend
+
+index.html
+- gatau juga buat apa
