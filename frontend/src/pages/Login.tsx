@@ -47,7 +47,7 @@ export const Login = () => {
             alert('Login Berhasil! Kunci token sudah disimpan.');
             
             // Nanti kita arahkan ke halaman Home/Dashboard menggunakan:
-            // navigate('/dashboard');
+            navigate('/dashboard');
         } catch(err: any) {
             setErrorMsg(err.message);
         } finally {

@@ -3,6 +3,7 @@ import cors from 'cors';
 import { registerRouter } from "./users/registerUser";
 import { loginRouter } from "./users/loginUser";
 import { googleAuthRouter } from "./users/googleAuth";
+import { profileRouter } from "./users/profile";
 import { authenticate } from "./middleware/auth"
 
 const app = express();
@@ -16,6 +17,8 @@ app.use(cors());
 app.use('/auth', registerRouter);
 app.use('/auth', loginRouter);
 app.use('/auth', googleAuthRouter);
+
+app.use('/users', profileRouter);
 
 // Rute tes dasar
 app.get('/api/test', (req, res) => {
