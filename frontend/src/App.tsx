@@ -3,6 +3,7 @@ import { Register } from './pages/Register';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Profile } from './pages/Profile';
+import { CreateGroup } from "./pages/CreateGroup";
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PWAPrompt } from "./components/PWAPrompt";
 
@@ -21,6 +22,11 @@ function App() {
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile/>
+            </ProtectedRoute>
+          } />
+          <Route path="/create-group" element={
+            <ProtectedRoute>
+              <CreateGroup/>
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/login" replace />} />

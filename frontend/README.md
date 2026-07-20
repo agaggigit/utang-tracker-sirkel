@@ -90,3 +90,5 @@ src
 
 index.html
 - gatau juga buat apa
+
+Jadi nanti konsep nya bakal kaya bubble aplikasi chat, dimana untuk setiap bubble merepresentasikan patungan atau tindakan transaksi, dan dibangun berdasarkan timeline, tanggal berapa tanggal berapa, dan nanti yang nalangin palanya muncul di atas, pas bubble nya diteken bakal masuk ke detail utang per orang nya
