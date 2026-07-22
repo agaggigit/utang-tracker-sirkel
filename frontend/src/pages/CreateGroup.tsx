@@ -20,7 +20,7 @@ export const CreateGroup = () => {
         
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3000/groups', {
+            const response = await fetch('http://localhost:3000/groups/make', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -68,7 +68,7 @@ export const Dashboard = () => {
                             ➕ Buat Sirkel Baru
                         </Button>
                         
-                        <Button variant="outline" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }} onClick={() => alert('Fitur Join Grup akan dibuat selanjutnya!')}>
+                        <Button variant="outline" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }} onClick={() => navigate('/join-group')}>
                             🤝 Gabung Sirkel
                         </Button>
                     </div>
@@ -81,7 +81,7 @@ export const Dashboard = () => {
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                             {/* TOMBOL KECIL (TIDAK DISTRACTING) DI KANAN ATAS */}
                             <Button variant="outline" onClick={() => navigate('/create-group')}>+ Buat</Button>
-                            <Button variant="outline" onClick={() => alert('Fitur Join Grup akan dibuat selanjutnya!')}>+ Gabung</Button>
+                            <Button variant="outline" onClick={() => navigate('/join-group')}>+ Gabung</Button>
                         </div>
                     </div>
                     {/* DAFTAR GRUP YANG DIMILIKI */}

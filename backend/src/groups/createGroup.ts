@@ -10,7 +10,7 @@ const createGroupSchema = z.object({
     name: z.string().min(3, "Nama grup minimal 3 karakter")
 });
 
-router.post('/', authenticate, async (req: Request, res: Response) => {
+router.post('/make', authenticate, async (req: Request, res: Response) => {
     const result = createGroupSchema.safeParse(req.body);
 
     if (!result.success) {
@@ -61,4 +61,4 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
     }
 });
 
-export { router as groupRouter };
+export { router as createGroupRouter };
