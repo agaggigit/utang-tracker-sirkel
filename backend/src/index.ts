@@ -8,6 +8,8 @@ import { createGroupRouter } from './groups/createGroup';
 import { joinGroupRouter } from './groups/joinGroup';
 import { joinRequestRouter } from './groups/joinRequests';
 import { authenticate } from "./middleware/auth"
+import { groupSettingsRouter } from './groups/groupSettings';
+import { getGroupDetailsRouter } from './groups/getGroupDetails';
 import { joinRequestNotificationRouter } from './notifications/joinRequestNotifications';
 
 const app = express();
@@ -27,6 +29,8 @@ app.use('/users', profileRouter);
 app.use('/groups', createGroupRouter);
 app.use('/groups', joinGroupRouter);
 app.use('/groups', joinRequestRouter);
+app.use('/groups', groupSettingsRouter);
+app.use('/groups', getGroupDetailsRouter);
 
 app.use('/notifications', joinRequestNotificationRouter)
 

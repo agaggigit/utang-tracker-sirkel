@@ -27,6 +27,8 @@ router.post('/make', authenticate, async (req: Request, res: Response) => {
         // Cetak kode undangan rahasia (8 karakter hex)
         const inviteCode = crypto.randomBytes(4).toString('hex');
 
+        // WARNING: HARUSNYA ADA PENGECEKAN APAKAH KODE INI SUDAH DIPAKAI SEBELUMNYA ATAU BELUM, DAN KALAU ADA BISA DI REROLL LAGI SAMPAI DAPET
+
         // PENTING: Gunakan Prisma Transaction. 
         // Ini memastikan pembuatan Grup dan pembuatan Member terjadi sekalian.
         // Jika salah satu gagal, keduanya akan dibatalkan otomatis (Rollback).
