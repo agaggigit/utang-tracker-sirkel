@@ -6,7 +6,9 @@ import { googleAuthRouter } from "./users/googleAuth";
 import { profileRouter } from "./users/profile";
 import { createGroupRouter } from './groups/createGroup';
 import { joinGroupRouter } from './groups/joinGroup';
+import { joinRequestRouter } from './groups/joinRequests';
 import { authenticate } from "./middleware/auth"
+import { joinRequestNotificationRouter } from './notifications/joinRequestNotifications';
 
 const app = express();
 const port = 3000;
@@ -21,8 +23,12 @@ app.use('/auth', loginRouter);
 app.use('/auth', googleAuthRouter);
 
 app.use('/users', profileRouter);
+
 app.use('/groups', createGroupRouter);
 app.use('/groups', joinGroupRouter);
+app.use('/groups', joinRequestRouter);
+
+app.use('/notifications', joinRequestNotificationRouter)
 
 // Rute tes dasar
 app.get('/api/test', (req, res) => {

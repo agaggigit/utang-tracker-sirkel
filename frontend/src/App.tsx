@@ -5,8 +5,10 @@ import { Dashboard } from './pages/Dashboard';
 import { Profile } from './pages/Profile';
 import { CreateGroup } from "./pages/CreateGroup";
 import { JoinGroup } from "./pages/JoinGroup";
+import { GroupDetail } from "./pages/GroupDetail";
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PWAPrompt } from "./components/PWAPrompt";
+import { Notifications } from "./pages/Notifications";
 
 function App() {
   return (
@@ -33,6 +35,16 @@ function App() {
           <Route path="/join-group" element={
             <ProtectedRoute>
               <JoinGroup/>
+            </ProtectedRoute>
+          } />
+          <Route path="/groups/:id" element={
+            <ProtectedRoute>
+              <GroupDetail/>
+            </ProtectedRoute>
+          } />
+          <Route path="/notifications" element={
+            <ProtectedRoute>
+              <Notifications/>
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/login" replace />} />

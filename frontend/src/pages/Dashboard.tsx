@@ -6,6 +6,7 @@ export const Dashboard = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [notifications, setNotifications] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -25,6 +26,24 @@ export const Dashboard = () => {
             }
         };
         fetchUserData();
+
+        const fetchNotifications = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:3000/notifications/join-requests', {
+                    headers: { 'Authorization': `Bearer ${token}` }  
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setNotifications(data);
+                }
+            } catch (error) {
+                console.error("Gagal mengambil notifikasi", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchNotifications();
     }, []);
 
     const handleLogout = () => { 
@@ -47,6 +66,20 @@ export const Dashboard = () => {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <Button variant="outline" onClick={() => navigate('/profile')}>Profil</Button>
                     <Button variant="outline" onClick={handleLogout}>Keluar</Button>
+                </div>
+                <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate('/notifications')}>
+                    <span style={{ fontSize: '1.5rem' }}>🔔</span>
+                    
+                    {/* Jika ada antrean, munculkan bulatan merah angka antrean! */}
+                    {notifications.length > 0 && (
+                        <span style={{
+                            position: 'absolute', top: '-5px', right: '-10px',
+                            backgroundColor: 'var(--color-error)', color: 'white',
+                            borderRadius: '50%', padding: '2px 6px', fontSize: '0.75rem', fontWeight: 'bold'
+                        }}>
+                            {notifications.length}
+                        </span>
+                    )}
                 </div>
             </div>
             {/* KONDISI 1: JIKA BELUM PUNYA GRUP SAMA SEKALI */}
@@ -100,7 +133,7 @@ export const Dashboard = () => {
                                     <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-primary)' }}>{membership.group.name}</h3>
                                     <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-light)' }}>Peranmu: {membership.role}</p>
                                 </div>
-                                <Button>Buka Sirkel</Button>
+                                <Button onClick={() => navigate('/groups/' + membership.group.id)}>Buka Sirkel</Button>
                             </div>
                         ))}
                     </div>

@@ -7,7 +7,8 @@ import crypto from 'crypto';
 const router = Router();
 
 const createGroupSchema = z.object({
-    name: z.string().min(3, "Nama grup minimal 3 karakter")
+    name: z.string().min(3, "Nama grup minimal 3 karakter"),
+    joinApprovalRequired: z.boolean().optional().default(false)
 });
 
 router.post('/make', authenticate, async (req: Request, res: Response) => {
@@ -21,11 +22,11 @@ router.post('/make', authenticate, async (req: Request, res: Response) => {
 
     try {
         const userId = res.locals.user.userId;
-        const { name } = result.data;
+        const { name, joinApprovalRequired } = result.data;
 
         // Cetak kode undangan rahasia (8 karakter hex)
         const inviteCode = crypto.randomBytes(4).toString('hex');
-        
+
         // PENTING: Gunakan Prisma Transaction. 
         // Ini memastikan pembuatan Grup dan pembuatan Member terjadi sekalian.
         // Jika salah satu gagal, keduanya akan dibatalkan otomatis (Rollback).
@@ -35,7 +36,8 @@ router.post('/make', authenticate, async (req: Request, res: Response) => {
                 data: {
                     name: name,
                     createdById: userId,
-                    inviteCode: inviteCode
+                    inviteCode: inviteCode,
+                    joinApprovalRequired: joinApprovalRequired
                 }
             });
 
@@ -55,7 +57,7 @@ router.post('/make', authenticate, async (req: Request, res: Response) => {
             message: "Grup berhasil dibuat!",
             group: newGroup
         });
-    } catch(error) {
+    } catch (error) {
         console.error("Create Group Error:", error);
         res.status(500).json({ message: "Gagal membuat grup" });
     }

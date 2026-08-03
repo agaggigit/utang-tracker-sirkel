@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
+import { Switch } from "../components/Switch";
 
 export const CreateGroup = () => {
     const navigate = useNavigate();
@@ -12,7 +13,8 @@ export const CreateGroup = () => {
     // State untuk menyimpan kode undangan setelah grup berhasil dibuat di Backend
     const [inviteCode, setInviteCode] = useState('');
     const [isCopied, setIsCopied] = useState(false);
-
+    const [joinApprovalRequired, setJoinApprovalRequired] = useState(false);
+    
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -26,7 +28,7 @@ export const CreateGroup = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name })  // Kirim nama grup ke backend
+                body: JSON.stringify({ name, joinApprovalRequired })  // Kirim nama grup ke backend
             });
 
             const data = await response.json();
@@ -86,6 +88,11 @@ export const CreateGroup = () => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
+                        />
+                        <Switch
+                            label="Butuh persetujuan Admin (Host) untuk anggota baru yang bergabung"
+                            checked={joinApprovalRequired}
+                            onChange={(val) => setJoinApprovalRequired(val)}
                         />
                         <Button type="submit" fullWidth disabled={isLoading}>
                             {isLoading ? 'Membuat...' : 'Buat Grup'}
