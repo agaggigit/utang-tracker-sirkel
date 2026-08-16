@@ -8,6 +8,8 @@ import { JoinGroup } from "./pages/JoinGroup";
 import { GroupDetail } from "./pages/GroupDetail";
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PWAPrompt } from "./components/PWAPrompt";
+import { CreateExpense } from "./pages/CreateExpense";
+import { GroupExpenses } from "./pages/GroupExpenses";
 import { Notifications } from "./pages/Notifications";
 
 function App() {
@@ -40,6 +42,16 @@ function App() {
           <Route path="/groups/:id" element={
             <ProtectedRoute>
               <GroupDetail/>
+            </ProtectedRoute>
+          } />
+          <Route path="/groups/:id/expenses" element={
+            <ProtectedRoute>
+              <GroupExpenses/>
+            </ProtectedRoute>
+          } />
+          <Route path="/groups/:id/expenses/create" element={
+            <ProtectedRoute>
+              <CreateExpense/>
             </ProtectedRoute>
           } />
           <Route path="/notifications" element={

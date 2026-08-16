@@ -11,6 +11,9 @@ import { authenticate } from "./middleware/auth"
 import { groupSettingsRouter } from './groups/groupSettings';
 import { getGroupDetailsRouter } from './groups/getGroupDetails';
 import { joinRequestNotificationRouter } from './notifications/joinRequestNotifications';
+import { createExpenseRouter } from './expenses/createExpense';
+import { getExpensesRouter } from './expenses/getExpenses';
+import { getGroupMembersRouter } from './groups/getGroupMembers';
 
 const app = express();
 const port = 3000;
@@ -31,6 +34,9 @@ app.use('/groups', joinGroupRouter);
 app.use('/groups', joinRequestRouter);
 app.use('/groups', groupSettingsRouter);
 app.use('/groups', getGroupDetailsRouter);
+app.use('/groups', getGroupMembersRouter);
+app.use('/groups', createExpenseRouter);
+app.use('/groups', getExpensesRouter);
 
 app.use('/notifications', joinRequestNotificationRouter)
 
