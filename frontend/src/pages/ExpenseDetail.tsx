@@ -16,6 +16,7 @@ interface ExpenseDetailData {
         shareAmount: string;
         isPaid: boolean;
         user: { name: string, email: string };
+        payments?: { status: string }[];
     }[];
 }
 
@@ -32,6 +33,11 @@ export const ExpenseDetail = () => {
     const [expense, setExpense] = useState<ExpenseDetailData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
+
+    // --- POLA PIKIR STATE MODAL (LANGKAH 2 & 3) ---
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [paymentNote, setPaymentNote] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -68,6 +74,54 @@ export const ExpenseDetail = () => {
     // Cek apakah 'saya' (current user) ada di daftar utang dan belum lunas
     const myShare = expense.shares.find(s => s.userId === currentUserId);
     const amIInvolvedAndUnpaid = myShare && !myShare.isPaid;
+
+    // Cek apakah utang saya ini sedang dalam status diajukan (pending)
+    const isPending = myShare?.payments?.some(p => p.status === 'pending');
+
+    const handleSubmitPayment = async () => {
+        if (!myShare) return;
+        setIsSubmitting(true);
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:3000/payments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    expenseShareId: myShare.id,
+                    note: paymentNote
+                })
+            });
+
+            if (response.ok) {
+                // Tutup modal dan bersihkan input
+                setIsModalOpen(false);
+                setPaymentNote('');
+                
+                // Ubah state lokal agar tulisan "Menunggu Konfirmasi" langsung muncul tanpa refresh halaman
+                setExpense(prev => {
+                    if (!prev) return prev;
+                    const updatedShares = prev.shares.map(s => {
+                        if (s.id === myShare.id) {
+                            return { ...s, payments: [...(s.payments || []), { status: 'pending' }] };
+                        }
+                        return s;
+                    });
+                    return { ...prev, shares: updatedShares };
+                });
+            } else {
+                const data = await response.json();
+                alert(`Gagal: ${data.message}`);
+            }
+        } catch (err) {
+            alert('Terjadi kesalahan jaringan saat mengirim pengajuan.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="dashboard-container">
@@ -125,19 +179,59 @@ export const ExpenseDetail = () => {
                         </div>
                     </div>
 
-                    {/* --- TOMBOL AKSI JIKA BELUM BAYAR (LANGKAH 3) --- */}
+                    {/* --- TOMBOL AKSI ATAU STATUS PENDING (LANGKAH 3) --- */}
                     {amIInvolvedAndUnpaid && (
                         <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center' }}>
-                            <Button 
-                                onClick={() => alert("Fitur segera datang! (Lanjut ke Issue #12 ya!)")} 
-                                style={{ padding: '0.75rem 2rem', fontSize: '1.05rem', boxShadow: 'var(--shadow-md)' }}
-                            >
-                                💸 Ajukan Pembayaran ke {expense.paidByUser.name}
-                            </Button>
+                            {isPending ? (
+                                <div style={{ padding: '1rem 2rem', backgroundColor: '#fef3c7', color: '#92400e', borderRadius: '8px', border: '1px solid #fde68a', fontWeight: 'bold' }}>
+                                    ⏳ Menunggu Konfirmasi Penombok
+                                </div>
+                            ) : (
+                                <Button 
+                                    onClick={() => setIsModalOpen(true)} 
+                                    style={{ padding: '0.75rem 2rem', fontSize: '1.05rem', boxShadow: 'var(--shadow-md)' }}
+                                >
+                                    💸 Ajukan Pembayaran ke {expense.paidByUser.name}
+                                </Button>
+                            )}
                         </div>
                     )}
                 </div>
             </main>
+
+            {/* --- POLA PIKIR UI MODAL POP-UP (LANGKAH 2) --- */}
+            {isModalOpen && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+                }}>
+                    <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', width: '90%', maxWidth: '400px', boxShadow: 'var(--shadow-lg)' }}>
+                        <h3 style={{ margin: 0, marginBottom: '1rem' }}>Ajukan Pembayaran</h3>
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            Beri tahu <strong>{expense.paidByUser.name}</strong> kalau kamu sudah mentransfer uangnya.
+                        </p>
+                        
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Catatan (Opsional)</label>
+                        <textarea 
+                            className="input-field"
+                            rows={3}
+                            placeholder="Misal: Udah kutransfer via GoPay ya brok!"
+                            value={paymentNote}
+                            onChange={(e) => setPaymentNote(e.target.value)}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', marginBottom: '1.5rem', fontFamily: 'inherit', resize: 'vertical' }}
+                        />
+                        
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
+                                Batal
+                            </Button>
+                            <Button onClick={handleSubmitPayment} disabled={isSubmitting}>
+                                {isSubmitting ? 'Mengirim...' : 'Kirim Pengajuan'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

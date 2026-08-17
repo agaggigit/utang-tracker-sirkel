@@ -21,6 +21,9 @@ router.get('/:id', authenticate, async (req: Request, res: Response) => {
                     include: {
                         user: { // Ambil info user yang berutang
                             select: { name: true, email: true }
+                        },
+                        payments: {
+                            select: { status: true } // Ambil status payment agar frontend tahu kalau ada yang pending
                         }
                     }
                 },

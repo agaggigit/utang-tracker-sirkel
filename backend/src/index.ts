@@ -15,6 +15,7 @@ import { createExpenseRouter } from './expenses/createExpense';
 import { getExpensesRouter } from './expenses/getExpenses';
 import { getGroupMembersRouter } from './groups/getGroupMembers';
 import { getExpenseDetailRouter } from './expenses/getExpenseDetail';
+import { createPaymentRouter } from './payments/createPayment';
 
 const app = express();
 const port = 3000;
@@ -40,6 +41,7 @@ app.use('/groups', createExpenseRouter);
 app.use('/groups', getExpensesRouter);
 
 app.use('/expenses', getExpenseDetailRouter);
+app.use('/payments', createPaymentRouter);
 
 app.use('/notifications', joinRequestNotificationRouter)
 
