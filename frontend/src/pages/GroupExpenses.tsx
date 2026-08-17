@@ -199,6 +199,7 @@ export const GroupExpenses = () => {
                                     )}
                                     
                                     <div 
+                                        onClick={() => navigate(`/expenses/${expense.id}`)}
                                         ref={isLastElement ? lastElementRef : null}
                                         style={{ 
                                             backgroundColor: 'var(--color-surface)', 
@@ -207,7 +208,18 @@ export const GroupExpenses = () => {
                                             border: '1px solid var(--color-border)',
                                             boxShadow: 'var(--shadow-sm)',
                                             display: 'flex',
-                                            flexDirection: 'column'
+                                            flexDirection: 'column',
+                                            cursor: 'pointer',
+                                            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                                        }}
+                                        // Efek hover agar terasa interaktif
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
                                         }}
                                     >
                                         {/* Bagian Atas: Info Umum */}

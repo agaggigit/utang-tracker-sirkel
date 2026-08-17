@@ -10,6 +10,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { PWAPrompt } from "./components/PWAPrompt";
 import { CreateExpense } from "./pages/CreateExpense";
 import { GroupExpenses } from "./pages/GroupExpenses";
+import { ExpenseDetail } from "./pages/ExpenseDetail";
 import { Notifications } from "./pages/Notifications";
 
 function App() {
@@ -47,6 +48,11 @@ function App() {
           <Route path="/groups/:id/expenses" element={
             <ProtectedRoute>
               <GroupExpenses/>
+            </ProtectedRoute>
+          } />
+          <Route path="/expenses/:id" element={
+            <ProtectedRoute>
+              <ExpenseDetail/>
             </ProtectedRoute>
           } />
           <Route path="/groups/:id/expenses/create" element={
