@@ -10,10 +10,11 @@ import { joinRequestRouter } from './groups/joinRequests';
 import { authenticate } from "./middleware/auth"
 import { groupSettingsRouter } from './groups/groupSettings';
 import { getGroupDetailsRouter } from './groups/getGroupDetails';
+import { getGroupMembersRouter } from './groups/getGroupMembers';
+import { getGroupBalanceRouter } from './groups/getGroupBalance';
 import { joinRequestNotificationRouter } from './notifications/joinRequestNotifications';
 import { createExpenseRouter } from './expenses/createExpense';
 import { getExpensesRouter } from './expenses/getExpenses';
-import { getGroupMembersRouter } from './groups/getGroupMembers';
 import { getExpenseDetailRouter } from './expenses/getExpenseDetail';
 import { createPaymentRouter } from './payments/createPayment';
 import { incomingPaymentsRouter } from './payments/getIncomingPayments';
@@ -40,6 +41,7 @@ app.use('/groups', joinRequestRouter);
 app.use('/groups', groupSettingsRouter);
 app.use('/groups', getGroupDetailsRouter);
 app.use('/groups', getGroupMembersRouter);
+app.use('/groups', getGroupBalanceRouter);
 app.use('/groups', createExpenseRouter);
 app.use('/groups', getExpensesRouter);
 

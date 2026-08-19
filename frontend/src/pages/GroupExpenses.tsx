@@ -22,6 +22,14 @@ interface Expense {
     shares: ExpenseShare[];
 }
 
+// --- POLA PIKIR RINGKASAN UTANG (LANGKAH 2) ---
+interface BalanceData {
+    totalIOwe: number;
+    totalOwedToMe: number;
+    iOwe: { userId: string, name: string, amount: number }[];
+    owedToMe: { userId: string, name: string, amount: number }[];
+}
+
 // --- HELPER FORMAT TANGGAL ---
 const formatDateHeader = (dateString: string) => {
     const date = new Date(dateString);
@@ -43,6 +51,13 @@ export const GroupExpenses = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
 
+    // --- POLA PIKIR RINGKASAN UTANG (LANGKAH 2) ---
+    const [balanceData, setBalanceData] = useState<BalanceData | null>(null);
+    const [isBalanceLoading, setIsBalanceLoading] = useState(true);
+
+    // --- POLA PIKIR MODAL RINGKASAN (LANGKAH 3) ---
+    const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
+
     // --- POLA PIKIR PAGINATION & INFINITE SCROLL (LANGKAH 2) ---
     // 1. State Pagination
     const [page, setPage] = useState(1);
@@ -63,6 +78,27 @@ export const GroupExpenses = () => {
         setExpenses([]); // Kosongkan layar
         setHasMore(true);
     };
+
+    // --- POLA PIKIR RINGKASAN UTANG (LANGKAH 2) ---
+    useEffect(() => {
+        const fetchBalance = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`http://localhost:3000/groups/${groupId}/balance`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setBalanceData(data);
+                }
+            } catch (err) {
+                console.error("Gagal memuat saldo grup", err);
+            } finally {
+                setIsBalanceLoading(false);
+            }
+        };
+        fetchBalance();
+    }, [groupId]);
 
     // 2. Fungsi Fetch Data
     useEffect(() => {
@@ -155,6 +191,50 @@ export const GroupExpenses = () => {
             </header>
 
             <main className="dashboard-main" style={{ marginTop: '2rem' }}>
+                {/* --- BANNER RINGKASAN UTANG (LANGKAH 2) --- */}
+                {!isBalanceLoading && balanceData && (
+                    <div 
+                        onClick={() => setIsBalanceModalOpen(true)}
+                        style={{
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            backgroundColor: 'var(--color-surface)',
+                            padding: '1.5rem',
+                            borderRadius: '12px',
+                            border: '1px solid var(--color-primary)',
+                            boxShadow: 'var(--shadow-md)',
+                            marginBottom: '2rem',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                        }}
+                    >
+                        {/* Aksen garis warna di kiri */}
+                        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', backgroundColor: 'var(--color-primary)' }}></div>
+                        
+                        <div style={{ paddingLeft: '1rem' }}>
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Piutang (Orang utang ke kamu)</p>
+                            <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')}</h3>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Utangmu (Kamu utang ke orang)</p>
+                            <h3 style={{ margin: 0, color: 'var(--color-error)' }}>Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
+                        </div>
+                        <div style={{ alignSelf: 'center', backgroundColor: '#f3f4f6', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem' }}>
+                            Lihat Rincian &rarr;
+                        </div>
+                    </div>
+                )}
+
                 {errorMsg && (
                     <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem' }}>
                         ⚠️ {errorMsg}
@@ -262,6 +342,55 @@ export const GroupExpenses = () => {
                     </div>
                 )}
             </main>
+
+            {/* --- MODAL DETAIL RINGKASAN (LANGKAH 3) --- */}
+            {isBalanceModalOpen && balanceData && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+                }}>
+                    <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', width: '90%', maxWidth: '500px', maxHeight: '80vh', overflowY: 'auto', boxShadow: 'var(--shadow-lg)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+                            <h3 style={{ margin: 0 }}>Rincian Ringkasan Utang</h3>
+                            <button onClick={() => setIsBalanceModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-muted)' }}>&times;</button>
+                        </div>
+                        
+                        {/* Bagian Aku Utang Ke Siapa Saja */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-error)' }}>Daftar Utangmu (Total: Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')})</h4>
+                            {balanceData.iOwe.length === 0 ? (
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Kamu tidak punya utang ke siapapun! 🎉</p>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {balanceData.iOwe.map(item => (
+                                        <div key={item.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#fef2f2', borderRadius: '8px', border: '1px solid #fee2e2' }}>
+                                            <span style={{ fontWeight: 'bold' }}>Ke {item.name}</span>
+                                            <span style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Bagian Siapa Saja Utang Ke Aku */}
+                        <div>
+                            <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-primary)' }}>Daftar Piutangmu (Total: Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')})</h4>
+                            {balanceData.owedToMe.length === 0 ? (
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Belum ada yang utang ke kamu. 💸</p>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {balanceData.owedToMe.map(item => (
+                                        <div key={item.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#ecfdf5', borderRadius: '8px', border: '1px solid #d1fae5' }}>
+                                            <span style={{ fontWeight: 'bold' }}>Dari {item.name}</span>
+                                            <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
