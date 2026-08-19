@@ -3,6 +3,7 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
+import toast from 'react-hot-toast';
 
 export const Register = () => {
     // --- 1. STATE (Tempat menyimpan apa yang diketik user) ---
@@ -65,7 +66,7 @@ export const Register = () => {
             }
 
             // Jika berhasil
-            alert('Pendaftaran berhasil, silahkan masuk ke halaman login');
+            toast.success('Pendaftaran berhasil, silahkan masuk ke halaman login');
             
             // Nanti kita akan redirect ke halaman login di sini
             navigate('/login')

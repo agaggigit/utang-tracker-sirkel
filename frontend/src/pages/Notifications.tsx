@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
+import { Inbox, Check, Clock, AlertTriangle, PartyPopper, Info, X, ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const Notifications = () => {
     const navigate = useNavigate();
@@ -89,7 +91,7 @@ export const Notifications = () => {
         
         if (action === 'reject' && !rejectionNote.trim()) {
             // Sesuai kesepakatan, kita paksa isi catatan khusus untuk reject
-            alert("Harap masukkan alasan penolakan!");
+            toast.error("Harap masukkan alasan penolakan!");
             return;
         }
 
@@ -111,12 +113,13 @@ export const Notifications = () => {
                 setIsReviewModalOpen(false);
                 setRejectionNote('');
                 setSelectedPayment(null);
+                toast.success('Aksi berhasil!');
             } else {
                 const data = await response.json();
-                alert(`Gagal: ${data.message}`);
+                toast.error(`Gagal: ${data.message}`);
             }
         } catch (err) {
-            alert("Terjadi kesalahan jaringan.");
+            toast.error("Terjadi kesalahan jaringan.");
         } finally {
             setIsSubmitting(false);
         }
@@ -127,25 +130,34 @@ export const Notifications = () => {
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Button variant="outline" onClick={() => navigate(-1)}>&larr; Kembali</Button>
-                    <h1 style={{ fontSize: '1.5rem', margin: 0 }}>Notifikasi 🔔</h1>
+                    <button 
+                        onClick={() => navigate(-1)}
+                        style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                        title="Kembali"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
+                    <h1 style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Kotak Masuk <Inbox size={24} /></h1>
                 </div>
                 {generalNotifs.some(n => !n.isRead) && (
-                    <Button variant="outline" onClick={markAllAsRead} style={{ fontSize: '0.85rem' }}>
-                        ✓ Tandai Semua Dibaca
-                    </Button>
+                    <button 
+                        onClick={markAllAsRead} 
+                        style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={16} /> Tandai Semua Dibaca</span>
+                    </button>
                 )}
             </div>
 
-            {/* List Notifikasi */}
+            {/* List Pesan */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {isLoading ? (
-                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
-                        ⏳ Memuat notifikasi...
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                        <Clock size={20} /> Memuat pesan...
                     </div>
                 ) : errorMsg ? (
-                    <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', textAlign: 'center' }}>
-                        ⚠️ {errorMsg}
+                    <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                        <AlertTriangle size={20} /> {errorMsg}
                     </div>
                 ) : hasNoNotifications ? (
                     <div style={{ 
@@ -155,8 +167,8 @@ export const Notifications = () => {
                         borderRadius: 'var(--radius-lg)',
                         boxShadow: 'var(--shadow-sm)'
                     }}>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', margin: 0 }}>
-                            Hore! Belum ada notifikasi baru saat ini. 🎉
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            Hore! Belum ada pesan baru saat ini. <PartyPopper size={20} />
                         </p>
                     </div>
                 ) : (
@@ -173,7 +185,7 @@ export const Notifications = () => {
                                     <div style={{ 
                                         width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#eab308', 
                                         color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                        fontWeight: 'bold', fontSize: '1.2rem', boxShadow: 'var(--shadow-sm)'
+                                        fontWeight: 'bold', fontSize: '1.2rem', boxShadow: 'var(--shadow-sm)', flexShrink: 0
                                     }}>
                                         {payment.from.name.charAt(0).toUpperCase()}
                                     </div>
@@ -209,7 +221,7 @@ export const Notifications = () => {
                                     <div style={{ 
                                         width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', 
                                         color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                        fontWeight: 'bold', fontSize: '1.2rem', boxShadow: 'var(--shadow-sm)'
+                                        fontWeight: 'bold', fontSize: '1.2rem', boxShadow: 'var(--shadow-sm)', flexShrink: 0
                                     }}>
                                         {notif.user.name.charAt(0).toUpperCase()}
                                     </div>
@@ -252,9 +264,9 @@ export const Notifications = () => {
                                     width: '40px', height: '40px', borderRadius: '50%', 
                                     backgroundColor: notif.isRead ? 'var(--color-border)' : '#38bdf8', 
                                     color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                    fontSize: '1rem'
+                                    fontSize: '1rem', flexShrink: 0
                                 }}>
-                                    ℹ️
+                                    <Info size={20} />
                                 </div>
                                 <div>
                                     <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>
@@ -266,7 +278,7 @@ export const Notifications = () => {
                                         })}
                                     </p>
                                 </div>
-                                {!notif.isRead && <div style={{ marginLeft: 'auto', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0ea5e9' }}></div>}
+                                {!notif.isRead && <div style={{ marginLeft: 'auto', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0ea5e9', flexShrink: 0 }}></div>}
                             </div>
                         ))}
                     </>
@@ -316,12 +328,12 @@ export const Notifications = () => {
                                 Batal
                             </Button>
                             
-                            <Button onClick={() => handleAction('reject')} disabled={isSubmitting} style={{ backgroundColor: 'var(--color-error)', border: 'none', color: 'white' }}>
-                                ❌ Tolak
+                            <Button onClick={() => handleAction('reject')} disabled={isSubmitting} style={{ backgroundColor: 'var(--color-error)', border: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <X size={18} /> Tolak
                             </Button>
 
-                            <Button onClick={() => handleAction('approve')} disabled={isSubmitting} style={{ backgroundColor: 'var(--color-primary)' }}>
-                                ✅ Terima
+                            <Button onClick={() => handleAction('approve')} disabled={isSubmitting} style={{ backgroundColor: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Check size={18} /> Terima
                             </Button>
                         </div>
                     </div>

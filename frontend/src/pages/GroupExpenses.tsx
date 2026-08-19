@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
+import { Settings, Search, Plus, AlertTriangle, Calendar, Wallet, Users, CheckCircle, XCircle, Clock, PartyPopper, Filter, ArrowLeft, ArrowRight } from 'lucide-react';
 
 // Tipe data berdasarkan struktur Schema Database
 interface ExpenseShare {
@@ -189,27 +190,38 @@ export const GroupExpenses = () => {
     }, [isLoading, isFetchingMore, hasMore]);
 
     return (
-        <div className="dashboard-container">
-            <header className="dashboard-header" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
+            <div className="expenses-layout">
+                {/* --- 1. HEADER (Kiri Atas) --- */}
+                <header className="expenses-header" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <Button variant="outline" onClick={() => navigate(`/dashboard`)}>&larr; Dasbor Utama</Button>
+                        <button 
+                            onClick={() => navigate(`/dashboard`)}
+                            style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                            title="Kembali ke Dasbor"
+                        >
+                            <ArrowLeft size={24} />
+                        </button>
                         <h2 style={{ margin: 0 }}>Riwayat Tagihan</h2>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <Button variant="outline" onClick={() => navigate(`/groups/${groupId}`)}>
-                            ⚙️ Pengaturan Sirkel
-                        </Button>
-                        <Button onClick={() => navigate(`/groups/${groupId}/expenses/create`)}>
-                            + Catat Tagihan Baru
-                        </Button>
+                    <div>
+                        <button 
+                            onClick={() => navigate(`/groups/${groupId}`)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                            title="Pengaturan Sirkel"
+                        >
+                            <Settings size={24} />
+                        </button>
                     </div>
                 </div>
 
                 {/* --- BAR PENCARIAN & FILTER --- */}
                 <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                     <div style={{ flex: 1, position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>🔍</span>
+                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>
+                            <Search size={18} />
+                        </span>
                         <input 
                             type="text" 
                             className="input-field" 
@@ -221,7 +233,8 @@ export const GroupExpenses = () => {
                         />
                     </div>
                     <Button variant="outline" onClick={() => setIsFilterSheetOpen(true)} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>⚙️ Filter</span>
+                        <Filter size={18} />
+                        <span>Filter</span>
                         {(startDate || endDate || filterType !== 'all') && (
                             <span style={{ width: '8px', height: '8px', backgroundColor: 'var(--color-primary)', borderRadius: '50%' }}></span>
                         )}
@@ -244,54 +257,65 @@ export const GroupExpenses = () => {
                 )}
             </header>
 
-            <main className="dashboard-main" style={{ marginTop: '2rem' }}>
-                {/* --- BANNER RINGKASAN UTANG (LANGKAH 2) --- */}
-                {!isBalanceLoading && balanceData && (
-                    <div 
-                        onClick={() => setIsBalanceModalOpen(true)}
-                        style={{
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            backgroundColor: 'var(--color-surface)',
-                            padding: '1.5rem',
-                            borderRadius: '12px',
-                            border: '1px solid var(--color-primary)',
-                            boxShadow: 'var(--shadow-md)',
-                            marginBottom: '2rem',
-                            cursor: 'pointer',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                        }}
-                    >
-                        {/* Aksen garis warna di kiri */}
-                        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', backgroundColor: 'var(--color-primary)' }}></div>
-                        
-                        <div style={{ paddingLeft: '1rem' }}>
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Piutang (Orang utang ke kamu)</p>
-                            <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')}</h3>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Utangmu (Kamu utang ke orang)</p>
-                            <h3 style={{ margin: 0, color: 'var(--color-error)' }}>Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
-                        </div>
-                        <div style={{ alignSelf: 'center', backgroundColor: '#f3f4f6', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem' }}>
-                            Lihat Rincian &rarr;
-                        </div>
-                    </div>
-                )}
+            {/* --- 3. PANEL STATS (Kanan) --- */}
+            <div className="expenses-stats">
+            {/* --- TOMBOL CATAT TAGIHAN BARU --- */}
+            <Button 
+                onClick={() => navigate(`/groups/${groupId}/expenses/create`)}
+                style={{ width: '100%', fontSize: '1.05rem', padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', boxShadow: 'var(--shadow-md)' }}
+            >
+                <Plus size={20} /> Catat Tagihan Baru
+            </Button>
 
+            {/* --- BANNER RINGKASAN UTANG --- */}
+            {!isBalanceLoading && balanceData && (
+                <div 
+                    onClick={() => setIsBalanceModalOpen(true)}
+                    style={{
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        gap: '1rem',
+                        backgroundColor: 'var(--color-surface)',
+                        padding: '1.5rem',
+                        borderRadius: '12px',
+                        border: '1px solid var(--color-primary)',
+                        boxShadow: 'var(--shadow-md)',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                    }}
+                >
+                    {/* Aksen garis warna di kiri (diubah jadi atas untuk layout kolom) */}
+                    <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '6px', backgroundColor: 'var(--color-primary)' }}></div>
+                    
+                    <div style={{ marginTop: '0.5rem' }}>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Piutang (Orang utang ke kamu)</p>
+                        <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')}</h3>
+                    </div>
+                    <div>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Utangmu (Kamu utang ke orang)</p>
+                        <h3 style={{ margin: 0, color: 'var(--color-error)' }}>Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
+                    </div>
+                    <div style={{ alignSelf: 'flex-start', backgroundColor: '#f3f4f6', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                        Lihat Rincian <ArrowRight size={16} style={{ marginLeft: '0.25rem' }} />
+                    </div>
+                </div>
+            )}
+            </div>
+
+            <main className="expenses-list">
                 {errorMsg && (
-                    <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem' }}>
-                        ⚠️ {errorMsg}
+                    <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <AlertTriangle size={20} /> {errorMsg}
                     </div>
                 )}
 
@@ -361,9 +385,9 @@ export const GroupExpenses = () => {
                                             <div>
                                                 <h3 style={{ margin: 0, marginBottom: '0.5rem' }}>{expense.description}</h3>
                                                 <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
-                                                    <span>📅 {new Date(expense.expenseDate).toLocaleDateString('id-ID')}</span>
-                                                    <span>💸 Ditalangi oleh: <strong>{expense.paidByUser?.name || 'Seseorang'}</strong></span>
-                                                    <span>👥 Dibagi ke {expense.shares.length} orang</span>
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> {new Date(expense.expenseDate).toLocaleDateString('id-ID')}</span>
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Wallet size={14} /> Ditalangi oleh: <strong>{expense.paidByUser?.name || 'Seseorang'}</strong></span>
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Users size={14} /> Dibagi ke {expense.shares.length} orang</span>
                                                 </div>
                                             </div>
                                             <div style={{ textAlign: 'right' }}>
@@ -377,12 +401,14 @@ export const GroupExpenses = () => {
                                             expense.paidBy === currentUserId ? (
                                                 <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', backgroundColor: '#f3f4f6', borderRadius: '8px', color: 'var(--color-text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <span style={{ fontSize: '0.9rem' }}>Status Tagihanmu:</span>
-                                                    <strong style={{ fontSize: '1.05rem' }}>✅ Ditalangi Sendiri</strong>
+                                                    <strong style={{ fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle size={18} /> Ditalangi Sendiri</strong>
                                                 </div>
                                             ) : (
                                                 <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', backgroundColor: myShare.isPaid ? '#ecfdf5' : '#fef2f2', borderRadius: '8px', color: myShare.isPaid ? 'var(--color-primary)' : 'var(--color-error)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <span style={{ fontSize: '0.9rem' }}>Status Tagihanmu:</span>
-                                                    <strong style={{ fontSize: '1.05rem' }}>{myShare.isPaid ? '✅ Sudah Lunas' : `❌ Belum Lunas (Rp ${Number(myShare.shareAmount).toLocaleString('id-ID')})`}</strong>
+                                                    <strong style={{ fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                        {myShare.isPaid ? <><CheckCircle size={18} /> Sudah Lunas</> : <><XCircle size={18} /> Belum Lunas (Rp {Number(myShare.shareAmount).toLocaleString('id-ID')})</>}
+                                                    </strong>
                                                 </div>
                                             )
                                         ) : (
@@ -396,13 +422,69 @@ export const GroupExpenses = () => {
                         })}
                         
                         {/* Menampilkan indikator loading saat scroll bawah */}
-                        {isFetchingMore && <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', margin: '1rem 0' }}>⏳ Memuat tagihan lama...</p>}
+                        {isFetchingMore && <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', margin: '1rem 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}><Clock size={16} /> Memuat tagihan lama...</p>}
                         
                         {/* Pesan kalau sudah habis */}
                         {!hasMore && expenses.length > 0 && <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', margin: '1rem 0', fontStyle: 'italic' }}>Tamat. Tidak ada histori lagi.</p>}
                     </div>
                 )}
             </main>
+
+            {/* --- 3. PANEL STATS (Kanan) --- */}
+            <div className="expenses-stats">
+            {/* --- TOMBOL CATAT TAGIHAN BARU --- */}
+            <Button 
+                onClick={() => navigate(`/groups/${groupId}/expenses/create`)}
+                style={{ width: '100%', fontSize: '1.05rem', padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', boxShadow: 'var(--shadow-md)' }}
+            >
+                <Plus size={20} /> Catat Tagihan Baru
+            </Button>
+
+            {/* --- BANNER RINGKASAN UTANG --- */}
+            {!isBalanceLoading && balanceData && (
+                <div 
+                    onClick={() => setIsBalanceModalOpen(true)}
+                    style={{
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        gap: '1rem',
+                        backgroundColor: 'var(--color-surface)',
+                        padding: '1.5rem',
+                        borderRadius: '12px',
+                        border: '1px solid var(--color-primary)',
+                        boxShadow: 'var(--shadow-md)',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                    }}
+                >
+                    {/* Aksen garis warna di kiri (diubah jadi atas untuk layout kolom) */}
+                    <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '6px', backgroundColor: 'var(--color-primary)' }}></div>
+                    
+                    <div style={{ marginTop: '0.5rem' }}>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Piutang (Orang utang ke kamu)</p>
+                        <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')}</h3>
+                    </div>
+                    <div>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Utangmu (Kamu utang ke orang)</p>
+                        <h3 style={{ margin: 0, color: 'var(--color-error)' }}>Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
+                    </div>
+                    <div style={{ alignSelf: 'flex-start', backgroundColor: '#f3f4f6', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                        Lihat Rincian &rarr;
+                    </div>
+                </div>
+            )}
+            </div> {/* END PANEL STATS */}
+        </div> {/* END EXPENSES LAYOUT */}
 
             {/* --- MODAL DETAIL RINGKASAN (LANGKAH 3) --- */}
             {isBalanceModalOpen && balanceData && (
@@ -420,7 +502,7 @@ export const GroupExpenses = () => {
                         <div style={{ marginBottom: '2rem' }}>
                             <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-error)' }}>Daftar Utangmu (Total: Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')})</h4>
                             {balanceData.iOwe.length === 0 ? (
-                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Kamu tidak punya utang ke siapapun! 🎉</p>
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><PartyPopper size={16} /> Kamu tidak punya utang ke siapapun!</p>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                     {balanceData.iOwe.map(item => (
@@ -437,7 +519,7 @@ export const GroupExpenses = () => {
                         <div>
                             <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-primary)' }}>Daftar Piutangmu (Total: Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')})</h4>
                             {balanceData.owedToMe.length === 0 ? (
-                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Belum ada yang utang ke kamu. 💸</p>
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Wallet size={16} /> Belum ada yang utang ke kamu.</p>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                     {balanceData.owedToMe.map(item => (
@@ -453,35 +535,32 @@ export const GroupExpenses = () => {
                 </div>
             )}
 
-            {/* --- BOTTOM SHEET FILTER (Seperi Tokopedia) --- */}
+            {/* --- BOTTOM SHEET FILTER --- */}
             {(isFilterSheetOpen || isClosingSheet) && (
-                <>
-                    {/* Backdrop Transparan */}
-                    <div 
-                        style={{
-                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                            backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 999,
-                            opacity: isClosingSheet ? 0 : 1, transition: 'opacity 0.3s ease'
-                        }}
-                        onClick={closeFilterSheet}
-                    />
-
+                <div 
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999,
+                        display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+                        opacity: isClosingSheet ? 0 : 1, transition: 'opacity 0.3s ease'
+                    }}
+                    onClick={closeFilterSheet}
+                >
                     {/* Lembar Sliding dari Bawah */}
                     <div 
                         style={{
-                            position: 'fixed', left: '50%', bottom: 0, transform: 'translateX(-50%)',
-                            width: '100%', maxWidth: '480px', backgroundColor: 'var(--color-surface)',
-                            borderTopLeftRadius: '20px', borderTopRightRadius: '20px',
-                            padding: '1.5rem', paddingBottom: '2.5rem', zIndex: 1000,
-                            boxShadow: '0 -4px 10px rgba(0,0,0,0.1)',
-                            animation: `${isClosingSheet ? 'slideDown' : 'slideUp'} 0.3s forwards ease-out`
+                            backgroundColor: 'var(--color-surface)', padding: '2rem',
+                            borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
+                            animation: `${isClosingSheet ? 'slideDown' : 'slideUp'} 0.3s forwards ease-out`,
+                            paddingBottom: '3rem'
                         }}
+                        onClick={e => e.stopPropagation()}
                     >
                         {/* Garis Handle Tarik (Visual Saja) */}
-                        <div style={{ width: '40px', height: '4px', backgroundColor: 'var(--color-border)', borderRadius: '2px', margin: '0 auto 1.5rem' }}></div>
+                        <div style={{ width: '40px', height: '5px', backgroundColor: 'var(--color-border)', borderRadius: '10px', margin: '0 auto 1.5rem auto' }}></div>
                         
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ margin: 0 }}>Filter Tagihan</h3>
+                            <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Filter Tagihan</h3>
                             <button onClick={closeFilterSheet} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-muted)' }}>&times;</button>
                         </div>
 
@@ -546,7 +625,7 @@ export const GroupExpenses = () => {
                             </Button>
                         </div>
                     </div>
-                </>
+                </div>
             )}
         </div>
     );

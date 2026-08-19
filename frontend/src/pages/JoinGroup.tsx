@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
+import { ArrowLeft } from 'lucide-react';
 
 export const JoinGroup = () => {
     const navigate = useNavigate();
@@ -47,12 +48,13 @@ export const JoinGroup = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <span 
-                    style={{ color: 'var(--color-primary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600 }} 
+                <button 
                     onClick={() => navigate('/dashboard')}
+                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                    title="Kembali ke Dashboard"
                 >
-                    &larr; Kembali ke Dashboard
-                </span>
+                    <ArrowLeft size={24} />
+                </button>
 
                 <div className="auth-header" style={{ marginTop: '1rem' }}>
                     <h2>Gabung Sirkel</h2>

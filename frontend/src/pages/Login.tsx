@@ -3,6 +3,7 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
+import toast from 'react-hot-toast';
 
 export const Login = () => {
     const navigate = useNavigate();
@@ -45,7 +46,7 @@ export const Login = () => {
             // MISI RAHASIA: Simpan "Kunci" (Token JWT) dari Backend ke Brankas Browser
             localStorage.setItem('token', data.token);
             
-            alert('Login Berhasil! Kunci token sudah disimpan.');
+            toast.success('Login Berhasil!');
             
             // Nanti kita arahkan ke halaman Home/Dashboard menggunakan:
             navigate('/dashboard');

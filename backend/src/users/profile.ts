@@ -31,7 +31,33 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
             }
         });
 
-        res.json(user)
+        // Cari tahu apakah user ini punya utang yang belum lunas (bukan dia yang nalangin) di grup-grup tersebut
+        const unpaidShares = await prisma.expenseShare.findMany({
+            where: {
+                userId: userId,
+                isPaid: false,
+                expense: {
+                    paidBy: { not: userId } // Pastikan bukan tagihannya sendiri
+                }
+            },
+            include: {
+                expense: { select: { groupId: true } }
+            }
+        });
+
+        // Kumpulkan ID grup yang memiliki utang
+        const groupsWithDebt = new Set(unpaidShares.map(s => s.expense.groupId));
+
+        // Tempelkan informasi utang ke dalam list memberships
+        const userWithDebtInfo = {
+            ...user,
+            memberships: user?.memberships.map(m => ({
+                ...m,
+                hasUnpaidDebt: groupsWithDebt.has(m.groupId)
+            }))
+        };
+
+        res.json(userWithDebtInfo);
     } catch (error) {
         res.status(500).json({ message: "Gagal mengambil profil" });
     }

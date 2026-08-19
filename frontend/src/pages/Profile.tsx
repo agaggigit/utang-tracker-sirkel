@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
+import { ArrowLeft } from 'lucide-react';
 
 export const Profile = () => {
     const navigate = useNavigate();
@@ -85,60 +86,73 @@ export const Profile = () => {
 
     return (
         <div className="auth-container">
-            <div className="auth-card">
+            <div className="auth-card profile-card" style={{ position: 'relative' }}>
                 
                 {/* Tombol Kembali ke Dashboard */}
-                <span 
-                    style={{ color: 'var(--color-primary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600 }} 
+                <button 
                     onClick={() => navigate('/dashboard')}
+                    style={{ position: 'absolute', top: '2rem', left: '2rem', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                    title="Kembali ke Dashboard"
                 >
-                    &larr; Kembali
-                </span>
-                <div className="auth-header" style={{ marginTop: '1rem' }}>
-                    <h2>Profil Pribadi</h2>
-                    <p>Atur nama dan foto profilmu</p>
-                </div>
-                {/* AREA FOTO PROFIL */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-                    <div className="avatar-preview">
-                        {formData.avatarUrl ? (
-                            <img src={formData.avatarUrl} alt="Avatar" />
-                        ) : (
-                            <div className="avatar-placeholder">
-                                {formData.name ? formData.name.charAt(0).toUpperCase() : '?'}
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <form onSubmit={handleSubmit} className="auth-form">
-                    {message.text && (
-                        <div className="auth-error-banner" style={{ 
-                            backgroundColor: message.type === 'success' ? '#dcfce7' : '#fef2f2',
-                            color: message.type === 'success' ? '#166534' : 'var(--color-error)',
-                            borderColor: message.type === 'success' ? '#bbf7d0' : '#fecaca'
-                        }}>
-                            {message.text}
+                    <ArrowLeft size={24} />
+                </button>
+
+                <div className="profile-layout" style={{ marginTop: '1.5rem' }}>
+                    
+                    {/* --- KOLOM KIRI --- */}
+                    <div>
+                        <div className="auth-header">
+                            <h2>Profil Pribadi</h2>
+                            <p>Atur nama dan foto profilmu</p>
                         </div>
-                    )}
-                    <Input 
-                        label="Nama Lengkap" 
-                        name="name"
-                        placeholder="Misal: Budi Santoso"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Input 
-                        label="URL Foto Profil (Opsional)" 
-                        name="avatarUrl"
-                        placeholder="https://contoh.com/foto.jpg"
-                        value={formData.avatarUrl}
-                        onChange={handleChange}
-                    />
-                    <Button type="submit" fullWidth disabled={isLoading}>
-                        {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
-                    </Button>
-                </form>
+                        {/* AREA FOTO PROFIL */}
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <div className="avatar-preview">
+                                {formData.avatarUrl ? (
+                                    <img src={formData.avatarUrl} alt="Avatar" />
+                                ) : (
+                                    <div className="avatar-placeholder">
+                                        {formData.name ? formData.name.charAt(0).toUpperCase() : '?'}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* --- KOLOM KANAN --- */}
+                    <div>
+                        <form onSubmit={handleSubmit} className="auth-form">
+                            {message.text && (
+                                <div className="auth-error-banner" style={{ 
+                                    backgroundColor: message.type === 'success' ? '#dcfce7' : '#fef2f2',
+                                    color: message.type === 'success' ? '#166534' : 'var(--color-error)',
+                                    borderColor: message.type === 'success' ? '#bbf7d0' : '#fecaca'
+                                }}>
+                                    {message.text}
+                                </div>
+                            )}
+                            <Input 
+                                label="Nama Lengkap" 
+                                name="name"
+                                placeholder="Misal: Budi Santoso"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                            />
+                            <Input 
+                                label="URL Foto Profil (Opsional)" 
+                                name="avatarUrl"
+                                placeholder="https://contoh.com/foto.jpg"
+                                value={formData.avatarUrl}
+                                onChange={handleChange}
+                            />
+                            <Button type="submit" fullWidth disabled={isLoading}>
+                                {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            </Button>
+                        </form>
+                    </div>
+
+                </div>
             </div>
         </div>
     );

@@ -13,6 +13,7 @@ import { EditExpense } from "./pages/EditExpense";
 import { GroupExpenses } from "./pages/GroupExpenses";
 import { ExpenseDetail } from "./pages/ExpenseDetail";
 import { Notifications } from "./pages/Notifications";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -76,6 +77,33 @@ function App() {
       </BrowserRouter>
 
       <PWAPrompt/>
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            borderRadius: '12px',
+            background: 'var(--color-surface)',
+            color: 'var(--color-text-main)',
+            boxShadow: 'var(--shadow-md)',
+            padding: '16px',
+            fontSize: '0.95rem',
+            fontWeight: 500,
+            border: '1px solid var(--color-border)',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--color-primary)',
+              secondary: 'white',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: 'var(--color-error)',
+              secondary: 'white',
+            },
+          }
+        }}
+      />
     </>
   );
 }

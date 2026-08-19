@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { Switch } from "../components/Switch";
+import { Check, ArrowLeft } from 'lucide-react';
 
 export const CreateGroup = () => {
     const navigate = useNavigate();
@@ -63,12 +64,13 @@ export const CreateGroup = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <span 
-                    style={{ color: 'var(--color-primary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600 }} 
+                <button 
                     onClick={() => navigate('/dashboard')}
+                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                    title="Kembali ke Dashboard"
                 >
-                    &larr; Kembali ke Dashboard
-                </span>
+                    <ArrowLeft size={24} />
+                </button>
 
                 <div className="auth-header" style={{ marginTop: '1rem' }}>
                     <h2>Buat Sirkel Baru</h2>
@@ -104,8 +106,8 @@ export const CreateGroup = () => {
                         <div style={{ padding: '2rem', backgroundColor: '#f0f9ff', borderRadius: '12px', border: '1px dashed var(--color-primary)' }}>
                             <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-light)' }}>Kode Undangan Rahasia:</p>
                             <h1 style={{ letterSpacing: '0.2em', color: 'var(--color-primary)', margin: '1rem 0' }}>{inviteCode}</h1>
-                            <Button variant={isCopied ? "outline" : "primary"} onClick={handleCopy} fullWidth>
-                                {isCopied ? 'Tersalin! ✅' : 'Copy Kode Undangan'}
+                            <Button variant={isCopied ? "outline" : "primary"} onClick={handleCopy} fullWidth style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                {isCopied ? <><Check size={18} /> Tersalin!</> : 'Copy Kode Undangan'}
                             </Button>
                         </div>
                         <p style={{ marginTop: '2rem', fontSize: '0.875rem', color: 'var(--color-text-light)' }}>

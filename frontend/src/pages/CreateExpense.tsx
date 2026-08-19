@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
+import { AlertTriangle, Scale, Trash2, ChevronDown, ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 // Tipe data untuk daftar anggota yang bisa dipilih
 interface Member {
@@ -141,7 +143,7 @@ export const CreateExpense = () => {
                 throw new Error(data.message || 'Gagal membuat tagihan');
             }
 
-            alert("Berhasil mencatat tagihan!");
+            toast.success("Berhasil mencatat tagihan!");
             navigate(`/groups/${groupId}/expenses`);
 
         } catch (err: any) {
@@ -152,26 +154,32 @@ export const CreateExpense = () => {
     };
 
     return (
-        <div className="dashboard-container">
+        <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
             <header className="dashboard-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Button variant="outline" onClick={() => navigate(-1)}>&larr; Kembali</Button>
-                    <h2>Catat Open Bill (Nalangin)</h2>
+                    <button 
+                        onClick={() => navigate(-1)}
+                        style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                        title="Kembali"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
+                    <h2>Buat Tagihan Baru</h2>
                 </div>
             </header>
 
             <main className="dashboard-main" style={{ marginTop: '2rem' }}>
                 <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)' }}>
                     {errorMsg && (
-                        <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem' }}>
-                            ⚠️ {errorMsg}
+                        <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <AlertTriangle size={20} /> {errorMsg}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <form className="expense-form-layout" onSubmit={handleSubmit}>
                         
                         {/* 1. INFORMASI UMUM */}
-                        <div style={{ paddingBottom: '1.5rem', borderBottom: '1px solid var(--color-border)' }}>
+                        <div className="expense-form-info">
                             <h3 style={{ marginBottom: '1rem' }}>Informasi Tagihan</h3>
                             
                             <div className="input-wrapper">
@@ -226,11 +234,11 @@ export const CreateExpense = () => {
                         </div>
 
                         {/* 2. SPLIT BILL */}
-                        <div>
+                        <div className="expense-form-split">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                 <h3 style={{ margin: 0 }}>Siapa saja yang berutang padamu?</h3>
-                                <Button type="button" variant="outline" onClick={handleSplitEqually} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
-                                    ⚖️ Bagi Rata
+                                <Button type="button" variant="outline" onClick={handleSplitEqually} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <Scale size={16} /> Bagi Rata
                                 </Button>
                             </div>
 
@@ -269,7 +277,7 @@ export const CreateExpense = () => {
                                                 }}
                                                 title="Hapus baris ini"
                                             >
-                                                ✖
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
 
@@ -319,13 +327,15 @@ export const CreateExpense = () => {
                                             <option key={m.id} value={m.id}>{m.name}</option>
                                         ))}
                                     </select>
-                                    <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-primary)' }}>▼</span>
+                                    <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-primary)' }}>
+                                        <ChevronDown size={20} />
+                                    </span>
                                 </div>
                             )}
                         </div>
 
                         {/* 3. SUMMARIES & SUBMIT */}
-                        <div style={{ marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div className="expense-form-submit">
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem' }}>
                                 <span>Total Tagihan:</span>
                                 <span style={{ fontWeight: 'bold' }}>Rp {totalAmount || 0}</span>
