@@ -17,6 +17,8 @@ import { notificationRouter } from './notifications/getNotifications';
 import { createExpenseRouter } from './expenses/createExpense';
 import { getExpensesRouter } from './expenses/getExpenses';
 import { getExpenseDetailRouter } from './expenses/getExpenseDetail';
+import { deleteExpenseRouter } from './expenses/deleteExpense';
+import { updateExpenseRouter } from './expenses/updateExpense';
 import { createPaymentRouter } from './payments/createPayment';
 import { incomingPaymentsRouter } from './payments/getIncomingPayments';
 import { approvePaymentRouter } from './payments/approvePayment';
@@ -50,6 +52,9 @@ app.use('/notifications', joinRequestNotificationRouter);
 app.use('/notifications', notificationRouter);
 
 app.use('/expenses', getExpenseDetailRouter);
+app.use('/expenses', deleteExpenseRouter);
+app.use('/expenses', updateExpenseRouter);
+
 app.use('/payments', createPaymentRouter);
 app.use('/payments', incomingPaymentsRouter);
 app.use('/payments', approvePaymentRouter);

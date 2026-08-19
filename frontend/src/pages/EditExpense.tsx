@@ -8,9 +8,13 @@ interface Member {
     name: string;
 }
 
-export const CreateExpense = () => {
-    const { id: groupId } = useParams();
+export const EditExpense = () => {
+    const { id: expenseId } = useParams();
     const navigate = useNavigate();
+
+    // Data dari backend
+    const [isLocked, setIsLocked] = useState(false);
+    const [isFetching, setIsFetching] = useState(true);
 
     // --- STATE FORM UTAMA ---
     const [description, setDescription] = useState('');
@@ -36,27 +40,63 @@ export const CreateExpense = () => {
 
     // --- EFFECT ---
     useEffect(() => {
-        const fetchMembers = async () => {
+        const fetchInitialData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`http://localhost:3000/groups/${groupId}/members`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
+                
+                // 1. Ambil data expense
+                const expenseRes = await fetch(`http://localhost:3000/expenses/${expenseId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setMembers(data);
+                if (!expenseRes.ok) throw new Error("Gagal mengambil data tagihan");
+                const expenseData = await expenseRes.json();
+                
+                const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).userId : '';
+                if (expenseData.paidBy !== currentUserId) {
+                    throw new Error("Akses ditolak. Kamu bukan penombok tagihan ini.");
                 }
-            } catch (err) {
-                console.error("Gagal mengambil anggota grup", err);
+
+                const hasPaid = expenseData.shares.some((s: any) => s.isPaid && s.userId !== currentUserId);
+                setIsLocked(hasPaid);
+                setDescription(expenseData.description);
+                setTotalAmount(expenseData.totalAmount);
+                
+                // Set tanggal & waktu
+                const dateObj = new Date(expenseData.expenseDate);
+                const isMidnightUTC = expenseData.expenseDate.endsWith("T00:00:00.000Z");
+                
+                if (isMidnightUTC) {
+                    setIsTimeSpecific(false);
+                    setExpenseDate(expenseData.expenseDate.split('T')[0]);
+                } else {
+                    setIsTimeSpecific(true);
+                    const tzOffset = dateObj.getTimezoneOffset() * 60000;
+                    const localISOTime = (new Date(dateObj.getTime() - tzOffset)).toISOString().slice(0, 16);
+                    setExpenseDate(localISOTime);
+                }
+
+                setShares(expenseData.shares.map((s: any) => ({
+                    userId: s.user.id || s.userId, // jika API mereturn include user
+                    shareAmount: s.shareAmount
+                })));
+
+                // 2. Ambil data member grup
+                const membersRes = await fetch(`http://localhost:3000/groups/${expenseData.groupId}/members`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (membersRes.ok) {
+                    const membersData = await membersRes.json();
+                    setMembers(membersData);
+                }
+            } catch (err: any) {
+                setErrorMsg(err.message);
+            } finally {
+                setIsFetching(false);
             }
         };
 
-        fetchMembers();
-    }, [groupId]);
+        fetchInitialData();
+    }, [expenseId]);
 
     // --- HANDLER UNTUK SPLIT BILL ---
 
@@ -112,7 +152,7 @@ export const CreateExpense = () => {
                 finalExpenseDate = new Date(`${expenseDate}T00:00:00.000Z`);
             }
 
-            // Panggil API POST /groups/:id/expenses
+            // Panggil API PUT /expenses/:id
             const payload = {
                 description,
                 totalAmount: Number(totalAmount),
@@ -121,8 +161,8 @@ export const CreateExpense = () => {
             };
 
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/groups/${groupId}/expenses`, {
-                method: 'POST',
+            const response = await fetch(`http://localhost:3000/expenses/${expenseId}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -134,15 +174,14 @@ export const CreateExpense = () => {
 
             if (!response.ok) {
                 if (data.errors) {
-                    // Ambil pesan error pertama dari validasi Zod
                     const firstError = Object.values(data.errors)[0] as string[];
                     throw new Error(firstError[0]);
                 }
-                throw new Error(data.message || 'Gagal membuat tagihan');
+                throw new Error(data.message || 'Gagal memperbarui tagihan');
             }
 
-            alert("Berhasil mencatat tagihan!");
-            navigate(`/groups/${groupId}/expenses`);
+            alert("Berhasil memperbarui tagihan!");
+            navigate(`/expenses/${expenseId}`, { replace: true });
 
         } catch (err: any) {
             setErrorMsg(err.message);
@@ -151,20 +190,27 @@ export const CreateExpense = () => {
         }
     };
 
+    if (isFetching) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem'}}>⏳ Memuat data...</p></div>;
+
     return (
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Button variant="outline" onClick={() => navigate(-1)}>&larr; Kembali</Button>
-                    <h2>Catat Open Bill (Nalangin)</h2>
+                    <Button variant="outline" onClick={() => navigate(-1)}>&larr; Batal</Button>
+                    <h2>Edit Tagihan</h2>
                 </div>
             </header>
 
             <main className="dashboard-main" style={{ marginTop: '2rem' }}>
                 <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)' }}>
+                    {isLocked && (
+                        <div style={{ padding: '1rem', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '8px', marginBottom: '1.5rem', fontWeight: 'bold' }}>
+                            🔒 Karena sudah ada anggota yang membayar lunas, kamu hanya bisa mengubah Judul dan Tanggal. Kolom nominal telah dikunci.
+                        </div>
+                    )}
                     {errorMsg && (
                         <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem' }}>
-                            ⚠️ {errorMsg}
+                            âš ï¸ {errorMsg}
                         </div>
                     )}
 
@@ -192,9 +238,12 @@ export const CreateExpense = () => {
                                     className="input-field" 
                                     placeholder="0"
                                     value={totalAmount}
+                                    disabled={isLocked}
+                                    style={isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)' } : {}}
                                     onChange={e => setTotalAmount(e.target.value ? Number(e.target.value) : '')}
                                 />
                             </div>
+                            
                             <div className="input-wrapper">
                                 <label className="input-label">Tanggal Transaksi</label>
                                 <input 
@@ -229,9 +278,11 @@ export const CreateExpense = () => {
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                 <h3 style={{ margin: 0 }}>Siapa saja yang berutang padamu?</h3>
-                                <Button type="button" variant="outline" onClick={handleSplitEqually} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
-                                    ⚖️ Bagi Rata
-                                </Button>
+                                {!isLocked && (
+                                    <Button type="button" variant="outline" onClick={handleSplitEqually} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
+                                        ⚖️ Bagi Rata
+                                    </Button>
+                                )}
                             </div>
 
                             {/* Daftar Dinamis */}
@@ -251,26 +302,28 @@ export const CreateExpense = () => {
                                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                             {/* Dropdown Anggota (Disabled/Read-only untuk yang sudah dipilih) */}
                                             <div className="input-wrapper" style={{ flex: 1, marginBottom: 0, minWidth: 0 }}>
-                                                <div style={{ padding: '0.5rem', backgroundColor: '#f3f4f6', borderRadius: '8px', border: '1px solid var(--color-border)', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <div style={{ padding: '0.5rem', backgroundColor: '#f3f4f6', borderRadius: '8px', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                     {members.find(m => m.id === share.userId)?.name || 'Anggota'}
                                                 </div>
                                             </div>
 
                                             {/* Tombol Hapus Baris */}
-                                            <button 
-                                                type="button" 
-                                                onClick={() => handleRemoveShare(index)}
-                                                style={{ 
-                                                    background: 'var(--color-error)', color: 'white', border: 'none', 
-                                                    borderRadius: '50%', width: '28px', height: '28px', 
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    fontSize: '0.8rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)',
-                                                    flexShrink: 0
-                                                }}
-                                                title="Hapus baris ini"
-                                            >
-                                                ✖
-                                            </button>
+                                            {!isLocked && (
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => handleRemoveShare(index)}
+                                                    style={{ 
+                                                        background: 'var(--color-error)', color: 'white', border: 'none', 
+                                                        borderRadius: '50%', width: '28px', height: '28px', 
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        fontSize: '0.8rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)',
+                                                        flexShrink: 0
+                                                    }}
+                                                    title="Hapus baris ini"
+                                                >
+                                                    ✖
+                                                </button>
+                                            )}
                                         </div>
 
                                         {/* Baris Bawah: Input Nominal */}
@@ -280,9 +333,10 @@ export const CreateExpense = () => {
                                                 <input 
                                                     type="number" 
                                                     className="input-field" 
-                                                    style={{ paddingLeft: '3rem', width: '100%', fontWeight: 'bold' }}
+                                                    style={{ paddingLeft: '3rem', width: '100%', fontWeight: 'bold', ...(isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)' } : {}) }}
                                                     placeholder="0"
                                                     value={share.shareAmount}
+                                                    disabled={isLocked}
                                                     onChange={e => handleShareChange(index, 'shareAmount', e.target.value ? Number(e.target.value) : '')}
                                                 />
                                             </div>
@@ -292,7 +346,7 @@ export const CreateExpense = () => {
                             </div>
 
                             {/* Dropdown Langsung Tambah Anggota */}
-                            {members.filter(m => !shares.some(s => s.userId === m.id)).length > 0 && (
+                            {!isLocked && members.filter(m => !shares.some(s => s.userId === m.id)).length > 0 && (
                                 <div style={{ position: 'relative' }}>
                                     <select 
                                         value=""
@@ -319,7 +373,7 @@ export const CreateExpense = () => {
                                             <option key={m.id} value={m.id}>{m.name}</option>
                                         ))}
                                     </select>
-                                    <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-primary)' }}>▼</span>
+                                    <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-primary)' }}>â–¼</span>
                                 </div>
                             )}
                         </div>
@@ -338,7 +392,7 @@ export const CreateExpense = () => {
                             </div>
 
                             <Button type="submit" disabled={isLoading} style={{ marginTop: '1rem', width: '100%' }}>
-                                {isLoading ? 'Menyimpan...' : 'Simpan & Tagih Mereka!'}
+                                {isLoading ? 'Menyimpan...' : 'Simpan Perubahan!'}
                             </Button>
                         </div>
 

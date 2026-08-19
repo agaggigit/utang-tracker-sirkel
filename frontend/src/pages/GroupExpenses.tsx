@@ -64,20 +64,39 @@ export const GroupExpenses = () => {
     const [hasMore, setHasMore] = useState(true); // Penanda apakah di database masih ada sisa data
     const [isFetchingMore, setIsFetchingMore] = useState(false); // Penanda loading saat nge-scroll
 
-    // --- POLA PIKIR FITUR KRONOLOGIS & STATUS (LANGKAH 3) ---
-    const [filterDate, setFilterDate] = useState('');
-    
+    // --- POLA PIKIR FITUR PENCARIAN & FILTER (LANGKAH 3) ---
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [filterType, setFilterType] = useState('all'); // all | involved | unpaid | payer
+    const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+    const [isClosingSheet, setIsClosingSheet] = useState(false); // Untuk animasi tutup
+
     // Mengambil ID user yang sedang login dari JWT Token untuk mengecek status lunas
     const token = localStorage.getItem('token');
     const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).userId : '';
 
-    // Handler ketika tanggal kalender dipilih
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFilterDate(e.target.value);
-        setPage(1); // Reset kembali ke halaman 1
-        setExpenses([]); // Kosongkan layar
+    // Menerapkan Filter & Search
+    const applyFilters = () => {
+        setPage(1);
         setHasMore(true);
+        closeFilterSheet();
     };
+
+    // Menutup sheet tanpa mereset data
+    const closeFilterSheet = () => {
+        setIsClosingSheet(true);
+        setTimeout(() => {
+            setIsFilterSheetOpen(false);
+            setIsClosingSheet(false);
+        }, 300); // 300ms sesuai durasi animasi CSS
+    };
+
+    // Reset ke halaman 1 setiap kali filter berubah
+    useEffect(() => {
+        setPage(1);
+        setHasMore(true);
+    }, [searchKeyword, startDate, endDate, filterType]);
 
     // --- POLA PIKIR RINGKASAN UTANG (LANGKAH 2) ---
     useEffect(() => {
@@ -111,9 +130,10 @@ export const GroupExpenses = () => {
                 const token = localStorage.getItem('token');
                 // Perhatikan penambahan filter date pada URL jika user memilih dari kalender
                 let url = `http://localhost:3000/groups/${groupId}/expenses?page=${page}&limit=10`;
-                if (filterDate) {
-                    url += `&date=${filterDate}`;
-                }
+                if (searchKeyword) url += `&keyword=${encodeURIComponent(searchKeyword)}`;
+                if (startDate) url += `&startDate=${startDate}`;
+                if (endDate) url += `&endDate=${endDate}`;
+                if (filterType !== 'all') url += `&filterType=${filterType}`;
 
                 const response = await fetch(url, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -144,7 +164,7 @@ export const GroupExpenses = () => {
         };
 
         fetchExpenses();
-    }, [groupId, page, filterDate]); // Efek ini akan berjalan setiap kali 'page' atau 'filterDate' berubah!
+    }, [groupId, page, searchKeyword, startDate, endDate, filterType]); // Efek ini akan berjalan setiap kali parameter filter berubah!
 
     // 3. Deteksi Ujung Bawah Layar (Intersection Observer)
     const observer = useRef<IntersectionObserver | null>(null);
@@ -170,27 +190,58 @@ export const GroupExpenses = () => {
 
     return (
         <div className="dashboard-container">
-            <header className="dashboard-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Button variant="outline" onClick={() => navigate(`/dashboard`)}>&larr; Dasbor Utama</Button>
-                    <h2>Riwayat Tagihan</h2>
+            <header className="dashboard-header" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <Button variant="outline" onClick={() => navigate(`/dashboard`)}>&larr; Dasbor Utama</Button>
+                        <h2 style={{ margin: 0 }}>Riwayat Tagihan</h2>
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <Button variant="outline" onClick={() => navigate(`/groups/${groupId}`)}>
+                            ⚙️ Pengaturan Sirkel
+                        </Button>
+                        <Button onClick={() => navigate(`/groups/${groupId}/expenses/create`)}>
+                            + Catat Tagihan Baru
+                        </Button>
+                    </div>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <Button variant="outline" onClick={() => navigate(`/groups/${groupId}`)}>
-                        ⚙️ Pengaturan Sirkel
-                    </Button>
-                    <input 
-                        type="date" 
-                        className="input-field" 
-                        value={filterDate}
-                        onChange={handleDateChange}
-                        title="Filter berdasarkan tanggal"
-                        style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
-                    />
-                    <Button onClick={() => navigate(`/groups/${groupId}/expenses/create`)}>
-                        + Catat Tagihan Baru
+
+                {/* --- BAR PENCARIAN & FILTER --- */}
+                <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                    <div style={{ flex: 1, position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>🔍</span>
+                        <input 
+                            type="text" 
+                            className="input-field" 
+                            placeholder="Cari tagihan (cth: Nasi Padang)..."
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+                            style={{ width: '100%', paddingLeft: '2.5rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                        />
+                    </div>
+                    <Button variant="outline" onClick={() => setIsFilterSheetOpen(true)} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>⚙️ Filter</span>
+                        {(startDate || endDate || filterType !== 'all') && (
+                            <span style={{ width: '8px', height: '8px', backgroundColor: 'var(--color-primary)', borderRadius: '50%' }}></span>
+                        )}
                     </Button>
                 </div>
+
+                {/* --- INDIKATOR FILTER AKTIF --- */}
+                {(startDate || endDate || filterType !== 'all') && (
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', width: '100%' }}>
+                        {startDate && <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Mulai: {new Date(startDate).toLocaleDateString('id-ID')}</span>}
+                        {endDate && <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Hingga: {new Date(endDate).toLocaleDateString('id-ID')}</span>}
+                        {filterType === 'involved' && <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Terlibat</span>}
+                        {filterType === 'unpaid' && <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Belum Lunas</span>}
+                        {filterType === 'payer' && <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Nalangin</span>}
+                        <span 
+                            onClick={() => { setSearchKeyword(''); setStartDate(''); setEndDate(''); setFilterType('all'); setPage(1); setHasMore(true); }}
+                            style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', textDecoration: 'underline', cursor: 'pointer', padding: '0.25rem' }}
+                        >Hapus Semua Filter</span>
+                    </div>
+                )}
             </header>
 
             <main className="dashboard-main" style={{ marginTop: '2rem' }}>
@@ -400,6 +451,102 @@ export const GroupExpenses = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* --- BOTTOM SHEET FILTER (Seperi Tokopedia) --- */}
+            {(isFilterSheetOpen || isClosingSheet) && (
+                <>
+                    {/* Backdrop Transparan */}
+                    <div 
+                        style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 999,
+                            opacity: isClosingSheet ? 0 : 1, transition: 'opacity 0.3s ease'
+                        }}
+                        onClick={closeFilterSheet}
+                    />
+
+                    {/* Lembar Sliding dari Bawah */}
+                    <div 
+                        style={{
+                            position: 'fixed', left: '50%', bottom: 0, transform: 'translateX(-50%)',
+                            width: '100%', maxWidth: '480px', backgroundColor: 'var(--color-surface)',
+                            borderTopLeftRadius: '20px', borderTopRightRadius: '20px',
+                            padding: '1.5rem', paddingBottom: '2.5rem', zIndex: 1000,
+                            boxShadow: '0 -4px 10px rgba(0,0,0,0.1)',
+                            animation: `${isClosingSheet ? 'slideDown' : 'slideUp'} 0.3s forwards ease-out`
+                        }}
+                    >
+                        {/* Garis Handle Tarik (Visual Saja) */}
+                        <div style={{ width: '40px', height: '4px', backgroundColor: 'var(--color-border)', borderRadius: '2px', margin: '0 auto 1.5rem' }}></div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ margin: 0 }}>Filter Tagihan</h3>
+                            <button onClick={closeFilterSheet} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-muted)' }}>&times;</button>
+                        </div>
+
+                        {/* Filter Tanggal */}
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Rentang Waktu</label>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <input 
+                                    type="date" 
+                                    className="input-field" 
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    style={{ flex: 1, padding: '0.5rem' }}
+                                />
+                                <span style={{ color: 'var(--color-text-muted)' }}>-</span>
+                                <input 
+                                    type="date" 
+                                    className="input-field" 
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    style={{ flex: 1, padding: '0.5rem' }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Filter Status/Peran */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Status Kamu</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <input type="radio" name="filterStatus" value="all" checked={filterType === 'all'} onChange={(e) => setFilterType(e.target.value)} />
+                                    <span>Tampilkan Semua</span>
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <input type="radio" name="filterStatus" value="involved" checked={filterType === 'involved'} onChange={(e) => setFilterType(e.target.value)} />
+                                    <span>Ada Namaku (Terlibat)</span>
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <input type="radio" name="filterStatus" value="unpaid" checked={filterType === 'unpaid'} onChange={(e) => setFilterType(e.target.value)} />
+                                    <span style={{ color: 'var(--color-error)' }}>Belum Lunas</span>
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <input type="radio" name="filterStatus" value="payer" checked={filterType === 'payer'} onChange={(e) => setFilterType(e.target.value)} />
+                                    <span style={{ color: 'var(--color-primary)' }}>Aku yang Nalangin</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Tombol Terapkan */}
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <Button 
+                                variant="outline" 
+                                style={{ flex: 1 }}
+                                onClick={() => {
+                                    setSearchKeyword(''); setStartDate(''); setEndDate(''); setFilterType('all');
+                                }}
+                            >
+                                Reset
+                            </Button>
+                            <Button style={{ flex: 2 }} onClick={applyFilters}>
+                                Terapkan Filter
+                            </Button>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );

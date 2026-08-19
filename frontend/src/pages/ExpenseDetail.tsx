@@ -8,6 +8,7 @@ interface ExpenseDetailData {
     description: string;
     totalAmount: string;
     expenseDate: string;
+    groupId: string;
     paidBy: string; // ID user yang menalangi
     paidByUser: { name: string, email: string };
     group: { name: string };
@@ -28,12 +29,11 @@ export const ExpenseDetail = () => {
     const navigate = useNavigate();
 
     // Mengambil ID user yang sedang login dari JWT Token
-    const token = localStorage.getItem('token');
-    const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).userId : '';
-
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [expense, setExpense] = useState<ExpenseDetailData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // --- POLA PIKIR STATE MODAL (LANGKAH 2 & 3) ---
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,12 +41,15 @@ export const ExpenseDetail = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setCurrentUserId(JSON.parse(atob(token.split('.')[1])).userId);
+        }
+
         const fetchDetail = async () => {
             try {
-                const token = localStorage.getItem('token');
-                // Panggil API getExpenseDetail yang baru dibuat di Langkah 1
                 const response = await fetch(`http://localhost:3000/expenses/${expenseId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token || ''}` }
                 });
 
                 if (response.ok) {
@@ -66,6 +69,30 @@ export const ExpenseDetail = () => {
         fetchDetail();
     }, [expenseId]);
 
+    // --- HANDLER HAPUS TAGIHAN ---
+    const handleDelete = async () => {
+        if (!window.confirm("Apakah kamu yakin ingin menghapus tagihan ini? (Tindakan ini tidak bisa dibatalkan)")) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:3000/expenses/${expenseId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token || ''}` }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Gagal menghapus');
+            alert('Tagihan berhasil dihapus!');
+            navigate(`/groups/${expense?.groupId}/expenses`, { replace: true });
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     // Handle kondisi layar saat sedang memuat atau terjadi error
     if (isLoading) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem'}}>⏳ Memuat detail...</p></div>;
     if (errorMsg) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem', color: 'var(--color-error)'}}>⚠️ {errorMsg}</p></div>;
@@ -76,6 +103,10 @@ export const ExpenseDetail = () => {
     const myShare = expense.shares.find(s => s.userId === currentUserId);
     // Jika saya yang menalangi (paidBy === currentUserId), saya tidak perlu bayar diri saya sendiri
     const amIInvolvedAndUnpaid = myShare && !myShare.isPaid && expense.paidBy !== currentUserId;
+
+    // Logika untuk Penombok (User yang membayar tagihan ini)
+    const amIThePayer = expense.paidBy === currentUserId;
+    const hasPaidShares = expense.shares.some(s => s.isPaid && s.userId !== expense.paidBy);
 
     // Cek apakah utang saya ini sedang dalam status diajukan (pending)
     const isPending = myShare?.payments?.some(p => p.status === 'pending');
@@ -90,7 +121,7 @@ export const ExpenseDetail = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token || ''}`
                 },
                 body: JSON.stringify({
                     expenseShareId: myShare.id,
@@ -132,7 +163,7 @@ export const ExpenseDetail = () => {
                 <h2>Detail Tagihan</h2>
             </header>
 
-            <main className="dashboard-main" style={{ marginTop: '2rem' }}>
+            <main className="dashboard-main" style={{ marginTop: '2rem', paddingBottom: '4rem' }}>
                 <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)' }}>
                     <h1 style={{ margin: 0, fontSize: '1.75rem' }}>{expense.description}</h1>
                     
@@ -197,6 +228,31 @@ export const ExpenseDetail = () => {
                                 >
                                     💸 Ajukan Pembayaran ke {expense.paidByUser.name}
                                 </Button>
+                            )}
+                        </div>
+                    )}
+                    {/* TOMBOL EDIT DAN HAPUS UNTUK PENOMBOK */}
+                    {amIThePayer && (
+                        <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                            <Button 
+                                variant="outline" 
+                                style={{ flex: 1, maxWidth: '200px' }}
+                                onClick={() => navigate(`/expenses/${expenseId}/edit`)}
+                            >
+                                ✏️ Edit Tagihan
+                            </Button>
+                            {!hasPaidShares ? (
+                                <Button 
+                                    style={{ flex: 1, maxWidth: '200px', backgroundColor: 'var(--color-error)' }}
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? 'Menghapus...' : '🗑️ Hapus Tagihan'}
+                                </Button>
+                            ) : (
+                                <div style={{ flex: 1, maxWidth: '200px', padding: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>
+                                    (Hapus dimatikan karena sudah ada yang lunas)
+                                </div>
                             )}
                         </div>
                     )}

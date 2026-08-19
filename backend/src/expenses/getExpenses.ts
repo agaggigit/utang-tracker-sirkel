@@ -26,23 +26,53 @@ router.get('/:id/expenses', authenticate, async (req: Request, res: Response) =>
         const limit = parseInt(req.query.limit as string) || 10;
         const skip = (page - 1) * limit;
 
-        // --- POLA PIKIR FILTER TANGGAL (LANGKAH 3) ---
-        // Jika user memilih tanggal dari kalender, kita saring datanya.
-        const dateFilter = req.query.date as string;
+        // --- POLA PIKIR FILTER TANGGAL, KEYWORD, DAN STATUS (LANGKAH 3) ---
+        const keyword = req.query.keyword as string;
+        const startDateQuery = req.query.startDate as string;
+        const endDateQuery = req.query.endDate as string;
+        const filterType = req.query.filterType as string;
+
         const whereClause: any = { groupId: groupId };
         
-        if (dateFilter) {
-            // Karena di database ada jamnya (misal: 2026-08-14T15:30:00Z)
-            // Kita harus mencari dari awal hari (00:00) sampai akhir hari (23:59)
-            const startDate = new Date(dateFilter);
-            startDate.setHours(0, 0, 0, 0);
-            const endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1); // Tambah 1 hari untuk batas akhir
-            
-            whereClause.expenseDate = {
-                gte: startDate, // >= 00:00
-                lt: endDate     // < besoknya
+        // 1. Filter Keyword (Mencari di deskripsi)
+        if (keyword) {
+            whereClause.description = {
+                contains: keyword
             };
+        }
+
+        // 2. Filter Rentang Tanggal
+        if (startDateQuery || endDateQuery) {
+            whereClause.expenseDate = {};
+            if (startDateQuery) {
+                const startDate = new Date(startDateQuery);
+                startDate.setHours(0, 0, 0, 0);
+                whereClause.expenseDate.gte = startDate;
+            }
+            if (endDateQuery) {
+                const endDate = new Date(endDateQuery);
+                endDate.setHours(23, 59, 59, 999);
+                whereClause.expenseDate.lte = endDate;
+            }
+        }
+
+        // 3. Filter Peran/Status (terlibat, belum lunas, ditalangi)
+        if (filterType) {
+            if (filterType === 'involved') {
+                whereClause.shares = {
+                    some: { userId: userId }
+                };
+            } else if (filterType === 'unpaid') {
+                whereClause.shares = {
+                    some: { userId: userId, isPaid: false }
+                };
+                // Pastikan tagihan yang ditalangi sendiri tidak dianggap 'Belum Lunas'
+                whereClause.paidBy = {
+                    not: userId
+                };
+            } else if (filterType === 'payer') {
+                whereClause.paidBy = userId;
+            }
         }
 
         // TODO 2: Ambil Daftar Tagihan dari Database dengan Batasan
@@ -58,9 +88,10 @@ router.get('/:id/expenses', authenticate, async (req: Request, res: Response) =>
                     }
                 }
             },
-            orderBy: {
-                expenseDate: 'desc'
-            }
+            orderBy: [
+                { expenseDate: 'desc' },
+                { createdAt: 'desc' }
+            ]
         });
         
         // TODO 3: Return Response
