@@ -7,48 +7,43 @@ import { createNotification } from "../notifications/notificationService";
 const router = Router()
 
 router.get('/:id/join-requests', authenticate, async (req: Request, res: Response)=> {
-    try {
-        const groupId = req.params.id as string;
-        const userId = res.locals.user.userId;
+    const groupId = req.params.id as string;
+    const userId = res.locals.user.userId;
 
-        const isAuthhorized = await prisma.groupMember.findFirst({
-            where: {
-                groupId: groupId,
-                userId: userId,
-                role: 'host'
-            }
-        });
-
-        if (!isAuthhorized) {
-            return res.status(403).json({ message: 'Hanya Host yang dapat melihat permintaan bergabung' })
+    const isAuthhorized = await prisma.groupMember.findFirst({
+        where: {
+            groupId: groupId,
+            userId: userId,
+            role: 'host'
         }
+    });
 
-        const joinRequest = await prisma.groupJoinRequest.findMany({
-            where: {
-                groupId : groupId,
-                status: 'pending'
-            },
-            select: {
-                id: true,
-                groupId: true,
-                userId: true,
-                status: true,
-                requestedAt: true,
-                user: {
-                    select: { 
-                        id: true, 
-                        name: true, 
-                        avatarUrl: true 
-                    } 
-                }
-            }
-        });
-
-        return res.status(200).json(joinRequest);
-    } catch(error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Gagal mengambil list request' });
+    if (!isAuthhorized) {
+        return res.status(403).json({ message: 'Hanya Host yang dapat melihat permintaan bergabung' })
     }
+
+    const joinRequest = await prisma.groupJoinRequest.findMany({
+        where: {
+            groupId : groupId,
+            status: 'pending'
+        },
+        select: {
+            id: true,
+            groupId: true,
+            userId: true,
+            status: true,
+            requestedAt: true,
+            user: {
+                select: { 
+                    id: true, 
+                    name: true, 
+                    avatarUrl: true 
+                } 
+            }
+        }
+    });
+
+    return res.status(200).json(joinRequest);
 });
 
 const joinRequestApprovalSchema = z.object({

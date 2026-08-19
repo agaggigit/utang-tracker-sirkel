@@ -100,7 +100,7 @@ export const GroupDetail = () => {
     const fetchEditGroup = async (updatedData: any) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/groups/${id}/edit`, {
+            const response = await fetch(`http://localhost:3000/groups/${id}`, {
                 method: 'PATCH',
                 headers: { 
                     'Content-Type': 'application/json',

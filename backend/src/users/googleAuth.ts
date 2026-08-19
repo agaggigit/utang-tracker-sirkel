@@ -24,85 +24,78 @@ router.post('/google', async (req: Request, res: Response) => {
         });
     }
 
-    try {
-        const { code } = result.data;
-        
-        const { tokens } = await googleClient.getToken({
-            code: code,
-            redirect_uri: 'postmessage'
-        });
+    const { code } = result.data;
+    
+    const { tokens } = await googleClient.getToken({
+        code: code,
+        redirect_uri: 'postmessage'
+    });
 
-        const idToken = tokens.id_token;
+    const idToken = tokens.id_token;
 
-        if (!idToken) throw new Error("Gagal mendapatkan idToken dari Google");
+    if (!idToken) throw new Error("Gagal mendapatkan idToken dari Google");
 
-        const ticket = await googleClient.verifyIdToken({
-            idToken: idToken,
-            audience: process.env.GOOGLE_CLIENT_ID
-        });
+    const ticket = await googleClient.verifyIdToken({
+        idToken: idToken,
+        audience: process.env.GOOGLE_CLIENT_ID
+    });
 
-        const payload = ticket.getPayload();
-        if (!payload) {
-            throw new Error("Token Google tidak valid")
-        }
+    const payload = ticket.getPayload();
+    if (!payload) {
+        throw new Error("Token Google tidak valid")
+    }
 
-        const { sub: googleId, email, name, picture } = payload;
+    const { sub: googleId, email, name, picture } = payload;
 
-        if (!email) {
-            return res.status(400).json({
-                message: "Akun Google tidak memiliki email"
-            });
-        }
-
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                email: email
-            }
-        });
-        
-        let user;
-        if (existingUser) {
-            user = existingUser;
-        } else {
-            user = await prisma.user.create({
-                data: {
-                    email: email,
-                    name: name || "Pengguna Google",
-                    googleId: googleId,
-                    authProvider: "google"
-                }
-            });
-        }
-
-        // JWT
-        const jwtPayload = {
-            userId: user.id
-        };
-
-        const secretKey = process.env.JWT_SECRET;
-        if (!secretKey) {
-            throw new Error("FATAL ERROR: JWT_SECRET belum diatur di file .env")
-        }
-
-        const token = jwt.sign(jwtPayload, secretKey, {
-            expiresIn: '7d'
-        })
-
-        return res.status(200).json({
-            message: "Login berhasil",
-            token: token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email
-            }
-        });
-    } catch (error) {
-        console.error("Login Error:", error);
-        res.status(500).json({
-            message: "Internal server error"
+    if (!email) {
+        return res.status(400).json({
+            message: "Akun Google tidak memiliki email"
         });
     }
+
+    const existingUser = await prisma.user.findUnique({
+        where: {
+            email: email
+        }
+    });
+    
+    let user;
+    if (existingUser) {
+        user = existingUser;
+    } else {
+        user = await prisma.user.create({
+            data: {
+                email: email,
+                name: name || "Pengguna Google",
+                googleId: googleId,
+                authProvider: "google"
+            }
+        });
+    }
+
+    // JWT
+    const jwtPayload = {
+        userId: user.id
+    };
+
+    const secretKey = process.env.JWT_SECRET;
+    if (!secretKey) {
+        throw new Error("FATAL ERROR: JWT_SECRET belum diatur di file .env")
+    }
+
+    const token = jwt.sign(jwtPayload, secretKey, {
+        expiresIn: '7d'
+    })
+
+    return res.status(200).json({
+        message: "Login berhasil",
+        token: token,
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email
+        }
+    });
 });
 
 export { router as googleAuthRouter }

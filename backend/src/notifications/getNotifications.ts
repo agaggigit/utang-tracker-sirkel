@@ -6,21 +6,16 @@ const router = Router();
 
 // GET /notifications
 router.get('/', authenticate, async (req: Request, res: Response) => {
-    try {
-        const currentUserId = res.locals.user.userId;
+    const currentUserId = res.locals.user.userId;
 
-        const notifications = await prisma.notification.findMany({
-            where: { userId: currentUserId },
-            orderBy: { createdAt: 'desc' },
-            // Batasi 50 terakhir agar tidak berat
-            take: 50
-        });
+    const notifications = await prisma.notification.findMany({
+        where: { userId: currentUserId },
+        orderBy: { createdAt: 'desc' },
+        // Batasi 50 terakhir agar tidak berat
+        take: 50
+    });
 
-        return res.status(200).json(notifications);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Gagal mengambil notifikasi" });
-    }
+    return res.status(200).json(notifications);
 });
 
 // PATCH /notifications/read-all

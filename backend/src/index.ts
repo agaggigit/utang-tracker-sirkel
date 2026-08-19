@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { errorHandler } from './middleware/errorHandler';
 import { registerRouter } from "./users/registerUser";
 import { loginRouter } from "./users/loginUser";
 import { googleAuthRouter } from "./users/googleAuth";
@@ -72,6 +73,8 @@ app.get('/api/me', authenticate, (req, res) => {
     user: res.locals.user
   });
 });
+
+app.use(errorHandler);
 
 // Menjalankan server
 app.listen(port, () => {

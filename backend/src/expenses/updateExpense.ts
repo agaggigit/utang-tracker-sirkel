@@ -31,84 +31,79 @@ router.put('/:id', authenticate, async (req: Request, res: Response) => {
         return res.status(400).json({ errors: result.error.flatten().fieldErrors });
     }
 
-    try {
-        const expenseId = req.params.id as string;
-        const userId = res.locals.user.userId;
-        const { description, totalAmount, expenseDate, shares } = result.data;
+    const expenseId = req.params.id as string;
+    const userId = res.locals.user.userId;
+    const { description, totalAmount, expenseDate, shares } = result.data;
 
-        // 1. Ambil data lama
-        const expense = await prisma.expense.findUnique({
-            where: { id: expenseId },
-            include: { shares: true }
-        });
+    // 1. Ambil data lama
+    const expense = await prisma.expense.findUnique({
+        where: { id: expenseId },
+        include: { shares: true }
+    });
 
-        if (!expense) {
-            return res.status(404).json({ message: "Tagihan tidak ditemukan" });
-        }
-
-        // 2. Validasi Hak Akses (Hanya Peyer)
-        if (expense.paidBy !== userId) {
-            return res.status(403).json({ message: "Kamu bukan penombok tagihan ini, tidak berhak mengedit." });
-        }
-
-        // 3. Cek kondisi "Apakah ada yang sudah lunas selain pembuat?"
-        const hasPaidShares = expense.shares.some(share => share.isPaid && share.userId !== userId);
-
-        await prisma.$transaction(async (tx) => {
-            if (hasPaidShares) {
-                // JIKA TERKUNCI: Hanya boleh update Judul dan Tanggal
-                await tx.expense.update({
-                    where: { id: expenseId },
-                    data: {
-                        description,
-                        expenseDate: new Date(expenseDate)
-                    }
-                });
-            } else {
-                // JIKA BEBAS: Update Semua (termasuk menghapus semua share lama dan membuat yang baru)
-                
-                // Ambil id shares lama untuk menghapus payments pending (jika ada)
-                const oldShareIds = expense.shares.map(s => s.id);
-                
-                await tx.payment.deleteMany({
-                    where: { expenseShareId: { in: oldShareIds } }
-                });
-
-                // Hapus shares lama
-                await tx.expenseShare.deleteMany({
-                    where: { expenseId: expenseId }
-                });
-
-                // Update info tagihan
-                await tx.expense.update({
-                    where: { id: expenseId },
-                    data: {
-                        description,
-                        totalAmount,
-                        expenseDate: new Date(expenseDate)
-                    }
-                });
-
-                // Buat shares baru
-                const expenseSharesData = shares.map(share => ({
-                    expenseId: expenseId,
-                    userId: share.userId,
-                    shareAmount: share.shareAmount,
-                    isPaid: share.userId === userId // otomatis lunas jika dirinya sendiri
-                }));
-
-                await tx.expenseShare.createMany({
-                    data: expenseSharesData
-                });
-            }
-        });
-
-        return res.status(200).json({ message: "Tagihan berhasil diperbarui.", isLocked: hasPaidShares });
-
-    } catch (error) {
-        console.error("Gagal memperbarui tagihan:", error);
-        return res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui tagihan' });
+    if (!expense) {
+        return res.status(404).json({ message: "Tagihan tidak ditemukan" });
     }
+
+    // 2. Validasi Hak Akses (Hanya Peyer)
+    if (expense.paidBy !== userId) {
+        return res.status(403).json({ message: "Kamu bukan penombok tagihan ini, tidak berhak mengedit." });
+    }
+
+    // 3. Cek kondisi "Apakah ada yang sudah lunas selain pembuat?"
+    const hasPaidShares = expense.shares.some(share => share.isPaid && share.userId !== userId);
+
+    await prisma.$transaction(async (tx) => {
+        if (hasPaidShares) {
+            // JIKA TERKUNCI: Hanya boleh update Judul dan Tanggal
+            await tx.expense.update({
+                where: { id: expenseId },
+                data: {
+                    description,
+                    expenseDate: new Date(expenseDate)
+                }
+            });
+        } else {
+            // JIKA BEBAS: Update Semua (termasuk menghapus semua share lama dan membuat yang baru)
+            
+            // Ambil id shares lama untuk menghapus payments pending (jika ada)
+            const oldShareIds = expense.shares.map(s => s.id);
+            
+            await tx.payment.deleteMany({
+                where: { expenseShareId: { in: oldShareIds } }
+            });
+
+            // Hapus shares lama
+            await tx.expenseShare.deleteMany({
+                where: { expenseId: expenseId }
+            });
+
+            // Update info tagihan
+            await tx.expense.update({
+                where: { id: expenseId },
+                data: {
+                    description,
+                    totalAmount,
+                    expenseDate: new Date(expenseDate)
+                }
+            });
+
+            // Buat shares baru
+            const expenseSharesData = shares.map(share => ({
+                expenseId: expenseId,
+                userId: share.userId,
+                shareAmount: share.shareAmount,
+                isPaid: share.userId === userId // otomatis lunas jika dirinya sendiri
+            }));
+
+            await tx.expenseShare.createMany({
+                data: expenseSharesData
+            });
+        }
+    });
+
+    return res.status(200).json({ message: "Tagihan berhasil diperbarui.", isLocked: hasPaidShares });
+
 });
 
 export { router as updateExpenseRouter };

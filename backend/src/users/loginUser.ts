@@ -20,64 +20,57 @@ router.post('/login', async (req: Request, res: Response) => {
         });
     }
 
-    try {
-        const { email, password } = result.data;
+    const { email, password } = result.data;
 
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                email: email
-            }
+    const existingUser = await prisma.user.findUnique({
+        where: {
+            email: email
+        }
+    });
+
+    if (!existingUser) {
+        return res.status(401).json({  
+            message: "Email atau password salah"
         });
+    } 
 
-        if (!existingUser) {
-            return res.status(401).json({  
-                message: "Email atau password salah"
-            });
-        } 
-
-        if (!existingUser.passwordHash) {
-            return res.status(401).json({
-                message: "Akun ini didaftarkan melalui Google. Silhkan gunakan tombol login with Google"
-            });
-        }
-        
-        const isPasswordValid = await bcrypt.compare(password, existingUser.passwordHash)
-
-        if (!isPasswordValid) {
-            return res.status(401).json({  
-                message: "Email atau password salah"
-            });
-        }
-
-        // JWT
-        const payload = {
-            userId: existingUser.id
-        };
-
-        const secretKey = process.env.JWT_SECRET;
-        if (!secretKey) {
-            throw new Error("FATAL ERROR: JWT_SECRET belum diatur di file .env")
-        }
-
-        const token = jwt.sign(payload, secretKey, {
-            expiresIn: '7d'
-        })
-
-        return res.status(200).json({
-            message: "Login berhasil",
-            token: token,
-            user: {
-                id: existingUser.id,
-                name: existingUser.name,
-                email: existingUser.email
-            }
-        });
-    } catch (error) {
-        console.error("Login Error:", error);
-        res.status(500).json({
-            message: "Internal server error"
+    if (!existingUser.passwordHash) {
+        return res.status(401).json({
+            message: "Akun ini didaftarkan melalui Google. Silhkan gunakan tombol login with Google"
         });
     }
+    
+    const isPasswordValid = await bcrypt.compare(password, existingUser.passwordHash)
+
+    if (!isPasswordValid) {
+        return res.status(401).json({  
+            message: "Email atau password salah"
+        });
+    }
+
+    // JWT
+    const payload = {
+        userId: existingUser.id
+    };
+
+    const secretKey = process.env.JWT_SECRET;
+    if (!secretKey) {
+        throw new Error("FATAL ERROR: JWT_SECRET belum diatur di file .env")
+    }
+
+    const token = jwt.sign(payload, secretKey, {
+        expiresIn: '7d'
+    })
+
+    return res.status(200).json({
+        message: "Login berhasil",
+        token: token,
+        user: {
+            id: existingUser.id,
+            name: existingUser.name,
+            email: existingUser.email
+        }
+    });
 });
 
 export { router as loginRouter }

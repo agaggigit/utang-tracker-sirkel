@@ -12,7 +12,7 @@ const editGroupSchema = z.object({
     regenerateInviteCode: z.boolean().optional().default(false)        
 });
 
-router.patch('/:id/edit', authenticate, async (req: Request, res: Response) => {
+router.patch('/:id', authenticate, async (req: Request, res: Response) => {
     const result = editGroupSchema.safeParse(req.body);
 
     if (!result.success) {
@@ -21,58 +21,53 @@ router.patch('/:id/edit', authenticate, async (req: Request, res: Response) => {
         });
     }
     
-    try {
-        const groupId = req.params.id as string;
-        const userId = res.locals.user.userId;
-        
-        // TODO: Ambil data name, joinApprovalRequired, regenerateInviteCode dari req.body
-        const { name, joinApprovalRequired, regenerateInviteCode } = result.data;
+    const groupId = req.params.id as string;
+    const userId = res.locals.user.userId;
+    
+    // TODO: Ambil data name, joinApprovalRequired, regenerateInviteCode dari req.body
+    const { name, joinApprovalRequired, regenerateInviteCode } = result.data;
 
-        // TODO: Cek apakah user yang request adalah 'host' dari grup ini. 
-        // Hint: Gunakan prisma.groupMember.findFirst(...)
-        // Jika bukan host, return res.status(403).json({ message: 'Hanya Host yang dapat mengubah pengaturan grup' })
-        const userRole = await prisma.groupMember.findFirst({
-            where: {
-                userId: userId,
-                groupId: groupId
-            },
-            select: {
-                role: true
-            }
-        });
+    // TODO: Cek apakah user yang request adalah 'host' dari grup ini. 
+    // Hint: Gunakan prisma.groupMember.findFirst(...)
+    // Jika bukan host, return res.status(403).json({ message: 'Hanya Host yang dapat mengubah pengaturan grup' })
+    const userRole = await prisma.groupMember.findFirst({
+        where: {
+            userId: userId,
+            groupId: groupId
+        },
+        select: {
+            role: true
+        }
+    });
 
-        if (!userRole || userRole.role !== 'host') {
-            return res.status(403).json({ message: 'Hanya Host yang dapat mengubah pengaturan grup' })
-        }
-        
-        // TODO: Siapkan objek data untuk diupdate ke Prisma
-        const updateData: any = {};
-        
-        if (name !== undefined) {
-            updateData.name = name;
-        }
-        
-        if (joinApprovalRequired !== undefined) {
-            updateData.joinApprovalRequired = joinApprovalRequired;
-        }
-        
-        if (regenerateInviteCode) {
-            updateData.inviteCode = crypto.randomBytes(4).toString('hex')
-        }
-
-        const updatedGroup = await prisma.group.update({
-            where: {
-                id: groupId,
-            },
-            data: updateData
-        });
-
-        return res.status(200).json({ message: 'Pengaturan grup berhasil diperbarui', group: updatedGroup });
-        
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Gagal memperbarui pengaturan grup' });
+    if (!userRole || userRole.role !== 'host') {
+        return res.status(403).json({ message: 'Hanya Host yang dapat mengubah pengaturan grup' })
     }
+    
+    // TODO: Siapkan objek data untuk diupdate ke Prisma
+    const updateData: any = {};
+    
+    if (name !== undefined) {
+        updateData.name = name;
+    }
+    
+    if (joinApprovalRequired !== undefined) {
+        updateData.joinApprovalRequired = joinApprovalRequired;
+    }
+    
+    if (regenerateInviteCode) {
+        updateData.inviteCode = crypto.randomBytes(4).toString('hex')
+    }
+
+    const updatedGroup = await prisma.group.update({
+        where: {
+            id: groupId,
+        },
+        data: updateData
+    });
+
+    return res.status(200).json({ message: 'Pengaturan grup berhasil diperbarui', group: updatedGroup });
+    
 });
 
 export { router as groupSettingsRouter };

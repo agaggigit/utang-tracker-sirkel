@@ -11,7 +11,7 @@ const createGroupSchema = z.object({
     joinApprovalRequired: z.boolean().optional().default(false)
 });
 
-router.post('/make', authenticate, async (req: Request, res: Response) => {
+router.post('/', authenticate, async (req: Request, res: Response) => {
     const result = createGroupSchema.safeParse(req.body);
 
     if (!result.success) {
@@ -20,49 +20,44 @@ router.post('/make', authenticate, async (req: Request, res: Response) => {
         });
     }
 
-    try {
-        const userId = res.locals.user.userId;
-        const { name, joinApprovalRequired } = result.data;
+    const userId = res.locals.user.userId;
+    const { name, joinApprovalRequired } = result.data;
 
-        // Cetak kode undangan rahasia (8 karakter hex)
-        const inviteCode = crypto.randomBytes(4).toString('hex');
+    // Cetak kode undangan rahasia (8 karakter hex)
+    const inviteCode = crypto.randomBytes(4).toString('hex');
 
-        // WARNING: HARUSNYA ADA PENGECEKAN APAKAH KODE INI SUDAH DIPAKAI SEBELUMNYA ATAU BELUM, DAN KALAU ADA BISA DI REROLL LAGI SAMPAI DAPET
+    // WARNING: HARUSNYA ADA PENGECEKAN APAKAH KODE INI SUDAH DIPAKAI SEBELUMNYA ATAU BELUM, DAN KALAU ADA BISA DI REROLL LAGI SAMPAI DAPET
 
-        // PENTING: Gunakan Prisma Transaction. 
-        // Ini memastikan pembuatan Grup dan pembuatan Member terjadi sekalian.
-        // Jika salah satu gagal, keduanya akan dibatalkan otomatis (Rollback).
-        const newGroup = await prisma.$transaction(async (tx) => {
-            // 1. Buat Grup
-            const group = await tx.group.create({
-                data: {
-                    name: name,
-                    createdById: userId,
-                    inviteCode: inviteCode,
-                    joinApprovalRequired: joinApprovalRequired
-                }
-            });
-
-            // 2. Jadikan pembuatnya sebagai "host"
-            await tx.groupMember.create({
-                data: {
-                    groupId: group.id,
-                    userId: userId,
-                    role: "host"
-                }
-            });
-
-            return group;
+    // PENTING: Gunakan Prisma Transaction. 
+    // Ini memastikan pembuatan Grup dan pembuatan Member terjadi sekalian.
+    // Jika salah satu gagal, keduanya akan dibatalkan otomatis (Rollback).
+    const newGroup = await prisma.$transaction(async (tx) => {
+        // 1. Buat Grup
+        const group = await tx.group.create({
+            data: {
+                name: name,
+                createdById: userId,
+                inviteCode: inviteCode,
+                joinApprovalRequired: joinApprovalRequired
+            }
         });
 
-        res.status(201).json({
-            message: "Grup berhasil dibuat!",
-            group: newGroup
+        // 2. Jadikan pembuatnya sebagai "host"
+        await tx.groupMember.create({
+            data: {
+                groupId: group.id,
+                userId: userId,
+                role: "host"
+            }
         });
-    } catch (error) {
-        console.error("Create Group Error:", error);
-        res.status(500).json({ message: "Gagal membuat grup" });
-    }
+
+        return group;
+    });
+
+    res.status(201).json({
+        message: "Grup berhasil dibuat!",
+        group: newGroup
+    });
 });
 
 export { router as createGroupRouter };

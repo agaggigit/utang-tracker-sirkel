@@ -21,46 +21,39 @@ router.post('/register', async (req: Request, res: Response) => {
         });
     }
 
-    try {
-        const { name, email, password, confirmPassword } = result.data;
+    const { name, email, password, confirmPassword } = result.data;
 
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                email: email
-            }
+    const existingUser = await prisma.user.findUnique({
+        where: {
+            email: email
+        }
+    });
+
+    if (existingUser) {
+        return res.status(400).json({  
+            message: "Email sudah terdaftar, silahkan gunakan email lain"
         });
+    } 
 
-        if (existingUser) {
-            return res.status(400).json({  
-                message: "Email sudah terdaftar, silahkan gunakan email lain"
-            });
-        } 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt)
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt)
+    const registerUser = await prisma.user.create({
+        data: {
+            name: name,
+            email: email,
+            passwordHash: hashedPassword,
+        },
+    });
 
-        const registerUser = await prisma.user.create({
-            data: {
-                name: name,
-                email: email,
-                passwordHash: hashedPassword,
-            },
-        });
-
-        return res.status(201).json({
-            message: "Pendaftaran berhasil",
-            user: {
-                id: registerUser.id,
-                name: registerUser.name,
-                email:  registerUser.email
-            }
-        });
-    } catch (error) {
-        console.error("Register Error:", error);
-        res.status(500).json({
-            message: "Internal server error"
-        });
-    }
+    return res.status(201).json({
+        message: "Pendaftaran berhasil",
+        user: {
+            id: registerUser.id,
+            name: registerUser.name,
+            email:  registerUser.email
+        }
+    });
 });
 
 export { router as registerRouter }
