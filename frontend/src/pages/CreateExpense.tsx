@@ -212,44 +212,64 @@ export const CreateExpense = () => {
                             {/* Daftar Dinamis */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
                                 {shares.map((share, index) => (
-                                    <div key={index} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                        {/* Dropdown Anggota */}
-                                        <div className="input-wrapper" style={{ flex: 1, marginBottom: 0 }}>
-                                            <select 
-                                                className="input-field" 
-                                                value={share.userId}
-                                                onChange={e => handleShareChange(index, 'userId', e.target.value)}
+                                    <div key={index} style={{ 
+                                        padding: '1.25rem', 
+                                        backgroundColor: '#f9fafb', 
+                                        borderRadius: '12px', 
+                                        border: '1px solid var(--color-border)',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '1rem'
+                                    }}>
+                                        
+                                        {/* Baris Atas: Nama dan Tombol Hapus */}
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                            {/* Dropdown Anggota */}
+                                            <div className="input-wrapper" style={{ flex: 1, marginBottom: 0, minWidth: 0 }}>
+                                                <select 
+                                                    className="input-field" 
+                                                    style={{ width: '100%', textOverflow: 'ellipsis' }}
+                                                    value={share.userId}
+                                                    onChange={e => handleShareChange(index, 'userId', e.target.value)}
+                                                >
+                                                    <option value="" disabled>-- Pilih Anggota --</option>
+                                                    {members.map(m => (
+                                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Tombol Hapus Baris */}
+                                            <button 
+                                                type="button" 
+                                                onClick={() => handleRemoveShare(index)}
+                                                style={{ 
+                                                    background: 'var(--color-error)', color: 'white', border: 'none', 
+                                                    borderRadius: '50%', width: '28px', height: '28px', 
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '0.8rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)',
+                                                    flexShrink: 0
+                                                }}
+                                                title="Hapus baris ini"
                                             >
-                                                <option value="" disabled>-- Pilih Anggota --</option>
-                                                {members.map(m => (
-                                                    <option key={m.id} value={m.id}>{m.name}</option>
-                                                ))}
-                                            </select>
+                                                ✖
+                                            </button>
                                         </div>
 
-                                        {/* Input Nominal */}
-                                        <div className="input-wrapper" style={{ flex: 1, marginBottom: 0 }}>
+                                        {/* Baris Bawah: Input Nominal */}
+                                        <div className="input-wrapper" style={{ marginBottom: 0 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                                                <span style={{ position: 'absolute', left: '1rem', color: 'var(--color-text-muted)' }}>Rp</span>
+                                                <span style={{ position: 'absolute', left: '1rem', color: 'var(--color-text-muted)', fontWeight: 'bold' }}>Rp</span>
                                                 <input 
                                                     type="number" 
                                                     className="input-field" 
-                                                    style={{ paddingLeft: '2.5rem', width: '100%' }}
+                                                    style={{ paddingLeft: '3rem', width: '100%', fontWeight: 'bold' }}
                                                     placeholder="0"
                                                     value={share.shareAmount}
                                                     onChange={e => handleShareChange(index, 'shareAmount', e.target.value ? Number(e.target.value) : '')}
                                                 />
                                             </div>
                                         </div>
-
-                                        {/* Tombol Hapus Baris */}
-                                        <button 
-                                            type="button" 
-                                            onClick={() => handleRemoveShare(index)}
-                                            style={{ background: 'none', border: 'none', fontSize: '1.2rem', color: 'var(--color-error)', cursor: 'pointer', padding: '0.5rem' }}
-                                        >
-                                            ❌
-                                        </button>
                                     </div>
                                 ))}
                             </div>

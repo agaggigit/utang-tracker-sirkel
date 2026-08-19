@@ -72,16 +72,22 @@ npm run dev
 
 ---
 
-## Testing Account
+## Testing
+### Account
 email: test01@test01.com
-password: test01
+password: test01@@
 
 email: test02@test02.com
-password: test02
+password: test02@@
 
 email: test03@test03.com
-password: test03
+password: test03@@
 
 email: test04@test04.com
-password: test04
+password: test04@@
+
+### Group
+Host: My Google Login 
+Name: Sirkel1NoHostPerm
+Code: 07a372cb
 ---

@@ -172,10 +172,13 @@ export const GroupExpenses = () => {
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Button variant="outline" onClick={() => navigate(`/groups/${groupId}`)}>&larr; Dasbor Grup</Button>
+                    <Button variant="outline" onClick={() => navigate(`/dashboard`)}>&larr; Dasbor Utama</Button>
                     <h2>Riwayat Tagihan</h2>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <Button variant="outline" onClick={() => navigate(`/groups/${groupId}`)}>
+                        ⚙️ Pengaturan Sirkel
+                    </Button>
                     <input 
                         type="date" 
                         className="input-field" 
@@ -320,10 +323,17 @@ export const GroupExpenses = () => {
                                         
                                         {/* Bagian Bawah: Status Pribadi (Langkah 3) */}
                                         {amIInvolved ? (
-                                            <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', backgroundColor: myShare.isPaid ? '#ecfdf5' : '#fef2f2', borderRadius: '8px', color: myShare.isPaid ? 'var(--color-primary)' : 'var(--color-error)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span style={{ fontSize: '0.9rem' }}>Status Tagihanmu:</span>
-                                                <strong style={{ fontSize: '1.05rem' }}>{myShare.isPaid ? '✅ Sudah Lunas' : `❌ Belum Lunas (Rp ${Number(myShare.shareAmount).toLocaleString('id-ID')})`}</strong>
-                                            </div>
+                                            expense.paidBy === currentUserId ? (
+                                                <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', backgroundColor: '#f3f4f6', borderRadius: '8px', color: 'var(--color-text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.9rem' }}>Status Tagihanmu:</span>
+                                                    <strong style={{ fontSize: '1.05rem' }}>✅ Ditalangi Sendiri</strong>
+                                                </div>
+                                            ) : (
+                                                <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', backgroundColor: myShare.isPaid ? '#ecfdf5' : '#fef2f2', borderRadius: '8px', color: myShare.isPaid ? 'var(--color-primary)' : 'var(--color-error)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.9rem' }}>Status Tagihanmu:</span>
+                                                    <strong style={{ fontSize: '1.05rem' }}>{myShare.isPaid ? '✅ Sudah Lunas' : `❌ Belum Lunas (Rp ${Number(myShare.shareAmount).toLocaleString('id-ID')})`}</strong>
+                                                </div>
+                                            )
                                         ) : (
                                             <div style={{ marginTop: '1.5rem', padding: '0.5rem', backgroundColor: '#f3f4f6', borderRadius: '8px', color: 'var(--color-text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>
                                                 <em>Kamu tidak ikut patungan ini</em>

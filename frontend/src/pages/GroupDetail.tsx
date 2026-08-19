@@ -125,7 +125,7 @@ export const GroupDetail = () => {
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Button variant="outline" onClick={() => navigate('/dashboard')}>&larr; Kembali</Button>
+                    <Button variant="outline" onClick={() => navigate(`/groups/${id}/expenses`)}>&larr; Riwayat Tagihan</Button>
                     <h2>Pengaturan Sirkel</h2>
                 </div>
             </header>

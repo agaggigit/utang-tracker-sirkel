@@ -93,7 +93,8 @@ router.post('/:id/expenses', authenticate, async (req: Request, res: Response) =
             const expenseSharesData = shares.map(share => ({
                 expenseId: expense.id,
                 userId: share.userId,
-                shareAmount: share.shareAmount
+                shareAmount: share.shareAmount,
+                isPaid: share.userId === paidByUserId // Otomatis lunas jika dia yang menalangi
             }));
             
             await tx.expenseShare.createMany({

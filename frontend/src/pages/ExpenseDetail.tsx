@@ -8,6 +8,7 @@ interface ExpenseDetailData {
     description: string;
     totalAmount: string;
     expenseDate: string;
+    paidBy: string; // ID user yang menalangi
     paidByUser: { name: string, email: string };
     group: { name: string };
     shares: {
@@ -73,7 +74,8 @@ export const ExpenseDetail = () => {
     // --- POLA PIKIR LOGIKA AKSI (LANGKAH 3) ---
     // Cek apakah 'saya' (current user) ada di daftar utang dan belum lunas
     const myShare = expense.shares.find(s => s.userId === currentUserId);
-    const amIInvolvedAndUnpaid = myShare && !myShare.isPaid;
+    // Jika saya yang menalangi (paidBy === currentUserId), saya tidak perlu bayar diri saya sendiri
+    const amIInvolvedAndUnpaid = myShare && !myShare.isPaid && expense.paidBy !== currentUserId;
 
     // Cek apakah utang saya ini sedang dalam status diajukan (pending)
     const isPending = myShare?.payments?.some(p => p.status === 'pending');
@@ -154,21 +156,23 @@ export const ExpenseDetail = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {expense.shares.map(share => (
                                 <div key={share.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0, paddingRight: '1rem' }}>
                                         {/* Avatar Bawaan (Huruf Depan Nama) */}
-                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                                        <div style={{ flexShrink: 0, width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
                                             {share.user.name.charAt(0).toUpperCase()}
                                         </div>
-                                        <div>
-                                            <p style={{ margin: 0, fontWeight: 'bold' }}>
-                                                {share.user.name} {share.userId === currentUserId && <span style={{color: 'var(--color-primary)', fontWeight: 'normal', fontSize: '0.85rem'}}>(Kamu)</span>}
+                                        <div style={{ minWidth: 0, flex: 1 }}>
+                                            <p style={{ margin: 0, fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {share.userId === currentUserId && <span style={{color: 'var(--color-primary)', fontWeight: 'normal', fontSize: '0.85rem', marginRight: '0.25rem'}}>(Kamu)</span>} {share.user.name}
                                             </p>
-                                            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{share.user.email}</p>
+                                            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{share.user.email}</p>
                                         </div>
                                     </div>
-                                    <div style={{ textAlign: 'right' }}>
+                                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
                                         <p style={{ margin: 0, fontWeight: 'bold' }}>Rp {Number(share.shareAmount).toLocaleString('id-ID')}</p>
-                                        {share.isPaid ? (
+                                        {share.userId === expense.paidBy ? (
+                                            <span style={{ display: 'inline-block', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', backgroundColor: '#f3f4f6', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>Ditalangi Sendiri</span>
+                                        ) : share.isPaid ? (
                                             <span style={{ display: 'inline-block', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-primary)', backgroundColor: '#ecfdf5', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>✅ Lunas</span>
                                         ) : (
                                             <span style={{ display: 'inline-block', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-error)', backgroundColor: '#fef2f2', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>❌ Belum Bayar</span>

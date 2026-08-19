@@ -135,7 +135,7 @@ export const Dashboard = () => {
                                     <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-primary)' }}>{membership.group.name}</h3>
                                     <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-light)' }}>Peranmu: {membership.role}</p>
                                 </div>
-                                <Button onClick={() => navigate('/groups/' + membership.group.id)}>Buka Sirkel</Button>
+                                <Button onClick={() => navigate('/groups/' + membership.group.id + '/expenses')}>Buka Sirkel</Button>
                             </div>
                         ))}
                     </div>
