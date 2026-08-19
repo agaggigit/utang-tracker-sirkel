@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin }  from '@react-oauth/google';
 
 export const Login = () => {
     const navigate = useNavigate();
@@ -55,6 +56,39 @@ export const Login = () => {
         }
     };
 
+    const handleGoogleLogin = useGoogleLogin({
+        flow: 'auth-code',
+        onSuccess: async (codeResponse) => {
+            try {
+                setIsLoading(true);
+                setErrorMsg('');
+
+                const response = await  fetch('http://localhost:3000/auth/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: codeResponse.code })
+                });
+
+                const data = await response.json();
+
+                if(!response.ok) throw new Error(data.message || 'Gagal login dengan Google');
+
+                localStorage.setItem('token', data.token);
+                navigate('/dashboard');
+            } catch (err: any) {
+                setErrorMsg(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        onError: () => {
+            setErrorMsg('Login dengan Google dibatalkan atau gagal.');
+        }
+
+    });
+
     return (
     <div className="auth-container">
         <div className="auth-card">
@@ -94,7 +128,7 @@ export const Login = () => {
                     <span>atau</span>
                 </div>
                 
-                <Button type="button" variant="outline" fullWidth>
+                <Button type="button" variant="outline" fullWidth onClick={() => handleGoogleLogin()}>
                     Masuk dengan Google
                 </Button>
                 

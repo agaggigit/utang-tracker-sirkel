@@ -6,10 +6,13 @@ import jwt from 'jsonwebtoken';
 
 const router = Router()
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleClient = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+);
 
 const googleAuthSchema= z.object({
-    idToken: z.string().min(1, "Token tidak boleh kosong")
+    code: z.string().min(1, "Code tidak boleh kosong")
 });
 
 router.post('/google', async (req: Request, res: Response) => {
@@ -22,8 +25,17 @@ router.post('/google', async (req: Request, res: Response) => {
     }
 
     try {
-        const { idToken } = result.data;
+        const { code } = result.data;
         
+        const { tokens } = await googleClient.getToken({
+            code: code,
+            redirect_uri: 'postmessage'
+        });
+
+        const idToken = tokens.id_token;
+
+        if (!idToken) throw new Error("Gagal mendapatkan idToken dari Google");
+
         const ticket = await googleClient.verifyIdToken({
             idToken: idToken,
             audience: process.env.GOOGLE_CLIENT_ID
