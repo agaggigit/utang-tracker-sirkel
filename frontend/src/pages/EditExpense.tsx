@@ -10,6 +10,24 @@ interface Member {
     name: string;
 }
 
+// Helper Kalkulator Cepat
+const evaluateMath = (expression: string | number): number | string => {
+    if (typeof expression === 'number') return expression;
+    if (!expression) return '';
+    try {
+        const sanitized = expression.toString().replace(/[^0-9+\-*/.()]/g, '');
+        if (!sanitized) return expression;
+        // eslint-disable-next-line no-new-func
+        const result = new Function(`return ${sanitized}`)();
+        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+            return Math.round(result * 100) / 100;
+        }
+        return expression;
+    } catch (e) {
+        return expression;
+    }
+};
+
 export const EditExpense = () => {
     const { id: expenseId } = useParams();
     const navigate = useNavigate();
@@ -20,7 +38,7 @@ export const EditExpense = () => {
 
     // --- STATE FORM UTAMA ---
     const [description, setDescription] = useState('');
-    const [totalAmount, setTotalAmount] = useState<number | ''>('');
+    const [totalAmount, setTotalAmount] = useState<number | string>('');
     const [expenseDate, setExpenseDate] = useState(() => {
         // Format YYYY-MM-DD untuk default awal
         const now = new Date();
@@ -32,7 +50,7 @@ export const EditExpense = () => {
 
     // --- STATE UNTUK SPLIT BILL DINAMIS ---
     // Menyimpan baris pembagian tagihan: { userId, shareAmount }
-    const [shares, setShares] = useState<{ userId: string, shareAmount: number | '' }[]>([]);
+    const [shares, setShares] = useState<{ userId: string, shareAmount: number | string }[]>([]);
     
     // State untuk daftar pilihan anggota grup (didapat dari Backend)
     const [members, setMembers] = useState<Member[]>([]);
@@ -118,9 +136,12 @@ export const EditExpense = () => {
 
     // Tombol pembantu: "Bagi Rata"
     const handleSplitEqually = () => {
-        if (!totalAmount || shares.length === 0) return;
+        const evaluatedTotal = evaluateMath(totalAmount);
+        if (!evaluatedTotal || typeof evaluatedTotal !== 'number' || shares.length === 0) return;
         
-        const equalAmount = Number((Number(totalAmount) / shares.length).toFixed(2));
+        setTotalAmount(evaluatedTotal); // Sync UI ke hasil hitung
+
+        const equalAmount = Number((evaluatedTotal / shares.length).toFixed(2));
         const newShares = shares.map(share => ({ ...share, shareAmount: equalAmount }));
         setShares(newShares);
     };
@@ -133,8 +154,9 @@ export const EditExpense = () => {
 
         try {
             // Validasi Frontend Dasar
-            if (!description || !totalAmount) {
-                throw new Error("Deskripsi dan Total Nominal harus diisi!");
+            const finalTotal = evaluateMath(totalAmount);
+            if (!description || !finalTotal || typeof finalTotal !== 'number') {
+                throw new Error("Deskripsi dan Total Nominal harus diisi dengan angka valid!");
             }
             if (shares.length === 0) {
                 throw new Error("Pilih setidaknya satu anggota untuk ditagih.");
@@ -142,8 +164,9 @@ export const EditExpense = () => {
 
             // Pastikan tidak ada data kosong di dalam shares
             const formattedShares = shares.map(s => {
-                if (!s.userId || !s.shareAmount) throw new Error("Ada baris anggota atau nominal yang kosong!");
-                return { userId: s.userId, shareAmount: Number(s.shareAmount) };
+                const finalShare = evaluateMath(s.shareAmount);
+                if (!s.userId || !finalShare || typeof finalShare !== 'number') throw new Error("Ada baris anggota atau nominal yang kosong/tidak valid!");
+                return { userId: s.userId, shareAmount: finalShare };
             });
 
             let finalExpenseDate = new Date(expenseDate);
@@ -157,7 +180,7 @@ export const EditExpense = () => {
             // Panggil API PUT /expenses/:id
             const payload = {
                 description,
-                totalAmount: Number(totalAmount),
+                totalAmount: finalTotal,
                 expenseDate: finalExpenseDate.toISOString(),
                 shares: formattedShares
             };
@@ -224,87 +247,39 @@ export const EditExpense = () => {
 
                     <form className="expense-form-layout" onSubmit={handleSubmit}>
                         
-                        {/* 1. INFORMASI UMUM */}
-                        <div className="expense-form-info">
-                            <h3 style={{ marginBottom: '1rem' }}>Informasi Tagihan</h3>
-                            
-                            <div className="input-wrapper">
-                                <label className="input-label">Deskripsi / Judul (Cth: Patungan Nasi Padang)</label>
-                                <input 
-                                    type="text" 
-                                    className="input-field" 
-                                    placeholder="Bayar apa hari ini?"
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value)}
-                                />
-                            </div>
+                        {/* 1. SPLIT BILL (KIRI) */}
+                        <div className="expense-form-split-wrapper">
+                            <div className="expense-form-split">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexShrink: 0 }}>
+                                    <h3 style={{ margin: 0 }}>Siapa saja yang berutang padamu?</h3>
+                                    {!isLocked && (
+                                        <Button type="button" variant="outline" onClick={handleSplitEqually} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                            <Scale size={16} /> Bagi Rata
+                                        </Button>
+                                    )}
+                                </div>
 
-                            <div className="input-wrapper">
-                                <label className="input-label">Total Nominal (Rp)</label>
-                                <input 
-                                    type="number" 
-                                    className="input-field" 
-                                    placeholder="0"
-                                    value={totalAmount}
-                                    disabled={isLocked}
-                                    style={isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)' } : {}}
-                                    onChange={e => setTotalAmount(e.target.value ? Number(e.target.value) : '')}
-                                />
-                            </div>
-                            
-                            <div className="input-wrapper">
-                                <label className="input-label">Tanggal Transaksi</label>
-                                <input 
-                                    type={isTimeSpecific ? "datetime-local" : "date"} 
-                                    className="input-field" 
-                                    value={expenseDate}
-                                    onChange={e => setExpenseDate(e.target.value)}
-                                />
-                                <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: 'var(--color-primary)', marginTop: '0.5rem' }}>
-                                    <input 
-                                        type="checkbox" 
-                                        checked={isTimeSpecific}
-                                        onChange={(e) => {
-                                            setIsTimeSpecific(e.target.checked);
-                                            const now = new Date();
-                                            const tzOffset = now.getTimezoneOffset() * 60000;
-                                            const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 16);
-                                            
-                                            if (e.target.checked) {
-                                                setExpenseDate(localISOTime);
-                                            } else {
-                                                setExpenseDate(localISOTime.split('T')[0]);
-                                            }
-                                        }}
-                                    />
-                                    Atur Jam Spesifik
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* 2. SPLIT BILL */}
-                        <div className="expense-form-split">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 style={{ margin: 0 }}>Siapa saja yang berutang padamu?</h3>
-                                {!isLocked && (
-                                    <Button type="button" variant="outline" onClick={handleSplitEqually} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                        <Scale size={16} /> Bagi Rata
-                                    </Button>
-                                )}
-                            </div>
-
-                            {/* Daftar Dinamis */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
-                                {shares.map((share, index) => (
-                                    <div key={index} style={{ 
-                                        padding: '1.25rem', 
-                                        backgroundColor: '#f9fafb', 
-                                        borderRadius: '12px', 
-                                        border: '1px solid var(--color-border)',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: '1rem'
-                                    }}>
+                                {/* Daftar Dinamis */}
+                                <div style={{ 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    gap: '1rem', 
+                                    marginBottom: '1rem',
+                                    flex: '0 1 auto',
+                                    minHeight: 0,
+                                    overflowY: 'auto',
+                                    paddingRight: '0.5rem'
+                                }}>
+                                    {shares.map((share, index) => (
+                                        <div key={index} style={{ 
+                                            padding: '1.25rem', 
+                                            backgroundColor: '#f9fafb', 
+                                            borderRadius: '12px', 
+                                            border: '1px solid var(--color-border)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '1rem'
+                                        }}>
                                         
                                         {/* Baris Atas: Nama dan Tombol Hapus */}
                                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -339,13 +314,20 @@ export const EditExpense = () => {
                                             <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
                                                 <span style={{ position: 'absolute', left: '1rem', color: 'var(--color-text-muted)', fontWeight: 'bold' }}>Rp</span>
                                                 <input 
-                                                    type="number" 
+                                                    type="text" 
                                                     className="input-field" 
                                                     style={{ paddingLeft: '3rem', width: '100%', fontWeight: 'bold', ...(isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)' } : {}) }}
                                                     placeholder="0"
                                                     value={share.shareAmount}
                                                     disabled={isLocked}
-                                                    onChange={e => handleShareChange(index, 'shareAmount', e.target.value ? Number(e.target.value) : '')}
+                                                    onChange={e => handleShareChange(index, 'shareAmount', e.target.value)}
+                                                    onBlur={() => handleShareChange(index, 'shareAmount', evaluateMath(share.shareAmount))}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            handleShareChange(index, 'shareAmount', evaluateMath(share.shareAmount));
+                                                        }
+                                                    }}
                                                 />
                                             </div>
                                         </div>
@@ -355,7 +337,7 @@ export const EditExpense = () => {
 
                             {/* Dropdown Langsung Tambah Anggota */}
                             {!isLocked && members.filter(m => !shares.some(s => s.userId === m.id)).length > 0 && (
-                                <div style={{ position: 'relative' }}>
+                                <div style={{ position: 'relative', flexShrink: 0 }}>
                                     <select 
                                         value=""
                                         onChange={(e) => {
@@ -372,7 +354,7 @@ export const EditExpense = () => {
                                             fontWeight: 'bold',
                                             color: 'var(--color-primary)',
                                             textAlign: 'center',
-                                            appearance: 'none', // Menghilangkan panah bawaan di beberapa browser
+                                            appearance: 'none', 
                                             padding: '0.75rem'
                                         }}
                                     >
@@ -387,8 +369,74 @@ export const EditExpense = () => {
                                 </div>
                             )}
                         </div>
+                    </div>
 
-                        {/* 3. SUMMARIES & SUBMIT */}
+                    {/* 2. KANAN: INFO & SUBMIT */}
+                    <div className="expense-form-right">
+                        <div className="expense-form-info">
+                            <h3 style={{ marginBottom: '1rem' }}>Informasi Tagihan</h3>
+                            
+                            <div className="input-wrapper">
+                                <label className="input-label">Deskripsi / Judul</label>
+                                <input 
+                                    type="text" 
+                                    className="input-field" 
+                                    placeholder="Bayar apa hari ini?"
+                                    value={description}
+                                    onChange={e => setDescription(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="input-wrapper">
+                                <label className="input-label">Total Nominal (Rp) - Cth: 50000+15000</label>
+                                <input 
+                                    type="text" 
+                                    className="input-field" 
+                                    placeholder="0"
+                                    value={totalAmount}
+                                    disabled={isLocked}
+                                    style={isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)' } : {}}
+                                    onChange={e => setTotalAmount(e.target.value)}
+                                    onBlur={() => setTotalAmount(evaluateMath(totalAmount))}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            setTotalAmount(evaluateMath(totalAmount));
+                                        }
+                                    }}
+                                />
+                            </div>
+                            
+                            <div className="input-wrapper">
+                                <label className="input-label">Tanggal Transaksi</label>
+                                <input 
+                                    type={isTimeSpecific ? "datetime-local" : "date"} 
+                                    className="input-field" 
+                                    value={expenseDate}
+                                    onChange={e => setExpenseDate(e.target.value)}
+                                />
+                                <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: 'var(--color-primary)', marginTop: '0.5rem' }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={isTimeSpecific}
+                                        onChange={(e) => {
+                                            setIsTimeSpecific(e.target.checked);
+                                            const now = new Date();
+                                            const tzOffset = now.getTimezoneOffset() * 60000;
+                                            const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 16);
+                                            
+                                            if (e.target.checked) {
+                                                setExpenseDate(localISOTime);
+                                            } else {
+                                                setExpenseDate(localISOTime.split('T')[0]);
+                                            }
+                                        }}
+                                    />
+                                    Atur Jam Spesifik
+                                </label>
+                            </div>
+                        </div>
+
                         <div className="expense-form-submit">
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem' }}>
                                 <span>Total Tagihan:</span>
@@ -405,10 +453,11 @@ export const EditExpense = () => {
                                 {isLoading ? 'Menyimpan...' : 'Simpan Perubahan!'}
                             </Button>
                         </div>
+                    </div>
 
-                    </form>
-                </div>
-            </main>
-        </div>
-    );
+                </form>
+            </div>
+        </main>
+    </div>
+);
 };
