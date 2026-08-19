@@ -1,5 +1,17 @@
+expenses
+- yang urusannya sama expense
+
+groups
+- yang urusannya sama grup
+
 middleware
 - valiadi token jwt
+
+notifications
+- urusan sama notification
+
+payments
+- urusan sama payment
 
 users
 - fitur berkaitan autentikasi user

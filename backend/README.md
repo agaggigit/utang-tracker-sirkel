@@ -6,3 +6,9 @@ prisma
 
 src
 - kode backend
+
+package-lock.json
+
+package.json
+
+prisma.config.ts
