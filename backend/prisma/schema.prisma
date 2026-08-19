@@ -16,13 +16,15 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   authProvider String   @default("local") @map("auth_provider")
 
-  groupsCreated Group[]        @relation("GroupCreator")
-  memberships   GroupMember[]  @relation("GroupMember")
-  expensesPaid  Expense[]      @relation("ExpensePaid")
-  expenseShares ExpenseShare[] @relation("ExpenseShare")
-  paymentsSent  Payment[]      @relation("PaymentFromUser")
-  paymentsRecv  Payment[]      @relation("PaymentToUser")
-  joinRequests  GroupJoinRequest[]
+  groupsCreated    Group[]            @relation("GroupCreator")
+  memberships      GroupMember[]      @relation("GroupMember")
+  expensesPaid     Expense[]          @relation("ExpensePaid")
+  expenseShares    ExpenseShare[]     @relation("ExpenseShare")
+  paymentsSent     Payment[]          @relation("PaymentsSent")
+  paymentsReceived Payment[]          @relation("PaymentsReceived")
+  notifications    Notification[]
+  joinRequests     GroupJoinRequest[] @relation("UserJoinRequests")
+  reviewedRequests GroupJoinRequest[] @relation("ReviewerJoinRequests")
 
   @@map("users")
 }
@@ -104,8 +106,8 @@ model Payment {
   reviewedAt     DateTime? @map("reviewed_at") // null sampai di-acc/tolak
   rejectionNote  String?   @map("rejection_note") // alasan kalau ditolak
 
-  from          User         @relation("PaymentFromUser", fields: [fromUser], references: [id])
-  to            User         @relation("PaymentToUser", fields: [toUser], references: [id])
+  from          User         @relation("PaymentsSent", fields: [fromUser], references: [id])
+  to            User         @relation("PaymentsReceived", fields: [toUser], references: [id])
   groupActivity Group?       @relation("InterGroupPayment", fields: [groupId], references: [id])
   expenseShare  ExpenseShare @relation(fields: [expenseShareId], references: [id])
 
@@ -116,12 +118,28 @@ model GroupJoinRequest {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   groupId     String    @map("group_id") @db.Uuid
   userId      String    @map("user_id") @db.Uuid
+  reviewedBy  String?   @map("reviewed_by") @db.Uuid
   status      String    @default("pending") @db.VarChar(20) // pending | approved | rejected
   requestedAt DateTime  @default(now()) @map("requested_at")
   reviewedAt  DateTime? @map("reviewed_at")
   
   group       Group     @relation(fields: [groupId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation("UserJoinRequests", fields: [userId], references: [id])
+  reviewer    User?     @relation("ReviewerJoinRequests", fields: [reviewedBy], references: [id])
   
   @@map("group_join_requests")
+}
+
+model Notification {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  type        String   @db.VarChar(50)
+  message     String
+  isRead      Boolean  @default(false) @map("is_read")
+  referenceId String?  @map("reference_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
 }

@@ -13,6 +13,7 @@ import { getGroupDetailsRouter } from './groups/getGroupDetails';
 import { getGroupMembersRouter } from './groups/getGroupMembers';
 import { getGroupBalanceRouter } from './groups/getGroupBalance';
 import { joinRequestNotificationRouter } from './notifications/joinRequestNotifications';
+import { notificationRouter } from './notifications/getNotifications';
 import { createExpenseRouter } from './expenses/createExpense';
 import { getExpensesRouter } from './expenses/getExpenses';
 import { getExpenseDetailRouter } from './expenses/getExpenseDetail';
@@ -45,13 +46,15 @@ app.use('/groups', getGroupBalanceRouter);
 app.use('/groups', createExpenseRouter);
 app.use('/groups', getExpensesRouter);
 
+app.use('/notifications', joinRequestNotificationRouter);
+app.use('/notifications', notificationRouter);
+
 app.use('/expenses', getExpenseDetailRouter);
 app.use('/payments', createPaymentRouter);
 app.use('/payments', incomingPaymentsRouter);
 app.use('/payments', approvePaymentRouter);
 app.use('/payments', rejectPaymentRouter);
 
-app.use('/notifications', joinRequestNotificationRouter)
 
 // Rute tes dasar
 app.get('/api/test', (req, res) => {

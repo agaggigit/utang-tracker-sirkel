@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { authenticate } from "../middleware/auth";
 import { prisma } from "../db";
 import z from "zod";
+import { createNotification } from "../notifications/notificationService";
 
 const router = Router()
 
@@ -116,6 +117,17 @@ router.patch('/:id/join-requests/:requestId', authenticate, async (req: Request,
                 }
             });
 
+            // --- TRIGGER NOTIFIKASI (LANGKAH 2) ---
+            const group = await prisma.group.findUnique({ where: { id: groupId }});
+            if (group) {
+                await createNotification(
+                    joinRequest.userId,
+                    'JOIN_REJECTED',
+                    `Permintaan bergabungmu ke grup "${group.name}" ditolak oleh Host.`,
+                    joinRequest.id
+                );
+            }
+
             return res.status(200).json({ message: 'Permintaan bergabung ditolak' })
         } else {
             await prisma.$transaction(async (tx) => {
@@ -136,6 +148,17 @@ router.patch('/:id/join-requests/:requestId', authenticate, async (req: Request,
                 });
             });
             
+            // --- TRIGGER NOTIFIKASI (LANGKAH 2) ---
+            const group = await prisma.group.findUnique({ where: { id: groupId }});
+            if (group) {
+                await createNotification(
+                    joinRequest.userId,
+                    'JOIN_APPROVED',
+                    `Permintaan bergabungmu ke grup "${group.name}" disetujui! Selamat datang.`,
+                    joinRequest.id
+                );
+            }
+
             return res.status(200).json({ message: 'Berhasil menyetujui permintaan bergabung' });
         }
     } catch(error) {

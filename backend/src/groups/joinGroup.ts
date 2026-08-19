@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { prisma } from "../db";
 import { authenticate } from "../middleware/auth";
 import { z } from "zod";
+import { createNotification } from "../notifications/notificationService";
 
 const router = Router();
 
@@ -76,13 +77,27 @@ router.post('/join', authenticate, async (req: Request, res: Response) => {
                 return res.status(400).json({ message: 'Permintaan bergabungmu sedang menunggu persetujuan Host' });
             }
 
-            await prisma.groupJoinRequest.create({
+            const newRequest = await prisma.groupJoinRequest.create({
                 data: {
                     groupId: group.id,
                     userId: userId,
                     status: 'pending',
                 }
             });
+
+            // --- TRIGGER NOTIFIKASI (LANGKAH 2) ---
+            const currentUser = await prisma.user.findUnique({ where: { id: userId }, select: { name: true }});
+            if (currentUser) {
+                const hosts = group.members.filter(m => m.role === 'host');
+                for (const host of hosts) {
+                    await createNotification(
+                        host.userId,
+                        'JOIN_REQUEST',
+                        `${currentUser.name} meminta untuk bergabung ke grup "${group.name}".`,
+                        newRequest.id
+                    );
+                }
+            }
 
             return res.status(200).json({ message: "Permintaan terkirim, menunggu persetujuan Host" });
         }

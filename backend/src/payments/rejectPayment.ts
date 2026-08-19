@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { authenticate } from "../middleware/auth";
 import { prisma } from "../db";
+import { createNotification } from "../notifications/notificationService";
 
 const router = Router();
 
@@ -11,7 +12,8 @@ router.patch('/:id/reject', authenticate, async (req: Request, res: Response) =>
         const { rejectionNote } = req.body;
 
         const payment = await prisma.payment.findUnique({
-            where: { id: paymentId }
+            where: { id: paymentId },
+            include: { expenseShare: { include: { expense: true } } }
         });
 
         if (!payment) return res.status(404).json({ message: "Pengajuan tidak ditemukan" });
@@ -26,6 +28,17 @@ router.patch('/:id/reject', authenticate, async (req: Request, res: Response) =>
                 rejectionNote: rejectionNote || null
             }
         });
+
+        // --- TRIGGER NOTIFIKASI (LANGKAH 2) ---
+        const currentUser = await prisma.user.findUnique({ where: { id: currentUserId }, select: { name: true }});
+        if (currentUser) {
+            await createNotification(
+                payment.fromUser,
+                'PAYMENT_REJECTED',
+                `${currentUser.name} menolak pembayaranmu untuk tagihan "${payment.expenseShare.expense.description}". Alasan: ${rejectionNote || 'Tidak ada alasan'}`,
+                payment.id
+            );
+        }
 
         return res.status(200).json({ message: "Pembayaran ditolak", payment: updatedPayment });
     } catch (error) {

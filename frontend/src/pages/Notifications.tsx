@@ -5,6 +5,8 @@ import { Button } from '../components/Button';
 export const Notifications = () => {
     const navigate = useNavigate();
     const [joinRequests, setJoinRequests] = useState<any[]>([]);
+    const [incomingPayments, setIncomingPayments] = useState<any[]>([]);
+    const [generalNotifs, setGeneralNotifs] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
 
@@ -19,21 +21,26 @@ export const Notifications = () => {
             try {
                 const token = localStorage.getItem('token');
                 
-                // Fetch kedua API secara paralel
-                const [joinRes, paymentRes] = await Promise.all([
+                // Fetch ketiga API secara paralel
+                const [joinRes, paymentRes, notifRes] = await Promise.all([
                     fetch('http://localhost:3000/notifications/join-requests', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     }),
                     fetch('http://localhost:3000/payments/incoming', {
                         headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch('http://localhost:3000/notifications', {
+                        headers: { 'Authorization': `Bearer ${token}` }
                     })
                 ]);
 
-                if (joinRes.ok && paymentRes.ok) {
+                if (joinRes.ok && paymentRes.ok && notifRes.ok) {
                     const joinData = await joinRes.json();
                     const paymentData = await paymentRes.json();
+                    const notifData = await notifRes.json();
                     setJoinRequests(joinData);
                     setIncomingPayments(paymentData);
+                    setGeneralNotifs(notifData);
                 } else {
                     throw new Error('Gagal mengambil notifikasi');
                 }
@@ -47,7 +54,34 @@ export const Notifications = () => {
         fetchNotifications();
     }, []);
 
-    const hasNoNotifications = joinRequests.length === 0 && incomingPayments.length === 0;
+    const hasNoNotifications = joinRequests.length === 0 && incomingPayments.length === 0 && generalNotifs.length === 0;
+
+    // --- LOGIKA READ NOTIFIKASI (LANGKAH 4) ---
+    const markAsRead = async (id: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:3000/notifications/${id}/read`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setGeneralNotifs(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const markAllAsRead = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:3000/notifications/read-all`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setGeneralNotifs(prev => prev.map(n => ({ ...n, isRead: true })));
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     // --- LOGIKA AKSI APPROVE & REJECT (LANGKAH 3) ---
     const handleAction = async (action: 'approve' | 'reject') => {
@@ -91,9 +125,16 @@ export const Notifications = () => {
     return (
         <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                <Button variant="outline" onClick={() => navigate(-1)}>&larr; Kembali</Button>
-                <h1 style={{ fontSize: '1.5rem', margin: 0 }}>Notifikasi 🔔</h1>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <Button variant="outline" onClick={() => navigate(-1)}>&larr; Kembali</Button>
+                    <h1 style={{ fontSize: '1.5rem', margin: 0 }}>Notifikasi 🔔</h1>
+                </div>
+                {generalNotifs.some(n => !n.isRead) && (
+                    <Button variant="outline" onClick={markAllAsRead} style={{ fontSize: '0.85rem' }}>
+                        ✓ Tandai Semua Dibaca
+                    </Button>
+                )}
             </div>
 
             {/* List Notifikasi */}
@@ -188,6 +229,44 @@ export const Notifications = () => {
                                         Buka Sirkel
                                     </Button>
                                 </div>
+                            </div>
+                        ))}
+
+                        {/* --- LIST NOTIFIKASI UMUM (LANGKAH 4) --- */}
+                        {generalNotifs.map((notif) => (
+                            <div key={notif.id} 
+                                onClick={() => !notif.isRead && markAsRead(notif.id)}
+                                style={{
+                                display: 'flex', alignItems: 'center', gap: '1rem',
+                                padding: '1.25rem 1.5rem', 
+                                backgroundColor: notif.isRead ? 'transparent' : '#f0f9ff',
+                                borderRadius: 'var(--radius-lg)', 
+                                border: '1px solid',
+                                borderColor: notif.isRead ? 'var(--color-border)' : '#bae6fd', 
+                                boxShadow: notif.isRead ? 'none' : 'var(--shadow-sm)', 
+                                transition: 'all 0.2s ease',
+                                cursor: notif.isRead ? 'default' : 'pointer',
+                                opacity: notif.isRead ? 0.7 : 1
+                            }}>
+                                <div style={{ 
+                                    width: '40px', height: '40px', borderRadius: '50%', 
+                                    backgroundColor: notif.isRead ? 'var(--color-border)' : '#38bdf8', 
+                                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                    fontSize: '1rem'
+                                }}>
+                                    ℹ️
+                                </div>
+                                <div>
+                                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>
+                                        {notif.message}
+                                    </p>
+                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
+                                        {new Date(notif.createdAt).toLocaleDateString('id-ID', { 
+                                            day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+                                        })}
+                                    </p>
+                                </div>
+                                {!notif.isRead && <div style={{ marginLeft: 'auto', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0ea5e9' }}></div>}
                             </div>
                         ))}
                     </>

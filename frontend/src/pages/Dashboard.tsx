@@ -30,12 +30,14 @@ export const Dashboard = () => {
         const fetchNotifications = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:3000/notifications/join-requests', {
+                const response = await fetch('http://localhost:3000/notifications', {
                     headers: { 'Authorization': `Bearer ${token}` }  
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    setNotifications(data);
+                    // Hanya hitung yang belum dibaca (isRead === false)
+                    const unread = data.filter((n: any) => !n.isRead);
+                    setNotifications(unread);
                 }
             } catch (error) {
                 console.error("Gagal mengambil notifikasi", error);

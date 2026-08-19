@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { authenticate } from "../middleware/auth";
 import { prisma } from "../db";
+import { createNotification } from "../notifications/notificationService";
 
 const router = Router();
 
@@ -45,6 +46,18 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
                 status: 'pending'
             }
         });
+
+        // --- TRIGGER NOTIFIKASI (LANGKAH 2) ---
+        // Beri tahu Penombok (Creditor) bahwa ada pengajuan masuk
+        const currentUser = await prisma.user.findUnique({ where: { id: currentUserId }, select: { name: true }});
+        if (currentUser) {
+            await createNotification(
+                share.expense.paidBy,
+                'PAYMENT_PENDING',
+                `${currentUser.name} mengajukan pelunasan untuk tagihan "${share.expense.description}".`,
+                newPayment.id
+            );
+        }
 
         return res.status(201).json({ message: "Pengajuan pembayaran berhasil dikirim", payment: newPayment });
 
