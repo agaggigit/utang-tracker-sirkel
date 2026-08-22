@@ -19,7 +19,7 @@ export function ExpenseCard({ id, description, totalAmount, expenseDate, paidByU
             onClick={() => navigate(`/expenses/${id}`)}
             style={{ 
                 padding: '1.5rem', 
-                backgroundColor: 'white', 
+                backgroundColor: 'var(--color-surface)', 
                 borderRadius: '12px', 
                 boxShadow: 'var(--shadow-sm)', 
                 border: '1px solid var(--color-border)',

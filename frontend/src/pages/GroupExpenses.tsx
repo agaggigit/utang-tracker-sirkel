@@ -128,7 +128,8 @@ export const GroupExpenses = () => {
     return (
         <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
             <div className="expenses-layout">
-                <PageHeader 
+                <div className="expenses-header">
+                    <PageHeader 
                     title="Riwayat Tagihan" 
                     onBack={() => navigate('/dashboard')}
                     action={
@@ -174,13 +175,14 @@ export const GroupExpenses = () => {
                         {endDate && <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Hingga: {new Date(endDate).toLocaleDateString('id-ID')}</span>}
                         {filterType === 'involved' && <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Terlibat</span>}
                         {filterType === 'unpaid' && <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Belum Lunas</span>}
-                        {filterType === 'payer' && <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Nalangin</span>}
+                        {filterType === 'payer' && <span style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success-text)', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Nalangin</span>}
                         <span 
                             onClick={() => { setSearchKeyword(''); setStartDate(''); setEndDate(''); setFilterType('all'); }}
                             style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', textDecoration: 'underline', cursor: 'pointer', padding: '0.25rem' }}
                         >Hapus Semua Filter</span>
                     </div>
                 )}
+                </div>
 
             {/* --- 3. PANEL STATS (Kanan) --- */}
             <div className="expenses-stats">
@@ -222,7 +224,7 @@ export const GroupExpenses = () => {
                         <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Utangmu (Kamu utang ke orang)</p>
                         <h3 style={{ margin: 0, color: 'var(--color-error)' }}>Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
                     </div>
-                    <div style={{ alignSelf: 'flex-start', backgroundColor: '#f3f4f6', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                    <div style={{ alignSelf: 'flex-start', backgroundColor: 'var(--color-surface-muted)', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem', marginTop: '0.5rem' }}>
                         Lihat Rincian <ArrowRight size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />
                     </div>
                 </div>
@@ -231,7 +233,7 @@ export const GroupExpenses = () => {
 
             <main className="expenses-list">
                 {errorMsg && (
-                    <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <AlertTriangle size={20} /> {errorMsg}
                     </div>
                 )}
@@ -295,7 +297,7 @@ export const GroupExpenses = () => {
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 {balanceData.iOwe.map(item => (
-                                    <div key={item.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#fef2f2', borderRadius: '8px' }}>
+                                    <div key={item.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--color-error-bg)', borderRadius: '8px' }}>
                                         <span style={{ fontWeight: 'bold' }}>Ke {item.name}</span>
                                         <span style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
                                     </div>
@@ -311,8 +313,8 @@ export const GroupExpenses = () => {
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 {balanceData.owedToMe.map(item => (
-                                    <div key={item.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#ecfdf5', borderRadius: '8px' }}>
-                                        <span style={{ fontWeight: 'bold' }}>Dari {item.name}</span>
+                                    <div key={item.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--color-success-bg)', borderRadius: '8px' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'var(--color-success-text)' }}>Dari {item.name}</span>
                                         <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
                                     </div>
                                 ))}

@@ -122,7 +122,7 @@ export const Notifications = () => {
                 {isLoading ? (
                     <SkeletonList count={5} />
                 ) : errorMsg ? (
-                    <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <AlertTriangle size={20} /> {errorMsg}
                     </div>
                 ) : hasNoNotifications ? (
@@ -266,7 +266,7 @@ export const Notifications = () => {
                             <p style={{ margin: '0 0 0.5rem 0' }}><strong>Nominal:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>Rp {Number(selectedPayment.amount).toLocaleString('id-ID')}</span></p>
                             
                             {selectedPayment.note && (
-                                <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f3f4f6', borderRadius: '8px', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                                <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'var(--color-surface-muted)', borderRadius: '8px', fontStyle: 'italic', fontSize: '0.9rem' }}>
                                     "{selectedPayment.note}"
                                 </div>
                             )}

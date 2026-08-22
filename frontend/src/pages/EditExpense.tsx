@@ -228,7 +228,7 @@ export const EditExpense = () => {
                         </div>
                     )}
                     {errorMsg && (
-                        <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <AlertTriangle size={20} /> {errorMsg}
                         </div>
                     )}
@@ -266,7 +266,7 @@ export const EditExpense = () => {
                                     {shares.map((share, index) => (
                                         <div key={index} style={{ 
                                             padding: '1.25rem', 
-                                            backgroundColor: '#f9fafb', 
+                                            backgroundColor: 'var(--color-surface-hover)', 
                                             borderRadius: '12px', 
                                             border: '1px solid var(--color-border)',
                                             display: 'flex',
@@ -278,7 +278,7 @@ export const EditExpense = () => {
                                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                             {/* Dropdown Anggota (Disabled/Read-only untuk yang sudah dipilih) */}
                                             <div className="input-wrapper" style={{ flex: 1, marginBottom: 0, minWidth: 0 }}>
-                                                <div style={{ padding: '0.5rem', backgroundColor: '#f3f4f6', borderRadius: '8px', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <div style={{ padding: '0.5rem', backgroundColor: 'var(--color-surface-muted)', borderRadius: '8px', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                     {members.find(m => m.id === share.userId)?.name || 'Anggota'}
                                                 </div>
                                             </div>
@@ -309,7 +309,7 @@ export const EditExpense = () => {
                                                 <input 
                                                     type="text" 
                                                     className="input-field" 
-                                                    style={isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)', paddingLeft: '3rem', width: '100%', fontWeight: 'bold' } : { paddingLeft: '3rem', width: '100%', fontWeight: 'bold' }}
+                                                    style={isLocked ? { backgroundColor: 'var(--color-surface-muted)', color: 'var(--color-text-muted)', paddingLeft: '3rem', width: '100%', fontWeight: 'bold' } : { paddingLeft: '3rem', width: '100%', fontWeight: 'bold' }}
                                                     placeholder="0"
                                                     value={share.shareAmount}
                                                     disabled={isLocked}
@@ -388,7 +388,7 @@ export const EditExpense = () => {
                                     placeholder="0"
                                     value={totalAmount}
                                     disabled={isLocked}
-                                    style={isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)' } : {}}
+                                    style={isLocked ? { backgroundColor: 'var(--color-surface-muted)', color: 'var(--color-text-muted)' } : {}}
                                     onChange={e => setTotalAmount(sanitizeMathInput(e.target.value))}
                                     onBlur={() => setTotalAmount(evaluateMath(totalAmount))}
                                     onKeyDown={(e) => {

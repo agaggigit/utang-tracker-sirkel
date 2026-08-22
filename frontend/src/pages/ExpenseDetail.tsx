@@ -209,7 +209,7 @@ export const ExpenseDetail = () => {
                     </div>
                     
                     <div className="expense-detail-list">
-                        <div style={{ padding: '1.5rem', backgroundColor: '#f9fafb', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                        <div style={{ padding: '1.5rem', backgroundColor: 'var(--color-surface-hover)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
                             <h3 style={{ margin: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
                                 Ditalangi oleh: <span style={{ color: 'var(--color-primary)' }}>{expense.paidByUser.name}</span>
                             </h3>

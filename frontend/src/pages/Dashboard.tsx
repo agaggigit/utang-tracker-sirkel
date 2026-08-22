@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
-import { Inbox, LogOut, Home, Settings, Plus, Users, AlertTriangle } from 'lucide-react';
+import { Inbox, LogOut, Home, Settings, Plus, Users, AlertTriangle, Sun, Moon } from 'lucide-react';
 import { Avatar } from '../components/ui/Avatar';
 import { SkeletonList, Skeleton } from '../components/ui/Skeleton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import api from '../lib/api';
 import { useQuery } from '@tanstack/react-query';
+import { useTheme } from '../contexts/ThemeContext';
 
 const MySwal = withReactContent(Swal);
 
 export const Dashboard = () => {
     const navigate = useNavigate();
+    const { isDark, toggleThemeQuick } = useTheme();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const { data: user, isLoading: isLoadingUser } = useQuery({
         queryKey: ['users', 'me'],
@@ -67,7 +69,7 @@ export const Dashboard = () => {
     return (
         <div style={{ display: 'flex' }}>
             {/* --- KONTEN UTAMA --- */}
-            <div className="app-main-content" style={{ minHeight: '100vh', backgroundColor: 'var(--color-primary)', display: 'flex', flexDirection: 'column' }}>
+            <div className="app-main-content" style={{ minHeight: '100vh', backgroundColor: 'var(--color-dashboard-bg)', display: 'flex', flexDirection: 'column' }}>
             {/* --- HERO HEADER: PROFIL --- */}
             <div style={{ padding: '2rem 1.5rem 4rem 1.5rem' }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -91,17 +93,26 @@ export const Dashboard = () => {
                         {isLoading ? (
                             <Skeleton width={150} height={24} />
                         ) : (
-                            <h1 style={{ fontSize: '1.5rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
+                            <h1 style={{ fontSize: '1.5rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--color-header-text)' }}>
                                 {user?.name || 'Sobat'}
                             </h1>
                         )}
                     </div>
                     
-                    {/* Bagian Kanan: Inbox & Logout */}
+                    {/* Bagian Kanan: Toggle Tema, Inbox & Logout */}
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                        {/* TOGGLE TEMA */}
+                        <div 
+                            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} 
+                            onClick={toggleThemeQuick} 
+                            title={isDark ? "Ubah ke Mode Terang" : "Ubah ke Mode Gelap"}
+                        >
+                            {isDark ? <Sun size={24} color="var(--color-header-icon)" /> : <Moon size={24} color="var(--color-header-icon)" />}
+                        </div>
+
                         {/* INBOX */}
                         <div style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={() => navigate('/notifications')} title="Kotak Masuk">
-                            <Inbox size={24} color="white" />
+                            <Inbox size={24} color="var(--color-header-icon)" />
                             {notifications.length > 0 && (
                                 <span style={{
                                     position: 'absolute', top: '-5px', right: '-10px',

@@ -26,7 +26,7 @@ export function Skeleton({ width = '100%', height = '20px', borderRadius = '8px'
 // Komponen Pembantu untuk Layout Loading Umum
 export const SkeletonDashboard = () => (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '2rem 1.5rem', backgroundColor: 'var(--color-primary)' }}>
+        <div style={{ padding: '2rem 1.5rem', backgroundColor: 'var(--color-dashboard-bg)' }}>
             <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <Skeleton circle width={48} height={48} />
@@ -42,11 +42,11 @@ export const SkeletonDashboard = () => (
             <div className="dashboard-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <Skeleton width={120} height={24} />
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                    <div style={{ flex: 1, padding: '1.5rem', border: '1px solid #eee', borderRadius: '12px' }}>
+                    <div style={{ flex: 1, padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
                         <Skeleton width="60%" height={20} style={{ marginBottom: '0.5rem' }} />
                         <Skeleton width="40%" height={32} />
                     </div>
-                    <div style={{ flex: 1, padding: '1.5rem', border: '1px solid #eee', borderRadius: '12px' }}>
+                    <div style={{ flex: 1, padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
                         <Skeleton width="60%" height={20} style={{ marginBottom: '0.5rem' }} />
                         <Skeleton width="40%" height={32} />
                     </div>
@@ -59,7 +59,7 @@ export const SkeletonDashboard = () => (
 export const SkeletonList = ({ count = 3 }: { count?: number }) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {Array.from({ length: count }).map((_, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', border: '1px solid #eee', borderRadius: '12px' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
                 <Skeleton circle width={48} height={48} />
                 <div style={{ flex: 1 }}>
                     <Skeleton width="40%" height={20} style={{ marginBottom: '0.5rem' }} />

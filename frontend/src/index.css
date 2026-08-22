@@ -13,6 +13,21 @@
   
   --color-border: #e2e8f0;     /* Warna garis pembatas yang samar */
   --color-error: #ef4444;      /* Merah untuk peringatan error */
+  
+  --color-surface-hover: #f9fafb;
+  --color-surface-muted: #f3f4f6;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-success-bg: #dcfce7;
+  --color-success-border: #bbf7d0;
+  --color-success-text: #166534;
+  
+  --color-skeleton-start: #e2e8f0;
+  --color-skeleton-end: #cbd5e1;
+
+  --color-dashboard-bg: var(--color-primary); /* Background khusus dashboard (Biru di Light Mode) */
+  --color-header-text: #ffffff; /* Putih di atas biru */
+  --color-header-icon: #ffffff;
 
   /* Efek Bayangan (Shadow) ala Apple/Bank */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -22,6 +37,33 @@
   /* Kelengkungan sudut */
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
+}
+
+body.dark-theme, html.dark-theme {
+  color-scheme: dark;
+  --color-background: #0f172a; 
+  --color-surface: #1e293b;    
+  --color-primary: #3b82f6;    
+  --color-primary-hover: #2563eb; 
+  --color-text-main: #f8fafc;  
+  --color-text-muted: #94a3b8; 
+  --color-border: #334155;     
+  --color-error: #f87171;      
+
+  --color-surface-hover: #334155;
+  --color-surface-muted: #0f172a;
+  --color-error-bg: #450a0a;
+  --color-error-border: #7f1d1d;
+  --color-success-bg: #052e16;
+  --color-success-border: #14532d;
+  --color-success-text: #4ade80;
+
+  --color-skeleton-start: #1e293b;
+  --color-skeleton-end: #334155;
+
+  --color-dashboard-bg: var(--color-background); /* Background dashboard gelap di Dark Mode */
+  --color-header-text: var(--color-text-main);
+  --color-header-icon: var(--color-text-muted);
 }
 
 * {
@@ -129,7 +171,7 @@ body {
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 1rem;
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-hover); /* Pakai warna hover atau input khusus agar sedikit berbeda dari card */
   color: var(--color-text-main);
   transition: all 0.2s ease;
   outline: none;
@@ -187,14 +229,14 @@ body {
   flex-direction: column;
 }
 .auth-error-banner {
-  background-color: #fef2f2;
+  background-color: var(--color-error-bg);
   color: var(--color-error);
   padding: 0.75rem;
   border-radius: var(--radius-md);
   font-size: 0.875rem;
   text-align: center;
   margin-bottom: 1rem;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-error-border);
 }
 .auth-divider {
   display: flex;
@@ -346,6 +388,7 @@ body {
     justify-content: flex-start;
     padding: 2rem 0;
     box-shadow: var(--shadow-md);
+    background-color: var(--color-surface); /* Pastikan background tersesuaikan */
   }
 
   .app-nav-item {
@@ -593,6 +636,13 @@ body {
 }
 .swal2-image-custom-avatar { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 12px; }
 
-@keyframes skeleton-pulse { 0% { background-color: #e2e8f0; } 50% { background-color: #cbd5e1; } 100% { background-color: #e2e8f0; } }
-.skeleton-loading { animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+@keyframes skeleton-pulse { 
+  0% { opacity: 1; } 
+  50% { opacity: 0.5; } 
+  100% { opacity: 1; } 
+}
+.skeleton-loading { 
+  background-color: var(--color-skeleton-start);
+  animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; 
+}
 

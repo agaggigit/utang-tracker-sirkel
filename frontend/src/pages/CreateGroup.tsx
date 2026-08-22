@@ -78,7 +78,7 @@ export const CreateGroup = () => {
                 {!inviteCode ? (
                     /* Jika belum ada kode undangan, tampilkan form pengisian */
                     <form onSubmit={handleSubmit} className="auth-form">
-                        {errorMsg && <div className="auth-error-banner" style={{ backgroundColor: '#fef2f2', color: 'var(--color-error)' }}>{errorMsg}</div>}
+                        {errorMsg && <div className="auth-error-banner" style={{ backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)' }}>{errorMsg}</div>}
                         
                         <Input 
                             label="Nama Grup / Sirkel" 

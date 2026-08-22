@@ -6,12 +6,14 @@ import api from '../lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import { Trash2, ArrowLeft } from 'lucide-react';
+import { Trash2, ArrowLeft, Moon } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const MySwal = withReactContent(Swal);
 
 export const Profile = () => {
     const navigate = useNavigate();
+    const { themeMode, setThemeMode, scheduleTime, setScheduleTime } = useTheme();
 
     const [formData, setFormData] = useState({
         name: ''
@@ -166,12 +168,12 @@ export const Profile = () => {
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <label style={{
                                     cursor: 'pointer',
-                                    backgroundColor: '#f3f4f6',
                                     padding: '0.5rem 1rem',
                                     borderRadius: '8px',
                                     border: '1px solid var(--color-border)',
                                     fontSize: '0.9rem',
                                     fontWeight: '500',
+                                    backgroundColor: 'var(--color-surface-muted)',
                                     color: 'var(--color-text-main)',
                                     transition: 'all 0.2s',
                                     display: 'flex',
@@ -220,11 +222,11 @@ export const Profile = () => {
                                         }}
                                         style={{
                                             cursor: 'pointer',
-                                            backgroundColor: '#fef2f2',
-                                            padding: '0.5rem',
-                                            borderRadius: '8px',
-                                            border: '1px solid #fecaca',
+                                            backgroundColor: 'var(--color-error-bg)',
                                             color: 'var(--color-error)',
+                                            padding: '0.5rem',
+                                            border: '1px solid var(--color-error-border)',
+                                            borderRadius: '8px',
                                             transition: 'all 0.2s',
                                             display: 'flex',
                                             alignItems: 'center',
@@ -238,31 +240,83 @@ export const Profile = () => {
                             </div>
                         </div>
                     </div>
-
                     {/* --- KOLOM KANAN --- */}
-                    <div>
-                        <form onSubmit={handleSubmit} className="auth-form">
-                            {message.text && (
-                                <div className="auth-error-banner" style={{ 
-                                    backgroundColor: message.type === 'success' ? '#dcfce7' : '#fef2f2',
-                                    color: message.type === 'success' ? '#166534' : 'var(--color-error)',
-                                    borderColor: message.type === 'success' ? '#bbf7d0' : '#fecaca'
-                                }}>
-                                    {message.text}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        
+                        {/* FORM PROFIL */}
+                        <div>
+                            <form onSubmit={handleSubmit} className="auth-form">
+                                {message.text && (
+                                    <div className="auth-error-banner" style={{ 
+                                        backgroundColor: message.type === 'success' ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+                                        color: message.type === 'success' ? 'var(--color-success-text)' : 'var(--color-error)',
+                                        borderColor: message.type === 'success' ? 'var(--color-success-border)' : 'var(--color-error-border)'
+                                    }}>
+                                        {message.text}
+                                    </div>
+                                )}
+                                <Input 
+                                    label="Nama Lengkap" 
+                                    name="name"
+                                    placeholder="Misal: Budi Santoso"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <Button type="submit" fullWidth disabled={mutation.isPending || isFetching}>
+                                    {mutation.isPending ? 'Menyimpan...' : 'Simpan Perubahan'}
+                                </Button>
+                            </form>
+                        </div>
+
+                        {/* PENGATURAN TAMPILAN */}
+                        <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                                <Moon size={20} color="var(--color-text-muted)" />
+                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--color-text-main)' }}>Pengaturan Tampilan</h3>
+                            </div>
+                            
+                            <div className="input-wrapper">
+                                <label className="input-label">Pilih Tema</label>
+                                <select 
+                                    className="input-field" 
+                                    value={themeMode}
+                                    onChange={(e) => setThemeMode(e.target.value as 'light' | 'dark' | 'system' | 'schedule')}
+                                    style={{ fontFamily: 'inherit', cursor: 'pointer' }}
+                                >
+                                    <option value="system">Otomatis (Ikuti Sistem)</option>
+                                    <option value="light">Terang (Light Mode)</option>
+                                    <option value="dark">Gelap (Dark Mode)</option>
+                                    <option value="schedule">Jadwal Waktu</option>
+                                </select>
+                            </div>
+
+                            {themeMode === 'schedule' && (
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '-0.5rem', backgroundColor: 'var(--color-background)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label className="input-label" style={{ fontSize: '0.8rem' }}>Mulai Gelap</label>
+                                        <input 
+                                            type="time" 
+                                            className="input-field"
+                                            value={scheduleTime.start}
+                                            onChange={(e) => setScheduleTime(e.target.value, scheduleTime.end)}
+                                            style={{ padding: '0.5rem', width: '100%' }}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label className="input-label" style={{ fontSize: '0.8rem' }}>Kembali Terang</label>
+                                        <input 
+                                            type="time" 
+                                            className="input-field"
+                                            value={scheduleTime.end}
+                                            onChange={(e) => setScheduleTime(scheduleTime.start, e.target.value)}
+                                            style={{ padding: '0.5rem', width: '100%' }}
+                                        />
+                                    </div>
                                 </div>
                             )}
-                            <Input 
-                                label="Nama Lengkap" 
-                                name="name"
-                                placeholder="Misal: Budi Santoso"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                            />
-                            <Button type="submit" fullWidth disabled={mutation.isPending || isFetching}>
-                                {mutation.isPending ? 'Menyimpan...' : 'Simpan Perubahan'}
-                            </Button>
-                        </form>
+                        </div>
+
                     </div>
 
                 </div>

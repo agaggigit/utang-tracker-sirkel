@@ -154,7 +154,7 @@ export const GroupDetail = () => {
                             {isMembersLoading ? (
                                 <SkeletonList count={3} />
                             ) : membersErrorMsg ? (
-                                <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <AlertTriangle size={20} /> {membersErrorMsg}
                                 </div>
                             ) : members.length === 0 ? (
@@ -191,7 +191,7 @@ export const GroupDetail = () => {
                             {isLoading ? (
                                 <SkeletonList count={2} />
                             ) : errorMsg ? (
-                                <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <AlertTriangle size={20} /> {errorMsg}
                                 </div>
                             ) : requests.length === 0 ? (
