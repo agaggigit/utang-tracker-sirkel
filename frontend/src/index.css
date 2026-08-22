@@ -592,3 +592,7 @@ body {
   margin-top: 2rem !important;
 }
 .swal2-image-custom-avatar { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 12px; }
+
+@keyframes skeleton-pulse { 0% { background-color: #e2e8f0; } 50% { background-color: #cbd5e1; } 100% { background-color: #e2e8f0; } }
+.skeleton-loading { animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+

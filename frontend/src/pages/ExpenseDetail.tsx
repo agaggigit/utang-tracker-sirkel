@@ -5,6 +5,7 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { Modal } from '../components/ui/Modal';
 import { ParticipantItem } from '../components/expenses/ParticipantItem';
 import { Clock, AlertTriangle, Calendar, Wallet, Edit2, Trash2 } from 'lucide-react';
+import { SkeletonForm } from '../components/ui/Skeleton';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -126,15 +127,15 @@ export const ExpenseDetail = () => {
         paymentMutation.mutate(paymentNote);
     };
 
-    if (isLoading) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}><Clock size={20} /> Memuat detail...</p></div>;
+    // Removed early return for isLoading to keep PageHeader visible
     if (errorMsg) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem', color: 'var(--color-error)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}><AlertTriangle size={20} /> {errorMsg}</p></div>;
-    if (!expense) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem'}}>Data tidak ditemukan</p></div>;
+    if (!isLoading && !expense) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem'}}>Data tidak ditemukan</p></div>;
 
-    const myShare = expense.shares.find(s => s.userId === currentUserId);
-    const amIInvolvedAndUnpaid = myShare && !myShare.isPaid && expense.paidBy !== currentUserId;
-    const amIThePayer = expense.paidBy === currentUserId;
-    const hasPaidShares = expense.shares.some(s => s.isPaid && s.userId !== expense.paidBy);
-    const isPending = myShare?.payments?.some(p => p.status === 'pending');
+    const myShare = expense?.shares.find((s: any) => s.userId === currentUserId);
+    const amIInvolvedAndUnpaid = myShare && !myShare.isPaid && expense?.paidBy !== currentUserId;
+    const amIThePayer = expense?.paidBy === currentUserId;
+    const hasPaidShares = expense?.shares.some((s: any) => s.isPaid && s.userId !== expense?.paidBy);
+    const isPending = myShare?.payments?.some((p: any) => p.status === 'pending');
 
     return (
         <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
@@ -143,7 +144,11 @@ export const ExpenseDetail = () => {
             <main className="dashboard-main" style={{ marginTop: '2rem', paddingBottom: '4rem' }}>
                 <div className="expense-detail-layout" style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)' }}>
                     
-                    <div className="expense-detail-info">
+                    {isLoading || !expense ? (
+                        <SkeletonForm />
+                    ) : (
+                        <>
+                            <div className="expense-detail-info">
                         <div>
                             <h1 style={{ margin: 0, fontSize: '1.75rem' }}>{expense.description}</h1>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', marginBottom: '2rem' }}>
@@ -223,16 +228,19 @@ export const ExpenseDetail = () => {
                                 ))}
                             </div>
                         </div>
+                        </div>
+                        </>
+                    )}
                     </div>
-                </div>
-            </main>
+                </main>
 
-            <Modal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                title="Ajukan Pembayaran"
-                description={<>Beri tahu <strong>{expense.paidByUser.name}</strong> kalau kamu sudah mentransfer uangnya.</>}
-            >
+            {expense && (
+                <Modal 
+                    isOpen={isModalOpen} 
+                    onClose={() => setIsModalOpen(false)} 
+                    title="Ajukan Pembayaran"
+                    description={<>Beri tahu <strong>{expense.paidByUser.name}</strong> kalau kamu sudah mentransfer uangnya.</>}
+                >
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Catatan (Opsional)</label>
                 <textarea 
                     className="input-field"
@@ -252,6 +260,7 @@ export const ExpenseDetail = () => {
                     </Button>
                 </div>
             </Modal>
+            )}
         </div>
     );
 };

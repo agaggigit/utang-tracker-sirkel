@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
+import { SkeletonList } from '../components/ui/Skeleton';
 import { Inbox, Check, Clock, AlertTriangle, PartyPopper, Info, X, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
@@ -119,9 +120,7 @@ export const Notifications = () => {
             {/* List Pesan */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {isLoading ? (
-                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                        <Clock size={20} /> Memuat pesan...
-                    </div>
+                    <SkeletonList count={5} />
                 ) : errorMsg ? (
                     <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <AlertTriangle size={20} /> {errorMsg}

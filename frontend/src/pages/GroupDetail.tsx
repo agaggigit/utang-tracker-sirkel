@@ -4,6 +4,7 @@ import { Button } from '../components/Button';
 import { Switch } from '../components/Switch';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Avatar } from '../components/ui/Avatar';
+import { SkeletonList } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Bell, Settings, AlertTriangle, Users, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -151,7 +152,7 @@ export const GroupDetail = () => {
                             <h3 style={{ marginBottom: '1.5rem' }}>Daftar Anggota</h3>
                             
                             {isMembersLoading ? (
-                                <p style={{ color: '#666' }}>Memuat anggota...</p>
+                                <SkeletonList count={3} />
                             ) : membersErrorMsg ? (
                                 <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <AlertTriangle size={20} /> {membersErrorMsg}
@@ -188,7 +189,7 @@ export const GroupDetail = () => {
                             <h3 style={{ marginBottom: '1.5rem' }}>Antrean Menunggu Persetujuan</h3>
                             
                             {isLoading ? (
-                                <p style={{ color: '#666' }}>Mengecek antrean...</p>
+                                <SkeletonList count={2} />
                             ) : errorMsg ? (
                                 <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: 'var(--color-error)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <AlertTriangle size={20} /> {errorMsg}

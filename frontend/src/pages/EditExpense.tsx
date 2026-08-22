@@ -6,6 +6,7 @@ import { AlertTriangle, Scale, Trash2, ChevronDown, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { SkeletonForm } from '../components/ui/Skeleton';
 
 // Tipe data untuk daftar anggota yang bisa dipilih
 interface Member {
@@ -213,7 +214,7 @@ export const EditExpense = () => {
         }
     };
 
-    if (isFetching) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem'}}>⏳ Memuat data...</p></div>;
+    // Removed early return
 
     return (
         <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
@@ -233,8 +234,13 @@ export const EditExpense = () => {
                     )}
 
                     <form className="expense-form-layout" onSubmit={handleSubmit}>
-                        
-                        {/* 1. SPLIT BILL (KIRI) */}
+                        {isFetching ? (
+                            <div style={{ padding: '2rem' }}>
+                                <SkeletonForm />
+                            </div>
+                        ) : (
+                            <>
+                                {/* 1. SPLIT BILL (KIRI) */}
                         <div className="expense-form-split-wrapper">
                             <div className="expense-form-split">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexShrink: 0 }}>
@@ -441,10 +447,11 @@ export const EditExpense = () => {
                             </Button>
                         </div>
                     </div>
-
-                </form>
-            </div>
-        </main>
+                </>
+            )}
+        </form>
+    </div>
+</main>
     </div>
 );
 };

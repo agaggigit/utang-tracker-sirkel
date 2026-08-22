@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Inbox, LogOut, Home, Settings, Plus, Users, AlertTriangle } from 'lucide-react';
 import { Avatar } from '../components/ui/Avatar';
+import { SkeletonList, Skeleton } from '../components/ui/Skeleton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import api from '../lib/api';
@@ -60,10 +61,6 @@ export const Dashboard = () => {
         });
     };
 
-    if (isLoading) {
-        return <div style={{ padding: '2rem', textAlign: 'center' }}>Memuat data...</div>;
-    }
-
     // Variabel penentu: Apakah user sudah punya grup atau belum?
     const hasGroups = user?.memberships && user.memberships.length > 0;
 
@@ -80,16 +77,24 @@ export const Dashboard = () => {
                         style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', maxWidth: '70%' }}
                         title="Buka Profil"
                     >
-                        <Avatar 
-                            name={user?.name || 'Sobat'} 
-                            imageUrl={user?.avatarUrl} 
-                            size={48} 
-                            backgroundColor="var(--color-surface)"
-                            textColor="var(--color-primary)"
-                        />
-                        <h1 style={{ fontSize: '1.5rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
-                            {user?.name || 'Sobat'}
-                        </h1>
+                        {isLoading ? (
+                            <Skeleton circle width={48} height={48} />
+                        ) : (
+                            <Avatar 
+                                name={user?.name || 'Sobat'} 
+                                imageUrl={user?.avatarUrl} 
+                                size={48} 
+                                backgroundColor="var(--color-surface)"
+                                textColor="var(--color-primary)"
+                            />
+                        )}
+                        {isLoading ? (
+                            <Skeleton width={150} height={24} />
+                        ) : (
+                            <h1 style={{ fontSize: '1.5rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
+                                {user?.name || 'Sobat'}
+                            </h1>
+                        )}
                     </div>
                     
                     {/* Bagian Kanan: Inbox & Logout */}
@@ -126,8 +131,15 @@ export const Dashboard = () => {
                     boxShadow: 'var(--shadow-lg)',
                     flex: 1 /* Memaksa kartu putih stretch tapi tetap ada jarak di bawah */
                 }}>
-                    {/* KONDISI 1: JIKA BELUM PUNYA GRUP SAMA SEKALI */}
-                    {!hasGroups ? (
+                    {/* KONDISI 1: JIKA SEDANG LOADING */}
+                    {isLoading ? (
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <Skeleton width={150} height={28} />
+                            </div>
+                            <SkeletonList count={3} />
+                        </div>
+                    ) : !hasGroups ? (
                         <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
                             <h2 style={{ marginBottom: '1rem' }}>Kamu belum memiliki Sirkel</h2>
                             <p style={{ color: 'var(--color-text-light)', marginBottom: '2rem' }}>
@@ -136,9 +148,6 @@ export const Dashboard = () => {
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                                 <Button style={{ padding: '1rem 2rem', fontSize: '1.1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={() => navigate('/create-group')}>
                                     <Plus size={20} /> Buat Sirkel Baru
-                                </Button>
-                                <Button variant="outline" style={{ padding: '1rem 2rem', fontSize: '1.1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={() => navigate('/join-group')}>
-                                    <Users size={20} /> Gabung Sirkel
                                 </Button>
                             </div>
                         </div>

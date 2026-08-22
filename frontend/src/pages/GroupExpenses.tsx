@@ -8,6 +8,8 @@ import { Modal } from '../components/ui/Modal';
 import { Settings, Search, Plus, AlertTriangle, Receipt, Filter, ArrowRight, Wallet, PartyPopper } from 'lucide-react';
 import api from '../lib/api';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { SkeletonList } from '../components/ui/Skeleton';
+import toast from 'react-hot-toast';
 
 interface ExpenseShare {
     id: string;
@@ -235,7 +237,7 @@ export const GroupExpenses = () => {
                 )}
 
                 {isLoading ? (
-                    <p style={{ color: 'var(--color-text-muted)', textAlign: 'center' }}>Memuat tagihan...</p>
+                    <SkeletonList count={4} />
                 ) : expenses.length === 0 ? (
                     <EmptyState 
                         icon={<Receipt size={48} />}
@@ -272,7 +274,7 @@ export const GroupExpenses = () => {
                                 </React.Fragment>
                             )
                         })}
-                        {isFetchingNextPage && <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Memuat tagihan lama...</p>}
+                        {isFetchingNextPage && <SkeletonList count={1} />}
                         {!hasNextPage && expenses.length > 0 && <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Tamat. Tidak ada histori lagi.</p>}
                     </div>
                 )}
