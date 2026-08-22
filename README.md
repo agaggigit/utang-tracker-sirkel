@@ -114,4 +114,3 @@ Gunakan akun berikut jika kamu ingin langsung menguji coba tanpa perlu registras
 - **Code:** `07a372cb`
 
 ---
-*Dibuat dengan penuh dedikasi untuk mengatasi krisis memori di sirkel pertemanan.*
