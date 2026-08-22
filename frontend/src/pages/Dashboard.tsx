@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Inbox, LogOut, Home, Settings, Plus, Users, AlertTriangle } from 'lucide-react';
+import { Avatar } from '../components/ui/Avatar';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import api from '../lib/api';
@@ -79,13 +80,13 @@ export const Dashboard = () => {
                         style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', maxWidth: '70%' }}
                         title="Buka Profil"
                     >
-                        <div style={{ 
-                            width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'var(--color-surface)', 
-                            color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                            fontWeight: 'bold', fontSize: '1.5rem', flexShrink: 0, boxShadow: 'var(--shadow-md)'
-                        }}>
-                            {user?.name?.charAt(0).toUpperCase() || 'U'}
-                        </div>
+                        <Avatar 
+                            name={user?.name || 'Sobat'} 
+                            imageUrl={user?.avatarUrl} 
+                            size={48} 
+                            backgroundColor="var(--color-surface)"
+                            textColor="var(--color-primary)"
+                        />
                         <h1 style={{ fontSize: '1.5rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
                             {user?.name || 'Sobat'}
                         </h1>

@@ -591,3 +591,4 @@ body {
   gap: 1rem !important;
   margin-top: 2rem !important;
 }
+.swal2-image-custom-avatar { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 12px; }

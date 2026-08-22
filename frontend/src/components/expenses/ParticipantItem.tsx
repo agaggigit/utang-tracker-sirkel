@@ -8,13 +8,14 @@ interface ParticipantItemProps {
     isPaid: boolean;
     isCurrentUser: boolean;
     isPayer: boolean;
+    avatarUrl?: string | null;
 }
 
-export function ParticipantItem({ name, email, shareAmount, isPaid, isCurrentUser, isPayer }: ParticipantItemProps) {
+export function ParticipantItem({ name, email, shareAmount, isPaid, isCurrentUser, isPayer, avatarUrl }: ParticipantItemProps) {
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0, paddingRight: '1rem' }}>
-                <Avatar name={name} size={40} />
+                <Avatar name={name} imageUrl={avatarUrl} size={40} />
                 <div style={{ minWidth: 0, flex: 1 }}>
                     <p style={{ margin: 0, fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {isCurrentUser && <span style={{color: 'var(--color-primary)', fontWeight: 'normal', fontSize: '0.85rem', marginRight: '0.25rem'}}>(Kamu)</span>} {name}

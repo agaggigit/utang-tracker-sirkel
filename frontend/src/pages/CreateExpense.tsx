@@ -16,19 +16,21 @@ interface Member {
 // Helper Kalkulator Cepat
 const evaluateMath = (expression: string | number): number | string => {
     if (typeof expression === 'number') return expression;
-    if (!expression) return '';
     try {
-        const sanitized = expression.toString().replace(/[^0-9+\-*/.()]/g, '');
-        if (!sanitized) return expression;
+        // Hanya karakter angka, titik, dan operator matematika yang diperbolehkan
+        const sanitized = expression.toString().replace(/[^0-9+\-*/().\s]/g, '');
+        if (!sanitized) return '';
         // eslint-disable-next-line no-new-func
         const result = new Function(`return ${sanitized}`)();
-        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
-            return Math.round(result * 100) / 100;
-        }
-        return expression;
-    } catch (e) {
-        return expression;
+        return isNaN(result) || !isFinite(result) ? '' : Math.round(result);
+    } catch {
+        return expression.toString(); // Return as is if evaluating fails
     }
+};
+
+const sanitizeMathInput = (value: string) => {
+    // Hanya perbolehkan angka dan operator matematika (plus koma/titik untuk desimal)
+    return value.replace(/[^0-9+\-*/().\s,]/g, '');
 };
 
 export const CreateExpense = () => {
@@ -87,8 +89,14 @@ export const CreateExpense = () => {
         
         setTotalAmount(evaluatedTotal); // Sync UI ke hasil hitung
 
-        const equalAmount = Number((evaluatedTotal / shares.length).toFixed(2));
-        const newShares = shares.map(share => ({ ...share, shareAmount: equalAmount }));
+        // Membulatkan ke bawah untuk nilai dasar, sisa (termasuk desimal) diberikan ke orang pertama
+        const equalAmount = Math.floor(evaluatedTotal / shares.length);
+        const remainder = evaluatedTotal - (equalAmount * shares.length);
+
+        const newShares = shares.map((share, index) => ({ 
+            ...share, 
+            shareAmount: index === 0 ? equalAmount + remainder : equalAmount 
+        }));
         setShares(newShares);
     };
 
@@ -240,7 +248,7 @@ export const CreateExpense = () => {
                                                     style={{ paddingLeft: '3rem', width: '100%', fontWeight: 'bold' }}
                                                     placeholder="0"
                                                     value={share.shareAmount}
-                                                    onChange={e => handleShareChange(index, 'shareAmount', e.target.value)}
+                                                    onChange={e => handleShareChange(index, 'shareAmount', sanitizeMathInput(e.target.value))}
                                                     onBlur={() => handleShareChange(index, 'shareAmount', evaluateMath(share.shareAmount))}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter') {
@@ -314,7 +322,7 @@ export const CreateExpense = () => {
                                         className="input-field" 
                                         placeholder="0"
                                         value={totalAmount}
-                                        onChange={e => setTotalAmount(e.target.value)}
+                                        onChange={e => setTotalAmount(sanitizeMathInput(e.target.value))}
                                         onBlur={() => setTotalAmount(evaluateMath(totalAmount))}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {

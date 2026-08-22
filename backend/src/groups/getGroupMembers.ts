@@ -14,7 +14,8 @@ router.get('/:id/members', authenticate, async (req: Request, res: Response) => 
             user: {
                 select: {
                     id: true,
-                    name: true
+                    name: true,
+                    avatarUrl: true
                 }
             }
         }
@@ -24,7 +25,8 @@ router.get('/:id/members', authenticate, async (req: Request, res: Response) => 
     // Dari [{ user: { id, name } }] menjadi [{ id, name }]
     const formattedMembers = members.map(m => ({
         id: m.user.id,
-        name: m.user.name
+        name: m.user.name,
+        avatarUrl: m.user.avatarUrl
     }));
 
     return res.status(200).json(formattedMembers);

@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { errorHandler } from './middleware/errorHandler';
 import { registerRouter } from "./users/registerUser";
 import { loginRouter } from "./users/loginUser";
@@ -32,6 +33,9 @@ const port = 3000;
 app.use(express.json());
 
 app.use(cors());
+
+// Serve folder 'public' secara statis agar foto bisa diakses via URL
+app.use('/public', express.static(path.join(process.cwd(), 'public')));
 
 app.use('/auth', registerRouter);
 app.use('/auth', loginRouter);

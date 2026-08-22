@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../db';
 import { authenticate } from '../middleware/auth';
+import { uploadAvatar } from '../middleware/upload';
 import { z } from 'zod';
 
 const router = Router();
@@ -87,6 +88,36 @@ router.patch('/me', authenticate, async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Update Profile Error:", error);
         res.status(500).json({ message: "Gagal memperbarui profil" });
+    }
+});
+
+// --- 3. MENGUNGGAH FOTO PROFIL ---
+router.post('/me/avatar', authenticate, uploadAvatar.single('avatar'), async (req: Request, res: Response) => {
+    try {
+        const userId = res.locals.user.userId;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({ message: "File gambar tidak ditemukan" });
+        }
+
+        // Simpan relative path ke database
+        // Misalnya: file.filename adalah "avatar-1234.jpg"
+        const avatarUrl = `/public/uploads/avatars/${file.filename}`;
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: { avatarUrl },
+            select: { id: true, name: true, email: true, avatarUrl: true }
+        });
+
+        res.json({
+            message: "Foto profil berhasil diunggah",
+            user: updatedUser
+        });
+    } catch (error) {
+        console.error("Upload Avatar Error:", error);
+        res.status(500).json({ message: "Gagal mengunggah foto profil" });
     }
 });
 

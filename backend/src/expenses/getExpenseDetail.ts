@@ -14,12 +14,12 @@ router.get('/:id', authenticate, async (req: Request, res: Response) => {
         where: { id: expenseId },
         include: {
             paidByUser: {
-                select: { name: true, email: true }
+                select: { name: true, email: true, avatarUrl: true }
             },
             shares: {
                 include: {
                     user: { // Ambil info user yang berutang
-                        select: { name: true, email: true }
+                        select: { name: true, email: true, avatarUrl: true }
                     },
                     payments: {
                         select: { status: true } // Ambil status payment agar frontend tahu kalau ada yang pending

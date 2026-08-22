@@ -16,19 +16,19 @@ interface Member {
 // Helper Kalkulator Cepat
 const evaluateMath = (expression: string | number): number | string => {
     if (typeof expression === 'number') return expression;
-    if (!expression) return '';
     try {
-        const sanitized = expression.toString().replace(/[^0-9+\-*/.()]/g, '');
-        if (!sanitized) return expression;
+        const sanitized = expression.toString().replace(/[^0-9+\-*/().\s]/g, '');
+        if (!sanitized) return '';
         // eslint-disable-next-line no-new-func
         const result = new Function(`return ${sanitized}`)();
-        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
-            return Math.round(result * 100) / 100;
-        }
-        return expression;
-    } catch (e) {
-        return expression;
+        return isNaN(result) || !isFinite(result) ? '' : Math.round(result);
+    } catch {
+        return expression.toString();
     }
+};
+
+const sanitizeMathInput = (value: string) => {
+    return value.replace(/[^0-9+\-*/().\s,]/g, '');
 };
 
 export const EditExpense = () => {
@@ -136,8 +136,14 @@ export const EditExpense = () => {
         
         setTotalAmount(evaluatedTotal); // Sync UI ke hasil hitung
 
-        const equalAmount = Number((evaluatedTotal / shares.length).toFixed(2));
-        const newShares = shares.map(share => ({ ...share, shareAmount: equalAmount }));
+        // Membulatkan ke bawah untuk nilai dasar, sisa (termasuk desimal) diberikan ke orang pertama
+        const equalAmount = Math.floor(evaluatedTotal / shares.length);
+        const remainder = evaluatedTotal - (equalAmount * shares.length);
+
+        const newShares = shares.map((share, index) => ({ 
+            ...share, 
+            shareAmount: index === 0 ? equalAmount + remainder : equalAmount 
+        }));
         setShares(newShares);
     };
 
@@ -297,11 +303,11 @@ export const EditExpense = () => {
                                                 <input 
                                                     type="text" 
                                                     className="input-field" 
-                                                    style={{ paddingLeft: '3rem', width: '100%', fontWeight: 'bold', ...(isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)' } : {}) }}
+                                                    style={isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)', paddingLeft: '3rem', width: '100%', fontWeight: 'bold' } : { paddingLeft: '3rem', width: '100%', fontWeight: 'bold' }}
                                                     placeholder="0"
                                                     value={share.shareAmount}
                                                     disabled={isLocked}
-                                                    onChange={e => handleShareChange(index, 'shareAmount', e.target.value)}
+                                                    onChange={e => handleShareChange(index, 'shareAmount', sanitizeMathInput(e.target.value))}
                                                     onBlur={() => handleShareChange(index, 'shareAmount', evaluateMath(share.shareAmount))}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter') {
@@ -377,7 +383,7 @@ export const EditExpense = () => {
                                     value={totalAmount}
                                     disabled={isLocked}
                                     style={isLocked ? { backgroundColor: '#f3f4f6', color: 'var(--color-text-muted)' } : {}}
-                                    onChange={e => setTotalAmount(e.target.value)}
+                                    onChange={e => setTotalAmount(sanitizeMathInput(e.target.value))}
                                     onBlur={() => setTotalAmount(evaluateMath(totalAmount))}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {

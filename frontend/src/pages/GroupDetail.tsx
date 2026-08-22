@@ -171,7 +171,7 @@ export const GroupDetail = () => {
                                             borderRadius: '12px', border: '1px solid #eee'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <Avatar name={member.name} />
+                                                <Avatar name={member.name} imageUrl={member.avatarUrl} />
                                                 <div>
                                                     <p style={{ margin: 0, fontWeight: 'bold' }}>{member.name}</p>
                                                 </div>
@@ -208,7 +208,7 @@ export const GroupDetail = () => {
                                             borderRadius: '12px', border: '1px solid #eee'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <Avatar name={req.user.name} />
+                                                <Avatar name={req.user.name} imageUrl={req.user.avatarUrl} />
                                                 <div>
                                                     <p style={{ margin: 0, fontWeight: 'bold' }}>{req.user.name}</p>
                                                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>Menunggu Persetujuan</p>
