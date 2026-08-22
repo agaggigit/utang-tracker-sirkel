@@ -4,6 +4,8 @@ import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
 import toast from 'react-hot-toast';
+import api from '../lib/api';
+import { useMutation } from '@tanstack/react-query';
 
 export const Login = () => {
     const navigate = useNavigate();
@@ -13,7 +15,6 @@ export const Login = () => {
     });
 
     const [errorMsg, setErrorMsg] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -22,73 +23,64 @@ export const Login = () => {
         });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setErrorMsg('');
-        setIsLoading(true);
-
-        try {
-            const response = await fetch('http://localhost:3000/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password: formData.password
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Gagal login');
-            }
-
+    const loginMutation = useMutation({
+        mutationFn: async (credentials: typeof formData) => {
+            const response = await api.post('/auth/login', credentials);
+            return response.data;
+        },
+        onSuccess: (data) => {
             // MISI RAHASIA: Simpan "Kunci" (Token JWT) dari Backend ke Brankas Browser
             localStorage.setItem('token', data.token);
-            
             toast.success('Login Berhasil!');
             
             // Nanti kita arahkan ke halaman Home/Dashboard menggunakan:
             navigate('/dashboard');
-        } catch(err: any) {
-            setErrorMsg(err.message);
-        } finally {
-            setIsLoading(false);
+        },
+        onError: (err: any) => {
+            if (err.response && err.response.data) {
+                setErrorMsg(err.response.data.message || 'Gagal login');
+            } else {
+                setErrorMsg(err.message);
+            }
         }
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setErrorMsg('');
+        loginMutation.mutate(formData);
     };
+
+    const googleLoginMutation = useMutation({
+        mutationFn: async (code: string) => {
+            const response = await api.post('/auth/google', { code });
+            return response.data;
+        },
+        onSuccess: (data) => {
+            localStorage.setItem('token', data.token);
+            navigate('/dashboard');
+        },
+        onError: (err: any) => {
+            if (err.response && err.response.data) {
+                setErrorMsg(err.response.data.message || 'Gagal login dengan Google');
+            } else {
+                setErrorMsg(err.message);
+            }
+        }
+    });
 
     const handleGoogleLogin = useGoogleLogin({
         flow: 'auth-code',
-        onSuccess: async (codeResponse) => {
-            try {
-                setIsLoading(true);
-                setErrorMsg('');
-
-                const response = await  fetch('http://localhost:3000/auth/google', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ code: codeResponse.code })
-                });
-
-                const data = await response.json();
-
-                if(!response.ok) throw new Error(data.message || 'Gagal login dengan Google');
-
-                localStorage.setItem('token', data.token);
-                navigate('/dashboard');
-            } catch (err: any) {
-                setErrorMsg(err.message);
-            } finally {
-                setIsLoading(false);
-            }
+        onSuccess: (codeResponse) => {
+            setErrorMsg('');
+            googleLoginMutation.mutate(codeResponse.code);
         },
         onError: () => {
             setErrorMsg('Login dengan Google dibatalkan atau gagal.');
         }
-
     });
+
+    const isSubmitting = loginMutation.isPending || googleLoginMutation.isPending;
 
     return (
     <div className="auth-container">
@@ -121,8 +113,8 @@ export const Login = () => {
                     required
                 />
 
-                <Button type="submit" fullWidth disabled={isLoading}>
-                    {isLoading ? 'Mengecek data...' : 'Masuk'}
+                <Button type="submit" fullWidth disabled={isSubmitting}>
+                    {loginMutation.isPending ? 'Mengecek data...' : 'Masuk'}
                 </Button>
                 
                 <div className="auth-divider">

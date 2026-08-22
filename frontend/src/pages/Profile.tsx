@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { ArrowLeft } from 'lucide-react';
+import api from '../lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const Profile = () => {
     const navigate = useNavigate();
@@ -12,36 +14,30 @@ export const Profile = () => {
         avatarUrl: ''
     });
 
-    const [isLoading, setIsLoading] = useState(false);
+    const queryClient = useQueryClient();
 
     const [message, setMessage] = useState({
-        type: '',   // type: 'error' | 'success'
+        type: '',
         text: ''
     });
 
-    // --- MENGAMBIL DATA SAAT HALAMAN DIBUKA ---
+    const { data: profile, isLoading: isFetching } = useQuery({
+        queryKey: ['users', 'me'],
+        queryFn: async () => {
+            const response = await api.get('/users/me');
+            return response.data;
+        }
+    });
+
+    // --- MENGISI FORM SAAT DATA SELESAI DIAMBIL ---
     useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:3000/users/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-
-                if (response.ok) {
-                    setFormData({
-                        name: data.name,
-                        avatarUrl: data.avatarUrl || ''
-                    });
-                }
-            } catch(error) {
-                console.error('Gagal mengambil profil')
-            }
-        };
-
-        fetchProfile();
-    }, []); // <-- Kurung siku kosong artinya: "Jalankan fungsi ini SATU KALI saja saat halaman pertama kali dibuka"
+        if (profile) {
+            setFormData({
+                name: profile.name,
+                avatarUrl: profile.avatarUrl || ''
+            });
+        }
+    }, [profile]);
 
     // --- MENGUBAH DATA (KETIKA MENGETIK) ---
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,38 +46,36 @@ export const Profile = () => {
             [e.target.name]: e.target.value
         });
     };
-    // --- MENGIRIM DATA (KETIKA TOMBOL SIMPAN DITEKAN) ---
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setMessage({ type: '', text: '' });
 
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3000/users/me', {
-                method: 'PATCH',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await response.json();
-            if (!response.ok) {
+    const mutation = useMutation({
+        mutationFn: async (newData: any) => {
+            const response = await api.patch('/users/me', newData);
+            return response.data;
+        },
+        onSuccess: () => {
+            setMessage({ type: 'success', text: 'Profil berhasil diperbarui' });
+            queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+        },
+        onError: (err: any) => {
+            if (err.response && err.response.data) {
+                const data = err.response.data;
                 if (data.errors) {
                     const firstError = Object.values(data.errors)[0] as string[];
-                    throw new Error(firstError[0]);
+                    setMessage({ type: 'error', text: firstError[0] });
+                } else {
+                    setMessage({ type: 'error', text: data.message || 'Gagal menyimpan' });
                 }
-                throw new Error(data.message || 'Gagal menyimpan');
+            } else {
+                setMessage({ type: 'error', text: err.message });
             }
-
-            setMessage({ type: 'success', text: 'Profil berhasil diperbarui' });
-        } catch(err: any) {
-            setMessage({ type: 'error', text: err.message });
-        } finally {
-            setIsLoading(false);
         }
+    });
+
+    // --- MENGIRIM DATA (KETIKA TOMBOL SIMPAN DITEKAN) ---
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setMessage({ type: '', text: '' });
+        mutation.mutate(formData);
     };
 
     return (
@@ -146,8 +140,8 @@ export const Profile = () => {
                                 value={formData.avatarUrl}
                                 onChange={handleChange}
                             />
-                            <Button type="submit" fullWidth disabled={isLoading}>
-                                {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            <Button type="submit" fullWidth disabled={mutation.isPending || isFetching}>
+                                {mutation.isPending ? 'Menyimpan...' : 'Simpan Perubahan'}
                             </Button>
                         </form>
                     </div>

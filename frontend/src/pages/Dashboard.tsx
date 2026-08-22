@@ -1,58 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Inbox, LogOut, Home, Settings, Plus, Users, AlertTriangle } from 'lucide-react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import api from '../lib/api';
+import { useQuery } from '@tanstack/react-query';
 
 const MySwal = withReactContent(Swal);
 
 export const Dashboard = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [notifications, setNotifications] = useState<any[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const { data: user, isLoading: isLoadingUser } = useQuery({
+        queryKey: ['users', 'me'],
+        queryFn: async () => {
+            const response = await api.get('/users/me');
+            return response.data;
+        }
+    });
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:3000/users/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setUser(data);
-                }
-            } catch (err) {
-                console.error("Gagal mengambil data profil", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchUserData();
+    const { data: notificationsData, isLoading: isLoadingNotif } = useQuery({
+        queryKey: ['notifications'],
+        queryFn: async () => {
+            const response = await api.get('/notifications');
+            return response.data;
+        }
+    });
 
-        const fetchNotifications = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:3000/notifications', {
-                    headers: { 'Authorization': `Bearer ${token}` }  
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    // Hanya hitung yang belum dibaca (isRead === false)
-                    const unread = data.filter((n: any) => !n.isRead);
-                    setNotifications(unread);
-                }
-            } catch (error) {
-                console.error("Gagal mengambil notifikasi", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchNotifications();
-    }, []);
+    const isLoading = isLoadingUser || isLoadingNotif;
+    const notifications = notificationsData ? notificationsData.filter((n: any) => !n.isRead) : [];
 
     const handleLogout = () => { 
         MySwal.fire({

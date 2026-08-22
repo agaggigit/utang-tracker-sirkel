@@ -4,11 +4,12 @@ import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { Switch } from "../components/Switch";
 import { Check, ArrowLeft } from 'lucide-react';
+import api from '../lib/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const CreateGroup = () => {
     const navigate = useNavigate();
     const [name, setName] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
     // State untuk menyimpan kode undangan setelah grup berhasil dibuat di Backend
@@ -16,40 +17,36 @@ export const CreateGroup = () => {
     const [isCopied, setIsCopied] = useState(false);
     const [joinApprovalRequired, setJoinApprovalRequired] = useState(false);
     
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setErrorMsg('');
-        
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3000/groups', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ name, joinApprovalRequired })  // Kirim nama grup ke backend
-            });
+    const queryClient = useQueryClient();
 
-            const data = await response.json();
-
-            if (!response.ok) {
+    const createMutation = useMutation({
+        mutationFn: async (payload: { name: string, joinApprovalRequired: boolean }) => {
+            const response = await api.post('/groups', payload);
+            return response.data;
+        },
+        onSuccess: (data) => {
+            setInviteCode(data.group.inviteCode);
+            queryClient.invalidateQueries({ queryKey: ['groups'] });
+        },
+        onError: (err: any) => {
+            if (err.response && err.response.data) {
+                const data = err.response.data;
                 if (data.errors) {
                     const firstError = Object.values(data.errors)[0] as string[];
-                    throw new Error(firstError[0]); 
+                    setErrorMsg(firstError[0]);
+                } else {
+                    setErrorMsg(data.message || 'Gagal membuat grup');
                 }
-                throw new Error(data.message || 'Gagal membuat grup');
-
+            } else {
+                setErrorMsg(err.message);
             }
-            // Jika sukses, simpan kode rahasia dari backend ke dalam state!
-            setInviteCode(data.group.inviteCode);
-            
-        } catch (err: any) {
-            setErrorMsg(err.message);
-        } finally {
-            setIsLoading(false);
         }
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setErrorMsg('');
+        createMutation.mutate({ name, joinApprovalRequired });
     };
 
     // Fungsi canggih untuk menyalin teks (berjalan di browser modern)
@@ -96,8 +93,8 @@ export const CreateGroup = () => {
                             checked={joinApprovalRequired}
                             onChange={(val) => setJoinApprovalRequired(val)}
                         />
-                        <Button type="submit" fullWidth disabled={isLoading}>
-                            {isLoading ? 'Membuat...' : 'Buat Grup'}
+                        <Button type="submit" fullWidth disabled={createMutation.isPending}>
+                            {createMutation.isPending ? 'Membuat...' : 'Buat Grup'}
                         </Button>
                     </form>
                 ) : (

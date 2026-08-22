@@ -4,6 +4,8 @@ import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
 import toast from 'react-hot-toast';
+import api from '../lib/api';
+import { useMutation } from '@tanstack/react-query';
 
 export const Register = () => {
     // --- 1. STATE (Tempat menyimpan apa yang diketik user) ---
@@ -16,7 +18,6 @@ export const Register = () => {
     });
 
     const [errorMsg, setErrorMsg] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
     // Fungsi untuk mencatat setiap kali user mengetik di kotak input
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,8 +27,38 @@ export const Register = () => {
         });
     };
 
+    const registerMutation = useMutation({
+        mutationFn: async (userData: typeof formData) => {
+            const response = await api.post('/auth/register', userData);
+            return response.data;
+        },
+        onSuccess: () => {
+            // Jika berhasil
+            toast.success('Pendaftaran berhasil, silahkan masuk ke halaman login');
+            
+            // Nanti kita akan redirect ke halaman login di sini
+            navigate('/login');
+        },
+        onError: (err: any) => {
+            if (err.response && err.response.data) {
+                const data = err.response.data;
+                // Jika error berasal dari Zod (validasi form)
+                if (data.errors) {
+                    // Ambil pesan error pertama yang dikembalikan Zod
+                    const firstError = Object.values(data.errors)[0] as string[];
+                    setErrorMsg(firstError[0]);
+                } else {
+                    // Jika backend menolak (misal: email sudah dipakai)
+                    setErrorMsg(data.message || 'Gagal mendaftar');
+                }
+            } else {
+                setErrorMsg(err.message);
+            }
+        }
+    });
+
     // --- 2. LOGIKA KETIKA TOMBOL DAFTAR DIKLIK --
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault(); // Mencegah halaman me-refresh (berkedip)
         setErrorMsg('');    // Bersihkan error sebelumnya
 
@@ -37,78 +68,39 @@ export const Register = () => {
             return;
         }
 
-        setIsLoading(true);
-
-        try {
-            // Mengirim paket ke Backend (Satpam kita)
-            const response = await fetch('http://localhost:3000/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
-                    password: formData.password,
-                    confirmPassword: formData.confirmPassword
-                })
-            });
-
-            const data = await response.json();
-            if (!response.ok) {
-                // Jika error berasal dari Zod (validasi form)
-                if (data.errors) {
-                    // Ambil pesan error pertama yang dikembalikan Zod
-                    const firstError = Object.values(data.errors)[0] as string[];
-                    throw new Error(firstError[0]);
-                }
-
-                // Jika backend menolak (misal: email sudah dipakai)
-                throw new Error(data.message || 'Gagal mendaftar');
-            }
-
-            // Jika berhasil
-            toast.success('Pendaftaran berhasil, silahkan masuk ke halaman login');
-            
-            // Nanti kita akan redirect ke halaman login di sini
-            navigate('/login')
-        } catch (err: any) {
-        setErrorMsg(err.message);
-        } finally {
-        setIsLoading(false);
-        }
+        registerMutation.mutate(formData);
     };
+
+    const googleLoginMutation = useMutation({
+        mutationFn: async (code: string) => {
+            const response = await api.post('/auth/google', { code });
+            return response.data;
+        },
+        onSuccess: (data) => {
+            localStorage.setItem('token', data.token);
+            navigate('/dashboard');
+        },
+        onError: (err: any) => {
+            if (err.response && err.response.data) {
+                setErrorMsg(err.response.data.message || 'Gagal login dengan Google');
+            } else {
+                setErrorMsg(err.message);
+            }
+        }
+    });
 
     const handleGoogleLogin = useGoogleLogin({
         flow: 'auth-code',
-        onSuccess: async (codeResponse) => {
-            try {
-                setIsLoading(true);
-                setErrorMsg('');
-
-                const response = await  fetch('http://localhost:3000/auth/google', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ code: codeResponse.code })
-                });
-
-                const data = await response.json();
-
-                if(!response.ok) throw new Error(data.message || 'Gagal login dengan Google');
-
-                localStorage.setItem('token', data.token);
-                navigate('/dashboard');
-            } catch (err: any) {
-                setErrorMsg(err.message);
-            } finally {
-                setIsLoading(false);
-            }
+        onSuccess: (codeResponse) => {
+            setErrorMsg('');
+            googleLoginMutation.mutate(codeResponse.code);
         },
         onError: () => {
             setErrorMsg('Login dengan Google dibatalkan atau gagal.');
         }
-
     });
+
+    const isSubmitting = registerMutation.isPending || googleLoginMutation.isPending;
 
     // --- 3. TAMPILAN (UI) ---
     return (
@@ -161,8 +153,8 @@ export const Register = () => {
                         required
                     />
 
-                    <Button type='submit' fullWidth disabled={isLoading}>
-                        {isLoading ? 'Mendaftarkan...' : 'Daftar Sekarang'}
+                    <Button type='submit' fullWidth disabled={isSubmitting}>
+                        {registerMutation.isPending ? 'Mendaftarkan...' : 'Daftar Sekarang'}
                     </Button>
 
                     <div className="auth-divider">

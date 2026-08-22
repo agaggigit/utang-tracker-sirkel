@@ -2,179 +2,107 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Switch } from '../components/Switch';
-import { Bell, Settings, AlertTriangle, ArrowLeft, Users, Copy } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Avatar } from '../components/ui/Avatar';
+import { EmptyState } from '../components/ui/EmptyState';
+import { Bell, Settings, AlertTriangle, Users, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import api from '../lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const MySwal = withReactContent(Swal);
 
 export const GroupDetail = () => {
-    const { id } = useParams(); // Mengambil ID grup dari URL
+    const { id } = useParams();
     const navigate = useNavigate();
     
     const [activeTab, setActiveTab] = useState<'members' | 'requests' | 'settings'>('requests');
     
-    // TODO: State untuk form pengaturan
     const [groupName, setGroupName] = useState('');
     const [joinApprovalRequired, setJoinApprovalRequired] = useState(false);
     const [initialGroupName, setInitialGroupName] = useState('');
     const [initialJoinApprovalRequired, setInitialJoinApprovalRequired] = useState(false);
-    const [inviteCode, setInviteCode] = useState('KODE123'); // Nanti ambil dari backend
-    const [requests, setRequests] = useState<any[]>([]);
-    const [members, setMembers] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isMembersLoading, setIsMembersLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState('');
-    const [membersErrorMsg, setMembersErrorMsg] = useState('');
-
-    // Fungsi untuk mengambil detail grup saat ini
-    const fetchGroupDetails = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/groups/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setGroupName(data.name);
-                setJoinApprovalRequired(data.joinApprovalRequired);
-                setInitialGroupName(data.name);
-                setInitialJoinApprovalRequired(data.joinApprovalRequired);
-                setInviteCode(data.inviteCode);
-            }
-        } catch (err: any) {
-            console.error("Gagal mengambil detail grup:", err);
+    const [inviteCode, setInviteCode] = useState('KODE123');
+    const queryClient = useQueryClient();
+    
+    const { data: groupDetail } = useQuery({
+        queryKey: ['groups', id],
+        queryFn: async () => {
+            const response = await api.get(`/groups/${id}`);
+            return response.data;
         }
-    };
+    });
 
-    // Fungsi untuk mengambil antrean (memanggil GET dari Backend)
-    const fetchJoinRequests = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/groups/${id}/join-requests`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                if (response.status === 403) {
-                    setErrorMsg('Hanya Host (Pembuat Grup) yang dapat melihat antrean ini.');
-                } else {
-                    throw new Error(data.message || 'Gagal mengambil data');
-                }
-            } else {
-                setRequests(data); // Simpan daftar antrean dari Backend ke state React
-            }
-        } catch (err: any) {
-            setErrorMsg(err.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Fungsi untuk mengambil anggota grup
-    const fetchGroupMembers = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/groups/${id}/members`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Gagal mengambil anggota grup');
-            } else {
-                setMembers(data); 
-            }
-        } catch (err: any) {
-            setMembersErrorMsg(err.message);
-        } finally {
-            setIsMembersLoading(false);
-        }
-    };
-
-    // Fungsi untuk mengubah pengaturan grup
-    const fetchEditGroup = async (updatedData: any) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/groups/${id}`, {
-                method: 'PATCH',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify(updatedData) // Kirim data apa adanya, bukan dibungkus { updatedData }
-            });
-            
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Gagal menyimpan pengaturan');
-            }
-            
-            toast.success(data.message || 'Berhasil menyimpan perubahan!');
-            fetchGroupDetails(); // Refresh detail UI setelah update berhasil
-        } catch (err: any) {
-            toast.error(err.message);
-        }
-    };
-
-    // Mengecek apakah ada perubahan pada pengaturan
-    const isSettingsChanged = groupName !== initialGroupName || joinApprovalRequired !== initialJoinApprovalRequired;
-
-    // Otomatis panggil API saat halaman pertama kali dibuka
     useEffect(() => {
-        fetchGroupDetails();
-        fetchJoinRequests();
-        fetchGroupMembers();
-    }, [id]);
-
-    // Fungsi untuk mengubah status (memanggil PATCH dari Backend)
-    const handleApproval = async (requestId: string, status: 'approved' | 'rejected') => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/groups/${id}/join-requests/${requestId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ status }) // Kirim 'approved' atau 'rejected' ke Backend
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Gagal mengubah status');
-            }
-
-            // Jika sukses, refresh daftar antrean (panggil ulang API GET)
-            fetchJoinRequests(); 
-            toast.success(data.message); // Munculkan notifikasi sukses
-
-        } catch (err: any) {
-            toast.error("Error: " + err.message);
+        if (groupDetail) {
+            setGroupName(groupDetail.name);
+            setJoinApprovalRequired(groupDetail.joinApprovalRequired);
+            setInitialGroupName(groupDetail.name);
+            setInitialJoinApprovalRequired(groupDetail.joinApprovalRequired);
+            setInviteCode(groupDetail.inviteCode);
         }
-    };
+    }, [groupDetail]);
+
+    const { data: requests = [], isLoading, error: requestError } = useQuery({
+        queryKey: ['groups', id, 'join-requests'],
+        queryFn: async () => {
+            const response = await api.get(`/groups/${id}/join-requests`);
+            return response.data;
+        },
+        retry: false
+    });
+    const errorMsg = requestError ? (requestError as any).response?.status === 403 ? 'Hanya Host (Pembuat Grup) yang dapat melihat antrean ini.' : (requestError as any).response?.data?.message || (requestError as any).message : '';
+
+    const { data: members = [], isLoading: isMembersLoading, error: memberError } = useQuery({
+        queryKey: ['groups', id, 'members'],
+        queryFn: async () => {
+            const response = await api.get(`/groups/${id}/members`);
+            return response.data;
+        }
+    });
+    const membersErrorMsg = memberError ? (memberError as any).response?.data?.message || (memberError as any).message : '';
+
+    const editGroupMutation = useMutation({
+        mutationFn: async (updatedData: any) => {
+            const response = await api.patch(`/groups/${id}`, updatedData);
+            return response.data;
+        },
+        onSuccess: (data) => {
+            toast.success(data.message || 'Berhasil menyimpan perubahan!');
+            queryClient.invalidateQueries({ queryKey: ['groups', id] });
+        },
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || err.message);
+        }
+    });
+
+    const approvalMutation = useMutation({
+        mutationFn: async ({ requestId, status }: { requestId: string, status: 'approved' | 'rejected' }) => {
+            const response = await api.patch(`/groups/${id}/join-requests/${requestId}`, { status });
+            return response.data;
+        },
+        onSuccess: (data) => {
+            toast.success(data.message || 'Berhasil mengubah status');
+            queryClient.invalidateQueries({ queryKey: ['groups', id, 'join-requests'] });
+            queryClient.invalidateQueries({ queryKey: ['groups', id, 'members'] });
+        },
+        onError: (err: any) => {
+            toast.error("Error: " + (err.response?.data?.message || err.message));
+        }
+    });
+
+    const isSettingsChanged = groupName !== initialGroupName || joinApprovalRequired !== initialJoinApprovalRequired;
 
     return (
         <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1000px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
-            <div style={{ position: 'relative', marginBottom: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40px' }}>
-                <button 
-                    onClick={() => navigate(`/groups/${id}/expenses`)}
-                    style={{ position: 'absolute', left: '0', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
-                    title="Kembali"
-                >
-                    <ArrowLeft size={24} />
-                </button>
-                <h2 style={{ margin: 0 }}>Pengaturan Sirkel</h2>
-            </div>
+            <PageHeader 
+                title="Pengaturan Sirkel" 
+                onBack={() => navigate(`/groups/${id}/expenses`)}
+            />
 
-            <div className="group-detail-layout">
-                {/* --- MENU NAVIGASI (KIRI PADA DESKTOP, ATAS PADA MOBILE) --- */}
+            <div className="group-detail-layout" style={{ marginTop: '2rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <button 
                         style={{ 
@@ -217,7 +145,6 @@ export const GroupDetail = () => {
                     </button>
                 </div>
 
-                {/* --- KONTEN (KANAN PADA DESKTOP, BAWAH PADA MOBILE) --- */}
                 <div>
                     {activeTab === 'members' && (
                         <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)' }}>
@@ -230,19 +157,21 @@ export const GroupDetail = () => {
                                     <AlertTriangle size={20} /> {membersErrorMsg}
                                 </div>
                             ) : members.length === 0 ? (
-                                <p style={{ color: '#666', fontStyle: 'italic' }}>Belum ada anggota di sirkel ini.</p>
+                                <EmptyState 
+                                    icon={<Users size={48} />}
+                                    title="Belum ada anggota"
+                                    description="Belum ada anggota di sirkel ini."
+                                />
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {members.map((member) => (
+                                    {members.map((member: any) => (
                                         <div key={member.id} style={{
                                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                             padding: '1rem 1.5rem', backgroundColor: 'var(--color-background)',
                                             borderRadius: '12px', border: '1px solid #eee'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                                    {member.name.charAt(0).toUpperCase()}
-                                                </div>
+                                                <Avatar name={member.name} />
                                                 <div>
                                                     <p style={{ margin: 0, fontWeight: 'bold' }}>{member.name}</p>
                                                 </div>
@@ -265,29 +194,31 @@ export const GroupDetail = () => {
                                     <AlertTriangle size={20} /> {errorMsg}
                                 </div>
                             ) : requests.length === 0 ? (
-                                <p style={{ color: '#666', fontStyle: 'italic' }}>Belum ada permintaan bergabung saat ini.</p>
+                                <EmptyState 
+                                    icon={<Bell size={48} />}
+                                    title="Antrean Kosong"
+                                    description="Belum ada permintaan bergabung saat ini."
+                                />
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {requests.map((req) => (
+                                    {requests.map((req: any) => (
                                         <div key={req.id} style={{
                                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                             padding: '1rem 1.5rem', backgroundColor: 'var(--color-background)',
                                             borderRadius: '12px', border: '1px solid #eee'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                                    {req.user.name.charAt(0).toUpperCase()}
-                                                </div>
+                                                <Avatar name={req.user.name} />
                                                 <div>
                                                     <p style={{ margin: 0, fontWeight: 'bold' }}>{req.user.name}</p>
                                                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>Menunggu Persetujuan</p>
                                                 </div>
                                             </div>
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <Button variant="outline" onClick={() => handleApproval(req.id, 'rejected')} style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}>
+                                                <Button variant="outline" onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'rejected' })} style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }} disabled={approvalMutation.isPending}>
                                                     Tolak
                                                 </Button>
-                                                <Button onClick={() => handleApproval(req.id, 'approved')}>
+                                                <Button onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'approved' })} disabled={approvalMutation.isPending}>
                                                     Terima
                                                 </Button>
                                             </div>
@@ -321,8 +252,8 @@ export const GroupDetail = () => {
                                 </div>
 
                                 <Button 
-                                    onClick={() => fetchEditGroup({ name: groupName, joinApprovalRequired })}
-                                    disabled={!isSettingsChanged}
+                                    onClick={() => editGroupMutation.mutate({ name: groupName, joinApprovalRequired })}
+                                    disabled={!isSettingsChanged || editGroupMutation.isPending}
                                     style={{ opacity: !isSettingsChanged ? 0.5 : 1, cursor: !isSettingsChanged ? 'not-allowed' : 'pointer' }}
                                 >
                                     Simpan Perubahan
@@ -369,7 +300,7 @@ export const GroupDetail = () => {
                                             cancelButtonText: "Batal"
                                         }).then((result) => {
                                             if (result.isConfirmed) {
-                                                fetchEditGroup({ regenerateInviteCode: true });
+                                                editGroupMutation.mutate({ regenerateInviteCode: true });
                                             }
                                         });
                                     }}>

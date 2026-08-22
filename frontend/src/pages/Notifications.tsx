@@ -1,128 +1,95 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Inbox, Check, Clock, AlertTriangle, PartyPopper, Info, X, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const Notifications = () => {
     const navigate = useNavigate();
-    const [joinRequests, setJoinRequests] = useState<any[]>([]);
-    const [incomingPayments, setIncomingPayments] = useState<any[]>([]);
-    const [generalNotifs, setGeneralNotifs] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState('');
+    const queryClient = useQueryClient();
 
     // --- STATE UNTUK MODAL REVIEW (LANGKAH 3) ---
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<any>(null);
     const [rejectionNote, setRejectionNote] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        const fetchNotifications = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                
-                // Fetch ketiga API secara paralel
-                const [joinRes, paymentRes, notifRes] = await Promise.all([
-                    fetch('http://localhost:3000/notifications/join-requests', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }),
-                    fetch('http://localhost:3000/payments/incoming', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }),
-                    fetch('http://localhost:3000/notifications', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    })
-                ]);
+    const { data: joinRequests = [], isLoading: isLoadingJoin, error: joinError } = useQuery({
+        queryKey: ['notifications', 'join-requests'],
+        queryFn: async () => {
+            const response = await api.get('/notifications/join-requests');
+            return response.data;
+        }
+    });
 
-                if (joinRes.ok && paymentRes.ok && notifRes.ok) {
-                    const joinData = await joinRes.json();
-                    const paymentData = await paymentRes.json();
-                    const notifData = await notifRes.json();
-                    setJoinRequests(joinData);
-                    setIncomingPayments(paymentData);
-                    setGeneralNotifs(notifData);
-                } else {
-                    throw new Error('Gagal mengambil notifikasi');
-                }
-            } catch (err: any) {
-                setErrorMsg(err.message);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const { data: incomingPayments = [], isLoading: isLoadingPayments, error: paymentError } = useQuery({
+        queryKey: ['payments', 'incoming'],
+        queryFn: async () => {
+            const response = await api.get('/payments/incoming');
+            return response.data;
+        }
+    });
 
-        fetchNotifications();
-    }, []);
+    const { data: generalNotifs = [], isLoading: isLoadingNotifs, error: notifError } = useQuery({
+        queryKey: ['notifications', 'general'],
+        queryFn: async () => {
+            const response = await api.get('/notifications');
+            return response.data;
+        }
+    });
+
+    const isLoading = isLoadingJoin || isLoadingPayments || isLoadingNotifs;
+    const errorMsg = [joinError, paymentError, notifError].filter(Boolean).map(e => (e as any).response?.data?.message || (e as any).message).join(', ');
 
     const hasNoNotifications = joinRequests.length === 0 && incomingPayments.length === 0 && generalNotifs.length === 0;
 
     // --- LOGIKA READ NOTIFIKASI (LANGKAH 4) ---
-    const markAsRead = async (id: string) => {
-        try {
-            const token = localStorage.getItem('token');
-            await fetch(`http://localhost:3000/notifications/${id}/read`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            setGeneralNotifs(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-        } catch (error) {
-            console.error(error);
+    const markAsReadMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await api.patch(`/notifications/${id}/read`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications', 'general'] });
         }
-    };
+    });
 
-    const markAllAsRead = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            await fetch(`http://localhost:3000/notifications/read-all`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            setGeneralNotifs(prev => prev.map(n => ({ ...n, isRead: true })));
-        } catch (error) {
-            console.error(error);
+    const markAllAsReadMutation = useMutation({
+        mutationFn: async () => {
+            await api.patch(`/notifications/read-all`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications', 'general'] });
         }
-    };
+    });
 
     // --- LOGIKA AKSI APPROVE & REJECT (LANGKAH 3) ---
-    const handleAction = async (action: 'approve' | 'reject') => {
+    const actionMutation = useMutation({
+        mutationFn: async ({ id, action, note }: { id: string, action: 'approve' | 'reject', note?: string }) => {
+            const payload = action === 'reject' ? { rejectionNote: note } : {};
+            await api.patch(`/payments/${id}/${action}`, payload);
+        },
+        onSuccess: () => {
+            toast.success('Aksi berhasil!');
+            setIsReviewModalOpen(false);
+            setRejectionNote('');
+            setSelectedPayment(null);
+            queryClient.invalidateQueries({ queryKey: ['payments', 'incoming'] });
+        },
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || "Terjadi kesalahan jaringan.");
+        }
+    });
+
+    const handleAction = (action: 'approve' | 'reject') => {
         if (!selectedPayment) return;
         
         if (action === 'reject' && !rejectionNote.trim()) {
-            // Sesuai kesepakatan, kita paksa isi catatan khusus untuk reject
             toast.error("Harap masukkan alasan penolakan!");
             return;
         }
 
-        setIsSubmitting(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/payments/${selectedPayment.id}/${action}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: action === 'reject' ? JSON.stringify({ rejectionNote }) : JSON.stringify({})
-            });
-
-            if (response.ok) {
-                // Hapus payment dari daftar lokal secara reaktif
-                setIncomingPayments(prev => prev.filter(p => p.id !== selectedPayment.id));
-                setIsReviewModalOpen(false);
-                setRejectionNote('');
-                setSelectedPayment(null);
-                toast.success('Aksi berhasil!');
-            } else {
-                const data = await response.json();
-                toast.error(`Gagal: ${data.message}`);
-            }
-        } catch (err) {
-            toast.error("Terjadi kesalahan jaringan.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        actionMutation.mutate({ id: selectedPayment.id, action, note: rejectionNote });
     };
 
     return (
@@ -139,9 +106,9 @@ export const Notifications = () => {
                     </button>
                     <h1 style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Kotak Masuk <Inbox size={24} /></h1>
                 </div>
-                {generalNotifs.some(n => !n.isRead) && (
+                {generalNotifs.some((n: any) => !n.isRead) && (
                     <button 
-                        onClick={markAllAsRead} 
+                        onClick={() => markAllAsReadMutation.mutate()} 
                         style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 'bold' }}
                     >
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={16} /> Tandai Semua Dibaca</span>
@@ -174,7 +141,7 @@ export const Notifications = () => {
                 ) : (
                     <>
                         {/* --- LIST PENGAJUAN PEMBAYARAN (LANGKAH 2) --- */}
-                        {incomingPayments.map((payment) => (
+                        {incomingPayments.map((payment: any) => (
                             <div key={payment.id} style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                 padding: '1.25rem 1.5rem', backgroundColor: '#fefce8', 
@@ -210,7 +177,7 @@ export const Notifications = () => {
                         ))}
 
                         {/* --- LIST JOIN REQUESTS (YANG SUDAH ADA SEBELUMNYA) --- */}
-                        {joinRequests.map((notif) => (
+                        {joinRequests.map((notif: any) => (
                             <div key={notif.id} style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                 padding: '1.25rem 1.5rem', backgroundColor: 'var(--color-surface)',
@@ -245,9 +212,9 @@ export const Notifications = () => {
                         ))}
 
                         {/* --- LIST NOTIFIKASI UMUM (LANGKAH 4) --- */}
-                        {generalNotifs.map((notif) => (
+                        {generalNotifs.map((notif: any) => (
                             <div key={notif.id} 
-                                onClick={() => !notif.isRead && markAsRead(notif.id)}
+                                onClick={() => !notif.isRead && markAsReadMutation.mutate(notif.id)}
                                 style={{
                                 display: 'flex', alignItems: 'center', gap: '1rem',
                                 padding: '1.25rem 1.5rem', 
@@ -324,15 +291,15 @@ export const Notifications = () => {
                                 setIsReviewModalOpen(false);
                                 setRejectionNote('');
                                 setSelectedPayment(null);
-                            }} disabled={isSubmitting}>
+                            }} disabled={actionMutation.isPending}>
                                 Batal
                             </Button>
                             
-                            <Button onClick={() => handleAction('reject')} disabled={isSubmitting} style={{ backgroundColor: 'var(--color-error)', border: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Button onClick={() => handleAction('reject')} disabled={actionMutation.isPending} style={{ backgroundColor: 'var(--color-error)', border: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <X size={18} /> Tolak
                             </Button>
 
-                            <Button onClick={() => handleAction('approve')} disabled={isSubmitting} style={{ backgroundColor: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Button onClick={() => handleAction('approve')} disabled={actionMutation.isPending} style={{ backgroundColor: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <Check size={18} /> Terima
                             </Button>
                         </div>

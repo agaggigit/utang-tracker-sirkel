@@ -3,46 +3,44 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { ArrowLeft } from 'lucide-react';
+import api from '../lib/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const JoinGroup = () => {
     const navigate = useNavigate();
     const [inviteCode, setInviteCode] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setErrorMsg('');
-        
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3000/groups/join', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ inviteCode })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
+    const queryClient = useQueryClient();
+    
+    const joinMutation = useMutation({
+        mutationFn: async (code: string) => {
+            const response = await api.post('/groups/join', { inviteCode: code });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['groups'] });
+            navigate('/dashboard');
+        },
+        onError: (err: any) => {
+            if (err.response && err.response.data) {
+                const data = err.response.data;
                 if (data.errors) {
                     const firstError = Object.values(data.errors)[0] as string[];
-                    throw new Error(firstError[0]); 
+                    setErrorMsg(firstError[0]);
+                } else {
+                    setErrorMsg(data.message || 'Gagal bergabung ke grup');
                 }
-                throw new Error(data.message || 'Gagal bergabung ke grup');
-
+            } else {
+                setErrorMsg(err.message);
             }
-
-            navigate('/dashboard');
-        } catch (err: any) {
-            setErrorMsg(err.message);
-        } finally {
-            setIsLoading(false);
         }
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setErrorMsg('');
+        joinMutation.mutate(inviteCode);
     };
 
     return (
@@ -72,8 +70,8 @@ export const JoinGroup = () => {
                         onChange={(e) => setInviteCode(e.target.value)}
                         required
                     />
-                    <Button type="submit" fullWidth disabled={isLoading}>
-                        {isLoading ? 'Bergabung...' : 'Bergabung Grup'}
+                    <Button type="submit" fullWidth disabled={joinMutation.isPending}>
+                        {joinMutation.isPending ? 'Bergabung...' : 'Bergabung Grup'}
                     </Button>
                 </form>
             </div>

@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
-import { AlertTriangle, Scale, Trash2, ChevronDown, ArrowLeft } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
+import { AlertTriangle, Scale, Trash2, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Tipe data untuk daftar anggota yang bisa dipilih
 interface Member {
@@ -49,34 +52,17 @@ export const CreateExpense = () => {
     const [shares, setShares] = useState<{ userId: string, shareAmount: number | string }[]>([]);
     
     // State untuk daftar pilihan anggota grup (didapat dari Backend)
-    const [members, setMembers] = useState<Member[]>([]);
+    const { data: members = [] } = useQuery({
+        queryKey: ['groups', groupId, 'members'],
+        queryFn: async () => {
+            const response = await api.get(`/groups/${groupId}/members`);
+            return response.data as Member[];
+        },
+        enabled: !!groupId
+    });
 
-    const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
-
-    // --- EFFECT ---
-    useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`http://localhost:3000/groups/${groupId}/members`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setMembers(data);
-                }
-            } catch (err) {
-                console.error("Gagal mengambil anggota grup", err);
-            }
-        };
-
-        fetchMembers();
-    }, [groupId]);
+    const queryClient = useQueryClient();
 
     // --- HANDLER UNTUK SPLIT BILL ---
 
@@ -106,11 +92,35 @@ export const CreateExpense = () => {
         setShares(newShares);
     };
 
-    // --- SUBMIT ---
-    const handleSubmit = async (e: React.FormEvent) => {
+    const createExpenseMutation = useMutation({
+        mutationFn: async (payload: any) => {
+            const response = await api.post(`/groups/${groupId}/expenses`, payload);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success("Berhasil mencatat tagihan!");
+            queryClient.invalidateQueries({ queryKey: ['groups', groupId, 'expenses'] });
+            queryClient.invalidateQueries({ queryKey: ['groups', groupId, 'balance'] });
+            navigate(`/groups/${groupId}/expenses`);
+        },
+        onError: (err: any) => {
+            if (err.response && err.response.data) {
+                const data = err.response.data;
+                if (data.errors) {
+                    const firstError = Object.values(data.errors)[0] as string[];
+                    setErrorMsg(firstError[0]);
+                } else {
+                    setErrorMsg(data.message || 'Gagal membuat tagihan');
+                }
+            } else {
+                setErrorMsg(err.message);
+            }
+        }
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMsg('');
-        setIsLoading(true);
 
         try {
             // Validasi Frontend Dasar
@@ -131,65 +141,26 @@ export const CreateExpense = () => {
 
             let finalExpenseDate = new Date(expenseDate);
             if (!isTimeSpecific) {
-                // Jika tidak spesifik jam, gunakan waktu netral hari tersebut di server
-                // namun karena kita tidak ingin mengubah harinya jika terpengaruh timezone, kita set string ISO
-                // YYYY-MM-DD akan di-parse ke 00:00:00 UTC
                 finalExpenseDate = new Date(`${expenseDate}T00:00:00.000Z`);
             }
 
-            // Panggil API POST /groups/:id/expenses
             const payload = {
                 description,
                 totalAmount: finalTotal,
                 expenseDate: finalExpenseDate.toISOString(),
                 shares: formattedShares
             };
-
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3000/groups/${groupId}/expenses`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                if (data.errors) {
-                    // Ambil pesan error pertama dari validasi Zod
-                    const firstError = Object.values(data.errors)[0] as string[];
-                    throw new Error(firstError[0]);
-                }
-                throw new Error(data.message || 'Gagal membuat tagihan');
-            }
-
-            toast.success("Berhasil mencatat tagihan!");
-            navigate(`/groups/${groupId}/expenses`);
+            
+            createExpenseMutation.mutate(payload);
 
         } catch (err: any) {
             setErrorMsg(err.message);
-        } finally {
-            setIsLoading(false);
         }
     };
 
     return (
         <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
-            <header className="dashboard-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button 
-                        onClick={() => navigate(-1)}
-                        style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
-                        title="Kembali"
-                    >
-                        <ArrowLeft size={24} />
-                    </button>
-                    <h2>Buat Tagihan Baru</h2>
-                </div>
-            </header>
+            <PageHeader title="Buat Tagihan Baru" />
 
             <main className="dashboard-main" style={{ marginTop: '2rem' }}>
                 <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)' }}>
@@ -395,8 +366,8 @@ export const CreateExpense = () => {
                                     </span>
                                 </div>
 
-                                <Button type="submit" disabled={isLoading} style={{ marginTop: '1rem', width: '100%' }}>
-                                    {isLoading ? 'Menyimpan...' : 'Simpan & Tagih Mereka!'}
+                                <Button type="submit" disabled={createExpenseMutation.isPending} style={{ marginTop: '1rem', width: '100%' }}>
+                                    {createExpenseMutation.isPending ? 'Menyimpan...' : 'Simpan & Tagih Mereka!'}
                                 </Button>
                             </div>
                         </div>
