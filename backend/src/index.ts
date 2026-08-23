@@ -14,6 +14,7 @@ import { groupSettingsRouter } from './groups/groupSettings';
 import { getGroupDetailsRouter } from './groups/getGroupDetails';
 import { getGroupMembersRouter } from './groups/getGroupMembers';
 import { getGroupBalanceRouter } from './groups/getGroupBalance';
+import { getActivityRouter } from './groups/activity';
 import { joinRequestNotificationRouter } from './notifications/joinRequestNotifications';
 import { notificationRouter } from './notifications/getNotifications';
 import { createExpenseRouter } from './expenses/createExpense';
@@ -52,6 +53,7 @@ app.use('/groups', getGroupMembersRouter);
 app.use('/groups', getGroupBalanceRouter);
 app.use('/groups', createExpenseRouter);
 app.use('/groups', getExpensesRouter);
+app.use('/groups', getActivityRouter);
 
 app.use('/notifications', joinRequestNotificationRouter);
 app.use('/notifications', notificationRouter);

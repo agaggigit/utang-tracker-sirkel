@@ -22,7 +22,9 @@ router.get('/:id', authenticate, async (req: Request, res: Response) => {
                         select: { name: true, email: true, avatarUrl: true }
                     },
                     payments: {
-                        select: { status: true } // Ambil status payment agar frontend tahu kalau ada yang pending
+                        orderBy: { submittedAt: 'desc' },
+                        take: 1,
+                        select: { id: true, status: true, note: true } // Ambil id dan note untuk keperluan review
                     }
                 }
             },

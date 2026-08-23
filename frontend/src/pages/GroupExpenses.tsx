@@ -5,17 +5,19 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { EmptyState } from '../components/ui/EmptyState';
 import { ExpenseCard } from '../components/expenses/ExpenseCard';
 import { Modal } from '../components/ui/Modal';
-import { Settings, Search, Plus, AlertTriangle, Receipt, Filter, ArrowRight, Wallet, PartyPopper } from 'lucide-react';
+import { Settings, Search, Plus, AlertTriangle, Receipt, Filter, ArrowRight, Wallet, PartyPopper, ArrowLeft } from 'lucide-react';
 import api from '../lib/api';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { SkeletonList } from '../components/ui/Skeleton';
-import toast from 'react-hot-toast';
+import { GroupActivityDropdown } from '../components/ui/GroupActivityDropdown';
+
 
 interface ExpenseShare {
     id: string;
     userId: string;
     shareAmount: string;
     isPaid: boolean;
+    payments?: { status: string }[];
 }
 
 interface Expense {
@@ -31,8 +33,8 @@ interface Expense {
 interface BalanceData {
     totalIOwe: number;
     totalOwedToMe: number;
-    iOwe: { userId: string, name: string, amount: number }[];
-    owedToMe: { userId: string, name: string, amount: number }[];
+    iOwe: { userId: string, name: string, amount: number, transactions: { id: string, description: string, amount: number, iOweThem: boolean }[] }[];
+    owedToMe: { userId: string, name: string, amount: number, transactions: { id: string, description: string, amount: number, iOweThem: boolean }[] }[];
 }
 
 const formatDateHeader = (dateString: string) => {
@@ -52,6 +54,7 @@ export const GroupExpenses = () => {
     const navigate = useNavigate();
 
     const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
+    const [selectedBalanceDetail, setSelectedBalanceDetail] = useState<{ userId: string, name: string, amount: number, transactions: { id: string, description: string, amount: number, iOweThem: boolean }[], isDebt: boolean } | null>(null);
     const [searchKeyword, setSearchKeyword] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -130,18 +133,22 @@ export const GroupExpenses = () => {
             <div className="expenses-layout">
                 <div className="expenses-header">
                     <PageHeader 
-                    title="Riwayat Tagihan" 
-                    onBack={() => navigate('/dashboard')}
-                    action={
-                        <button 
-                            onClick={() => navigate(`/groups/${groupId}`)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
-                            title="Pengaturan Sirkel"
-                        >
-                            <Settings size={24} />
-                        </button>
-                    }
-                />
+                        title="Riwayat Tagihan" 
+                        onBack={() => navigate('/dashboard')}
+                        action={
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <GroupActivityDropdown groupId={groupId || ''} />
+                                <button 
+                                    onClick={() => navigate(`/groups/${groupId}`)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}
+                                    title="Pengaturan Sirkel"
+                                    className="hover-bg-surface-muted"
+                                >
+                                    <Settings size={24} />
+                                </button>
+                            </div>
+                        }
+                    />
 
                 {/* --- BAR PENCARIAN & FILTER --- */}
                 <div style={{ display: 'flex', gap: '0.5rem', width: '100%', marginBottom: '1rem' }}>
@@ -271,6 +278,7 @@ export const GroupExpenses = () => {
                                             paidByUserName={expense.paidByUser?.name || 'Seseorang'}
                                             paidByUserId={expense.paidBy}
                                             currentUserId={currentUserId}
+                                            myShare={expense.shares.find(s => s.userId === currentUserId)}
                                         />
                                     </div>
                                 </React.Fragment>
@@ -288,39 +296,78 @@ export const GroupExpenses = () => {
                 <Modal 
                     isOpen={isBalanceModalOpen} 
                     onClose={() => setIsBalanceModalOpen(false)} 
-                    title="Rincian Ringkasan Utang"
+                    title={selectedBalanceDetail ? `Rincian dengan ${selectedBalanceDetail.name}` : "Rincian Ringkasan Utang"}
                 >
-                    <div style={{ marginBottom: '2rem' }}>
-                        <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-error)' }}>Daftar Utangmu (Total: Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')})</h4>
-                        {balanceData.iOwe.length === 0 ? (
-                            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><PartyPopper size={16} /> Kamu tidak punya utang ke siapapun!</p>
-                        ) : (
+                    {selectedBalanceDetail ? (
+                        <div>
+                            <button 
+                                onClick={() => setSelectedBalanceDetail(null)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', padding: 0, marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                            >
+                                <ArrowLeft size={16} /> Kembali
+                            </button>
+                            <h4 style={{ margin: '0 0 1rem 0', color: selectedBalanceDetail.isDebt ? 'var(--color-error)' : 'var(--color-primary)' }}>
+                                Total {selectedBalanceDetail.isDebt ? 'Utangmu' : 'Piutangmu'}: Rp {Number(selectedBalanceDetail.amount).toLocaleString('id-ID')}
+                            </h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                {balanceData.iOwe.map(item => (
-                                    <div key={item.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--color-error-bg)', borderRadius: '8px' }}>
-                                        <span style={{ fontWeight: 'bold' }}>Ke {item.name}</span>
-                                        <span style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
+                                {selectedBalanceDetail.transactions.map(tx => (
+                                    <div 
+                                        key={tx.id} 
+                                        onClick={() => {
+                                            setIsBalanceModalOpen(false);
+                                            navigate(`/expenses/${tx.id}`);
+                                        }}
+                                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'var(--color-surface-hover)', borderRadius: '8px', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+                                    >
+                                        <span style={{ fontWeight: 'bold', color: 'var(--color-text-main)' }}>{tx.description}</span>
+                                        <span style={{ color: tx.iOweThem ? 'var(--color-error)' : 'var(--color-success-text)', fontWeight: 'bold' }}>Rp {Number(tx.amount).toLocaleString('id-ID')}</span>
                                     </div>
                                 ))}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div style={{ marginBottom: '2rem' }}>
+                                <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-error)' }}>Daftar Utangmu (Total: Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')})</h4>
+                                {balanceData.iOwe.length === 0 ? (
+                                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><PartyPopper size={16} /> Kamu tidak punya utang ke siapapun!</p>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                        {balanceData.iOwe.map(item => (
+                                            <div 
+                                                key={item.userId} 
+                                                onClick={() => setSelectedBalanceDetail({ ...item, isDebt: true })}
+                                                style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--color-surface-hover)', borderRadius: '8px', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+                                            >
+                                                <span style={{ fontWeight: 'bold', color: 'var(--color-text-main)' }}>Ke {item.name}</span>
+                                                <span style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
 
-                    <div>
-                        <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-primary)' }}>Daftar Piutangmu (Total: Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')})</h4>
-                        {balanceData.owedToMe.length === 0 ? (
-                            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Wallet size={16} /> Belum ada yang utang ke kamu.</p>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                {balanceData.owedToMe.map(item => (
-                                    <div key={item.userId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--color-success-bg)', borderRadius: '8px' }}>
-                                        <span style={{ fontWeight: 'bold', color: 'var(--color-success-text)' }}>Dari {item.name}</span>
-                                        <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
+                            <div>
+                                <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-primary)' }}>Daftar Piutangmu (Total: Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')})</h4>
+                                {balanceData.owedToMe.length === 0 ? (
+                                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Wallet size={16} /> Belum ada yang utang ke kamu.</p>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                        {balanceData.owedToMe.map(item => (
+                                            <div 
+                                                key={item.userId} 
+                                                onClick={() => setSelectedBalanceDetail({ ...item, isDebt: false })}
+                                                style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--color-surface-hover)', borderRadius: '8px', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+                                            >
+                                                <span style={{ fontWeight: 'bold', color: 'var(--color-text-main)' }}>Dari {item.name}</span>
+                                                <span style={{ color: 'var(--color-success-text)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </>
+                    )}
                 </Modal>
             )}
 

@@ -35,7 +35,12 @@ router.get('/:id/balance', authenticate, async (req: Request, res: Response) => 
     });
 
     // Map untuk menampung balance per pasangan user (hanya dari sudut pandang current user)
-    const balances = new Map<string, { userId: string, name: string, netAmount: number }>();
+    const balances = new Map<string, { 
+        userId: string, 
+        name: string, 
+        netAmount: number,
+        transactions: { id: string, description: string, amount: number, iOweThem: boolean }[] 
+    }>();
     // netAmount positif = mereka utang ke aku
     // netAmount negatif = aku utang ke mereka
 
@@ -45,8 +50,9 @@ router.get('/:id/balance', authenticate, async (req: Request, res: Response) => 
             for (const share of exp.shares) {
                 if (share.userId === currentUserId) continue; // utang diriku sendiri diabaikan
                 
-                const b = balances.get(share.userId) || { userId: share.userId, name: share.user.name, netAmount: 0 };
+                const b = balances.get(share.userId) || { userId: share.userId, name: share.user.name, netAmount: 0, transactions: [] };
                 b.netAmount += Number(share.shareAmount);
+                b.transactions.push({ id: exp.id, description: exp.description, amount: Number(share.shareAmount), iOweThem: false });
                 balances.set(share.userId, b);
             }
         } else {
@@ -54,25 +60,26 @@ router.get('/:id/balance', authenticate, async (req: Request, res: Response) => 
             const myShare = exp.shares.find(s => s.userId === currentUserId);
             if (myShare) {
                 // Aku berutang ke orang ini
-                const b = balances.get(exp.paidBy) || { userId: exp.paidBy, name: exp.paidByUser.name, netAmount: 0 };
+                const b = balances.get(exp.paidBy) || { userId: exp.paidBy, name: exp.paidByUser.name, netAmount: 0, transactions: [] };
                 b.netAmount -= Number(myShare.shareAmount);
+                b.transactions.push({ id: exp.id, description: exp.description, amount: Number(myShare.shareAmount), iOweThem: true });
                 balances.set(exp.paidBy, b);
             }
         }
     }
 
-    const iOwe: { userId: string, name: string, amount: number }[] = [];
-    const owedToMe: { userId: string, name: string, amount: number }[] = [];
+    const iOwe: { userId: string, name: string, amount: number, transactions: { id: string, description: string, amount: number, iOweThem: boolean }[] }[] = [];
+    const owedToMe: { userId: string, name: string, amount: number, transactions: { id: string, description: string, amount: number, iOweThem: boolean }[] }[] = [];
     let totalIOwe = 0;
     let totalOwedToMe = 0;
 
     balances.forEach((b) => {
         if (b.netAmount > 0) {
-            owedToMe.push({ userId: b.userId, name: b.name, amount: b.netAmount });
+            owedToMe.push({ userId: b.userId, name: b.name, amount: b.netAmount, transactions: b.transactions });
             totalOwedToMe += b.netAmount;
         } else if (b.netAmount < 0) {
             const amount = Math.abs(b.netAmount);
-            iOwe.push({ userId: b.userId, name: b.name, amount });
+            iOwe.push({ userId: b.userId, name: b.name, amount, transactions: b.transactions });
             totalIOwe += amount;
         }
     });

@@ -80,7 +80,13 @@ router.get('/:id/expenses', authenticate, async (req: Request, res: Response) =>
         skip: skip,
         take: limit,
         include: {
-            shares: true,
+            shares: {
+                include: {
+                    payments: {
+                        select: { status: true }
+                    }
+                }
+            },
             paidByUser: {
                 select: {
                     name: true

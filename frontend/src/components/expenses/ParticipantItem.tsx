@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
 
 interface ParticipantItemProps {
@@ -9,9 +9,12 @@ interface ParticipantItemProps {
     isCurrentUser: boolean;
     isPayer: boolean;
     avatarUrl?: string | null;
+    payments?: { id: string; status: string; note?: string }[];
+    showReviewButton?: boolean;
+    onReviewClick?: (paymentId: string, note?: string) => void;
 }
 
-export function ParticipantItem({ name, email, shareAmount, isPaid, isCurrentUser, isPayer, avatarUrl }: ParticipantItemProps) {
+export function ParticipantItem({ name, email, shareAmount, isPaid, isCurrentUser, isPayer, avatarUrl, payments, showReviewButton, onReviewClick }: ParticipantItemProps) {
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'var(--color-surface)', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0, paddingRight: '1rem' }}>
@@ -29,6 +32,30 @@ export function ParticipantItem({ name, email, shareAmount, isPaid, isCurrentUse
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', backgroundColor: 'var(--color-surface-muted)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>Ditalangi Sendiri</span>
                 ) : isPaid ? (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-success-text)', backgroundColor: 'var(--color-success-bg)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}><CheckCircle size={12} /> Lunas</span>
+                ) : payments && payments.length > 0 && payments[0].status === 'pending' ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', justifyContent: 'flex-end' }}>
+                        {showReviewButton && onReviewClick && (
+                            <button 
+                                onClick={() => onReviewClick(payments[0].id, payments[0].note)}
+                                style={{
+                                    backgroundColor: '#eab308',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    padding: '0.2rem 0.6rem',
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold'
+                                }}
+                                className="hover-brightness"
+                            >
+                                Review
+                            </button>
+                        )}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.2rem 0.5rem', borderRadius: '12px' }}><Clock size={12} /> Menunggu ACC</span>
+                    </div>
+                ) : payments && payments.length > 0 && payments[0].status === 'rejected' ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-error)', backgroundColor: 'var(--color-error-bg)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}><XCircle size={12} /> Ditolak</span>
                 ) : (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-error)', backgroundColor: 'var(--color-error-bg)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}><XCircle size={12} /> Belum Bayar</span>
                 )}

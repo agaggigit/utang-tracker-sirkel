@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { SkeletonList } from '../components/ui/Skeleton';
-import { Inbox, Check, Clock, AlertTriangle, PartyPopper, Info, X, ArrowLeft } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { ReviewPaymentModal } from '../components/expenses/ReviewPaymentModal';
+import { Inbox, Check, AlertTriangle, PartyPopper, Info, ArrowLeft } from 'lucide-react';
 import api from '../lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -14,7 +14,6 @@ export const Notifications = () => {
     // --- STATE UNTUK MODAL REVIEW (LANGKAH 3) ---
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<any>(null);
-    const [rejectionNote, setRejectionNote] = useState('');
 
     const { data: joinRequests = [], isLoading: isLoadingJoin, error: joinError } = useQuery({
         queryKey: ['notifications', 'join-requests'],
@@ -63,35 +62,6 @@ export const Notifications = () => {
             queryClient.invalidateQueries({ queryKey: ['notifications', 'general'] });
         }
     });
-
-    // --- LOGIKA AKSI APPROVE & REJECT (LANGKAH 3) ---
-    const actionMutation = useMutation({
-        mutationFn: async ({ id, action, note }: { id: string, action: 'approve' | 'reject', note?: string }) => {
-            const payload = action === 'reject' ? { rejectionNote: note } : {};
-            await api.patch(`/payments/${id}/${action}`, payload);
-        },
-        onSuccess: () => {
-            toast.success('Aksi berhasil!');
-            setIsReviewModalOpen(false);
-            setRejectionNote('');
-            setSelectedPayment(null);
-            queryClient.invalidateQueries({ queryKey: ['payments', 'incoming'] });
-        },
-        onError: (err: any) => {
-            toast.error(err.response?.data?.message || "Terjadi kesalahan jaringan.");
-        }
-    });
-
-    const handleAction = (action: 'approve' | 'reject') => {
-        if (!selectedPayment) return;
-        
-        if (action === 'reject' && !rejectionNote.trim()) {
-            toast.error("Harap masukkan alasan penolakan!");
-            return;
-        }
-
-        actionMutation.mutate({ id: selectedPayment.id, action, note: rejectionNote });
-    };
 
     return (
         <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
@@ -143,8 +113,8 @@ export const Notifications = () => {
                         {incomingPayments.map((payment: any) => (
                             <div key={payment.id} style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                padding: '1.25rem 1.5rem', backgroundColor: '#fefce8', 
-                                borderRadius: 'var(--radius-lg)', border: '1px solid #fde047', 
+                                padding: '1.25rem 1.5rem', backgroundColor: 'var(--color-surface-hover)', 
+                                borderRadius: 'var(--radius-lg)', border: '1px solid #eab308', 
                                 boxShadow: 'var(--shadow-sm)', transition: 'all 0.2s ease',
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -217,10 +187,10 @@ export const Notifications = () => {
                                 style={{
                                 display: 'flex', alignItems: 'center', gap: '1rem',
                                 padding: '1.25rem 1.5rem', 
-                                backgroundColor: notif.isRead ? 'transparent' : '#f0f9ff',
+                                backgroundColor: notif.isRead ? 'transparent' : 'var(--color-surface-hover)',
                                 borderRadius: 'var(--radius-lg)', 
                                 border: '1px solid',
-                                borderColor: notif.isRead ? 'var(--color-border)' : '#bae6fd', 
+                                borderColor: notif.isRead ? 'var(--color-border)' : 'var(--color-primary)', 
                                 boxShadow: notif.isRead ? 'none' : 'var(--shadow-sm)', 
                                 transition: 'all 0.2s ease',
                                 cursor: notif.isRead ? 'default' : 'pointer',
@@ -251,60 +221,14 @@ export const Notifications = () => {
                 )}
             </div>
 
-            {/* --- MODAL REVIEW PEMBAYARAN (LANGKAH 3) --- */}
-            {isReviewModalOpen && selectedPayment && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-                }}>
-                    <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', width: '90%', maxWidth: '450px', boxShadow: 'var(--shadow-lg)' }}>
-                        <h3 style={{ margin: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>Review Pembayaran</h3>
-                        
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <p style={{ margin: '0 0 0.5rem 0' }}><strong>Pengirim:</strong> {selectedPayment.from.name} ({selectedPayment.from.email})</p>
-                            <p style={{ margin: '0 0 0.5rem 0' }}><strong>Untuk:</strong> {selectedPayment.expenseShare.expense.description} (Grup: {selectedPayment.expenseShare.expense.group.name})</p>
-                            <p style={{ margin: '0 0 0.5rem 0' }}><strong>Nominal:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>Rp {Number(selectedPayment.amount).toLocaleString('id-ID')}</span></p>
-                            
-                            {selectedPayment.note && (
-                                <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'var(--color-surface-muted)', borderRadius: '8px', fontStyle: 'italic', fontSize: '0.9rem' }}>
-                                    "{selectedPayment.note}"
-                                </div>
-                            )}
-                        </div>
-
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                            Catatan Penolakan <br/>
-                            <span style={{fontWeight:'normal', fontSize: '0.8rem', color: 'var(--color-text-muted)'}}>(Opsional jika Approve, <span style={{color:'var(--color-error)'}}>Wajib jika Reject</span>)</span>
-                        </label>
-                        <textarea 
-                            className="input-field"
-                            rows={2}
-                            placeholder="Misal: Uangnya kurang 50rb bos!"
-                            value={rejectionNote}
-                            onChange={(e) => setRejectionNote(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', marginBottom: '1.5rem', fontFamily: 'inherit', resize: 'vertical' }}
-                        />
-                        
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <Button variant="outline" onClick={() => {
-                                setIsReviewModalOpen(false);
-                                setRejectionNote('');
-                                setSelectedPayment(null);
-                            }} disabled={actionMutation.isPending}>
-                                Batal
-                            </Button>
-                            
-                            <Button onClick={() => handleAction('reject')} disabled={actionMutation.isPending} style={{ backgroundColor: 'var(--color-error)', border: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <X size={18} /> Tolak
-                            </Button>
-
-                            <Button onClick={() => handleAction('approve')} disabled={actionMutation.isPending} style={{ backgroundColor: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Check size={18} /> Terima
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ReviewPaymentModal
+                isOpen={isReviewModalOpen}
+                onClose={() => {
+                    setIsReviewModalOpen(false);
+                    setSelectedPayment(null);
+                }}
+                payment={selectedPayment}
+            />
         </div>
     );
 };

@@ -6,6 +6,7 @@ import { Modal } from '../components/ui/Modal';
 import { ParticipantItem } from '../components/expenses/ParticipantItem';
 import { Clock, AlertTriangle, Calendar, Wallet, Edit2, Trash2 } from 'lucide-react';
 import { SkeletonForm } from '../components/ui/Skeleton';
+import { ReviewPaymentModal } from '../components/expenses/ReviewPaymentModal';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -22,14 +23,14 @@ interface ExpenseDetailData {
     groupId: string;
     paidBy: string; 
     paidByUser: { name: string, email: string };
-    group: { name: string };
+    group: { name: string, id: string };
     shares: {
         id: string;
         userId: string;
         shareAmount: string;
         isPaid: boolean;
-        user: { name: string, email: string };
-        payments?: { status: string }[];
+        user: { name: string, email: string, avatarUrl?: string };
+        payments?: { id: string; status: string; note?: string }[];
     }[];
 }
 
@@ -42,6 +43,8 @@ export const ExpenseDetail = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [paymentNote, setPaymentNote] = useState('');
+
+    const [reviewPayment, setReviewPayment] = useState<{ id: string, amount: string, note?: string, from: { name: string, email: string } } | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -114,9 +117,11 @@ export const ExpenseDetail = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Pengajuan pelunasan berhasil dikirim!');
             setIsModalOpen(false);
             setPaymentNote('');
             queryClient.invalidateQueries({ queryKey: ['expenses', expenseId] });
+            queryClient.invalidateQueries({ queryKey: ['groups', expense?.groupId, 'activity'] }); // Invalidate activity log too
         },
         onError: (err: any) => {
             toast.error(err.response?.data?.message || 'Terjadi kesalahan jaringan saat mengirim pengajuan.');
@@ -224,6 +229,14 @@ export const ExpenseDetail = () => {
                                         isPaid={share.isPaid}
                                         isCurrentUser={share.userId === currentUserId}
                                         isPayer={share.userId === expense.paidBy}
+                                        payments={share.payments}
+                                        showReviewButton={amIThePayer}
+                                        onReviewClick={(paymentId, note) => setReviewPayment({ 
+                                            id: paymentId, 
+                                            amount: share.shareAmount,
+                                            note, 
+                                            from: { name: share.user.name, email: share.user.email } 
+                                        })}
                                     />
                                 ))}
                             </div>
@@ -251,15 +264,34 @@ export const ExpenseDetail = () => {
                     style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', marginBottom: '1.5rem', fontFamily: 'inherit', resize: 'vertical' }}
                 />
                 
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                    <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={paymentMutation.isPending}>
-                        Batal
-                    </Button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.5rem' }}>
+                    <Button variant="outline" onClick={() => setIsModalOpen(false)}>Batal</Button>
                     <Button onClick={handleSubmitPayment} disabled={paymentMutation.isPending}>
                         {paymentMutation.isPending ? 'Mengirim...' : 'Kirim Pengajuan'}
                     </Button>
                 </div>
-            </Modal>
+                </Modal>
+            )}
+
+            {expense && (
+                <ReviewPaymentModal
+                    isOpen={!!reviewPayment}
+                    onClose={() => setReviewPayment(null)}
+                    payment={reviewPayment ? {
+                        id: reviewPayment.id,
+                        amount: reviewPayment.amount,
+                        note: reviewPayment.note,
+                        from: reviewPayment.from,
+                        expenseShare: {
+                            expense: {
+                                id: expense.id,
+                                description: expense.description,
+                                groupId: expense.group.id,
+                                group: { name: expense.group.name }
+                            }
+                        }
+                    } : null}
+                />
             )}
         </div>
     );
