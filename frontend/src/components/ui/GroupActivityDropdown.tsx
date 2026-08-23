@@ -59,62 +59,27 @@ export function GroupActivityDropdown({ groupId }: { groupId: string }) {
     const hasPendingForMe = allActivities?.some(a => a.status === 'pending' && a.to.id === currentUserId) || false;
 
     return (
-        <div style={{ position: 'relative' }} ref={dropdownRef}>
+        <div className="relative" ref={dropdownRef}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                style={{ 
-                    background: 'none', 
-                    border: 'none', 
-                    cursor: 'pointer', 
-                    position: 'relative',
-                    padding: '0.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--color-primary)',
-                    borderRadius: '50%',
-                    transition: 'background-color 0.2s'
-                }}
-                className="hover-bg-surface-muted"
+                className="bg-transparent border-none cursor-pointer relative p-2 flex items-center justify-center text-primary rounded-full transition-colors duration-200 hover:bg-surface-muted"
             >
                 <Bell size={24} />
                 {hasPendingForMe && (
-                    <span style={{ 
-                        position: 'absolute', 
-                        top: '4px', 
-                        right: '6px', 
-                        width: '10px', 
-                        height: '10px', 
-                        backgroundColor: 'var(--color-error)', 
-                        borderRadius: '50%',
-                        border: '2px solid var(--color-dashboard-bg)'
-                    }}></span>
+                    <span className="absolute top-1 right-[6px] w-2.5 h-2.5 bg-error rounded-full border-2 border-dashboard-bg"></span>
                 )}
             </button>
 
             {isOpen && (
-                <div style={{ 
-                    position: 'absolute', 
-                    top: '100%', 
-                    right: 0, 
-                    marginTop: '0.5rem', 
-                    width: '320px', 
-                    backgroundColor: 'var(--color-surface)', 
-                    borderRadius: '12px', 
-                    boxShadow: 'var(--shadow-lg)', 
-                    border: '1px solid var(--color-border)',
-                    zIndex: 100,
-                    maxHeight: '400px',
-                    overflowY: 'auto'
-                }}>
-                    <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h3 style={{ margin: 0, fontSize: '1rem' }}>Aktivitas Grup</h3>
+                <div className="absolute top-full right-0 mt-2 w-[320px] bg-surface rounded-xl shadow-lg border border-border z-[100] max-h-[400px] overflow-y-auto">
+                    <div className="p-4 border-b border-border flex justify-between items-center">
+                        <h3 className="m-0 text-[1rem]">Aktivitas Grup</h3>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className="flex flex-col">
                         {isLoading || !allActivities ? (
-                            <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>Memuat...</div>
+                            <div className="p-4 text-center text-text-muted">Memuat...</div>
                         ) : allActivities.length === 0 ? (
-                            <div style={{ padding: '1.5rem 1rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>Belum ada aktivitas.</div>
+                            <div className="py-6 px-4 text-center text-text-muted">Belum ada aktivitas.</div>
                         ) : (
                             allActivities.map(activity => {
                                 const isForMe = activity.to.id === currentUserId;
@@ -148,29 +113,20 @@ export function GroupActivityDropdown({ groupId }: { groupId: string }) {
                                             setIsOpen(false);
                                             navigate(`/expenses/${activity.expenseShare.expense.id}`);
                                         }}
-                                        style={{ 
-                                            padding: '1rem', 
-                                            borderBottom: '1px solid var(--color-border)', 
-                                            cursor: 'pointer',
-                                            transition: 'background-color 0.2s',
-                                            display: 'flex',
-                                            gap: '0.75rem',
-                                            backgroundColor: (activity.status === 'pending' && isForMe) ? 'var(--color-surface-muted)' : 'transparent'
-                                        }}
-                                        className="hover-bg-surface-muted"
+                                        className={`p-4 border-b border-border cursor-pointer transition-colors duration-200 flex gap-3 hover:bg-surface-muted ${activity.status === 'pending' && isForMe ? 'bg-surface-muted' : 'bg-transparent'}`}
                                     >
-                                        <div style={{ color: statusColor, marginTop: '2px' }}>
+                                        <div className="mt-[2px]" style={{ color: statusColor }}>
                                             {statusIcon}
                                         </div>
-                                        <div style={{ flex: 1 }}>
-                                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-main)', lineHeight: '1.4' }}>
+                                        <div className="flex-1">
+                                            <p className="m-0 text-[0.9rem] text-text-main leading-snug">
                                                 {actionText} untuk tagihan <strong>{activity.expenseShare.expense.description}</strong>
                                             </p>
-                                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
+                                            <p className="m-0 text-[0.75rem] text-text-muted mt-1">
                                                 Rp {Number(activity.amount).toLocaleString('id-ID')} • {new Date(activity.submittedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
-                                        <ArrowRight size={16} style={{ color: 'var(--color-text-muted)', alignSelf: 'center' }} />
+                                        <ArrowRight size={16} className="text-text-muted self-center" />
                                     </div>
                                 );
                             })

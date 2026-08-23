@@ -97,49 +97,28 @@ export const GroupDetail = () => {
     const isSettingsChanged = groupName !== initialGroupName || joinApprovalRequired !== initialJoinApprovalRequired;
 
     return (
-        <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1000px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
+        <div className="dashboard-container pt-8 max-w-[1000px] mx-auto px-6 pb-12">
             <PageHeader 
                 title="Pengaturan Sirkel" 
                 onBack={() => navigate(`/groups/${id}/expenses`)}
             />
 
-            <div className="group-detail-layout" style={{ marginTop: '2rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className="group-detail-layout mt-8">
+                <div className="flex flex-col gap-2">
                     <button 
-                        style={{ 
-                            textAlign: 'left', padding: '1rem 1.5rem', borderRadius: '8px', 
-                            background: activeTab === 'members' ? 'var(--color-primary)' : 'transparent', 
-                            border: 'none', fontSize: '1.05rem', 
-                            fontWeight: activeTab === 'members' ? 'bold' : 'normal', 
-                            color: activeTab === 'members' ? 'white' : 'var(--color-text-main)', 
-                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' 
-                        }}
+                        className={`text-left py-4 px-6 rounded-lg border-none text-[1.05rem] cursor-pointer flex items-center justify-between transition-all duration-200 ${activeTab === 'members' ? 'bg-primary font-bold text-white' : 'bg-transparent font-normal text-text-main'}`}
                         onClick={() => setActiveTab('members')}
                     >
                         Anggota Grup <Users size={18} />
                     </button>
                     <button 
-                        style={{ 
-                            textAlign: 'left', padding: '1rem 1.5rem', borderRadius: '8px', 
-                            background: activeTab === 'requests' ? 'var(--color-primary)' : 'transparent', 
-                            border: 'none', fontSize: '1.05rem', 
-                            fontWeight: activeTab === 'requests' ? 'bold' : 'normal', 
-                            color: activeTab === 'requests' ? 'white' : 'var(--color-text-main)', 
-                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' 
-                        }}
+                        className={`text-left py-4 px-6 rounded-lg border-none text-[1.05rem] cursor-pointer flex items-center justify-between transition-all duration-200 ${activeTab === 'requests' ? 'bg-primary font-bold text-white' : 'bg-transparent font-normal text-text-main'}`}
                         onClick={() => setActiveTab('requests')}
                     >
                         Antrean Join <Bell size={18} />
                     </button>
                     <button 
-                        style={{ 
-                            textAlign: 'left', padding: '1rem 1.5rem', borderRadius: '8px', 
-                            background: activeTab === 'settings' ? 'var(--color-primary)' : 'transparent', 
-                            border: 'none', fontSize: '1.05rem', 
-                            fontWeight: activeTab === 'settings' ? 'bold' : 'normal', 
-                            color: activeTab === 'settings' ? 'white' : 'var(--color-text-main)', 
-                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' 
-                        }}
+                        className={`text-left py-4 px-6 rounded-lg border-none text-[1.05rem] cursor-pointer flex items-center justify-between transition-all duration-200 ${activeTab === 'settings' ? 'bg-primary font-bold text-white' : 'bg-transparent font-normal text-text-main'}`}
                         onClick={() => setActiveTab('settings')}
                     >
                         Pengaturan <Settings size={18} />
@@ -148,13 +127,13 @@ export const GroupDetail = () => {
 
                 <div>
                     {activeTab === 'members' && (
-                        <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)' }}>
-                            <h3 style={{ marginBottom: '1.5rem' }}>Daftar Anggota</h3>
+                        <div className="bg-surface p-8 rounded-xl shadow-sm">
+                            <h3 className="mb-6">Daftar Anggota</h3>
                             
                             {isMembersLoading ? (
                                 <SkeletonList count={3} />
                             ) : membersErrorMsg ? (
-                                <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div className="p-4 bg-error-bg text-error rounded-lg flex items-center gap-2">
                                     <AlertTriangle size={20} /> {membersErrorMsg}
                                 </div>
                             ) : members.length === 0 ? (
@@ -164,17 +143,13 @@ export const GroupDetail = () => {
                                     description="Belum ada anggota di sirkel ini."
                                 />
                             ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div className="flex flex-col gap-4">
                                     {members.map((member: any) => (
-                                        <div key={member.id} style={{
-                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            padding: '1rem 1.5rem', backgroundColor: 'var(--color-background)',
-                                            borderRadius: '12px', border: '1px solid #eee'
-                                        }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div key={member.id} className="flex justify-between items-center py-4 px-6 bg-background rounded-xl border border-gray-200">
+                                            <div className="flex items-center gap-4">
                                                 <Avatar name={member.name} imageUrl={member.avatarUrl} />
                                                 <div>
-                                                    <p style={{ margin: 0, fontWeight: 'bold' }}>{member.name}</p>
+                                                    <p className="m-0 font-bold">{member.name}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -185,13 +160,13 @@ export const GroupDetail = () => {
                     )}
 
                     {activeTab === 'requests' && (
-                        <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)' }}>
-                            <h3 style={{ marginBottom: '1.5rem' }}>Antrean Menunggu Persetujuan</h3>
+                        <div className="bg-surface p-8 rounded-xl shadow-sm">
+                            <h3 className="mb-6">Antrean Menunggu Persetujuan</h3>
                             
                             {isLoading ? (
                                 <SkeletonList count={2} />
                             ) : errorMsg ? (
-                                <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div className="p-4 bg-error-bg text-error rounded-lg flex items-center gap-2">
                                     <AlertTriangle size={20} /> {errorMsg}
                                 </div>
                             ) : requests.length === 0 ? (
@@ -201,22 +176,18 @@ export const GroupDetail = () => {
                                     description="Belum ada permintaan bergabung saat ini."
                                 />
                             ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div className="flex flex-col gap-4">
                                     {requests.map((req: any) => (
-                                        <div key={req.id} style={{
-                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            padding: '1rem 1.5rem', backgroundColor: 'var(--color-background)',
-                                            borderRadius: '12px', border: '1px solid #eee'
-                                        }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div key={req.id} className="flex justify-between items-center py-4 px-6 bg-background rounded-xl border border-gray-200">
+                                            <div className="flex items-center gap-4">
                                                 <Avatar name={req.user.name} imageUrl={req.user.avatarUrl} />
                                                 <div>
-                                                    <p style={{ margin: 0, fontWeight: 'bold' }}>{req.user.name}</p>
-                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>Menunggu Persetujuan</p>
+                                                    <p className="m-0 font-bold">{req.user.name}</p>
+                                                    <p className="m-0 text-[0.85rem] text-gray-500">Menunggu Persetujuan</p>
                                                 </div>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <Button variant="outline" onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'rejected' })} style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }} disabled={approvalMutation.isPending}>
+                                            <div className="flex gap-2">
+                                                <Button variant="outline" onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'rejected' })} className="border-error text-error" disabled={approvalMutation.isPending}>
                                                     Tolak
                                                 </Button>
                                                 <Button onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'approved' })} disabled={approvalMutation.isPending}>
@@ -232,8 +203,8 @@ export const GroupDetail = () => {
 
                     {activeTab === 'settings' && (
                         <div>
-                            <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)', marginBottom: '2rem' }}>
-                                <h3 style={{ marginBottom: '1.5rem' }}>Pengaturan Grup</h3>
+                            <div className="bg-surface p-8 rounded-xl shadow-sm mb-8">
+                                <h3 className="mb-6">Pengaturan Grup</h3>
                                 <div className="input-wrapper">
                                     <label className="input-label">Nama Grup</label>
                                     <input 
@@ -244,7 +215,7 @@ export const GroupDetail = () => {
                                     />
                                 </div>
 
-                                <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+                                <div className="my-6">
                                     <Switch
                                         label="Butuh persetujuan Admin (Host) untuk anggota baru yang bergabung" 
                                         checked={joinApprovalRequired} 
@@ -255,39 +226,39 @@ export const GroupDetail = () => {
                                 <Button 
                                     onClick={() => editGroupMutation.mutate({ name: groupName, joinApprovalRequired })}
                                     disabled={!isSettingsChanged || editGroupMutation.isPending}
-                                    style={{ opacity: !isSettingsChanged ? 0.5 : 1, cursor: !isSettingsChanged ? 'not-allowed' : 'pointer' }}
+                                    className={!isSettingsChanged ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                                 >
                                     Simpan Perubahan
                                 </Button>
                             </div>
 
-                            <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)' }}>
-                                <h3 style={{ marginBottom: '1.5rem' }}>Kode Undangan</h3>
-                                <p style={{ color: 'var(--color-text-muted)', marginBottom: '1rem' }}>Berikan kode ini kepada temanmu agar mereka bisa bergabung.</p>
+                            <div className="bg-surface p-8 rounded-xl shadow-sm">
+                                <h3 className="mb-6">Kode Undangan</h3>
+                                <p className="text-text-muted mb-4">Berikan kode ini kepada temanmu agar mereka bisa bergabung.</p>
                                 
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                    <div style={{ padding: '0.75rem 1.5rem', backgroundColor: 'var(--color-background)', border: '1.5px dashed var(--color-border)', borderRadius: '8px', fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '2px' }}>
+                                <div className="flex gap-4 items-center mb-6">
+                                    <div className="py-3 px-6 bg-background border-[1.5px] border-dashed border-border rounded-lg text-[1.2rem] font-bold tracking-[2px]">
                                         {inviteCode}
                                     </div>
                                     <Button variant="outline" onClick={() => {
                                         navigator.clipboard.writeText(inviteCode);
                                         toast.success('Kode disalin!');
-                                    }} style={{ padding: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Salin Kode">
+                                    }} className="p-3 flex items-center justify-center" title="Salin Kode">
                                         <Copy size={20} />
                                     </Button>
                                 </div>
 
-                                <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>Ganti kode undangan jika menurutmu kode lama sudah tersebar luas ke orang yang tidak diinginkan.</p>
-                                    <Button variant="outline" style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }} onClick={() => {
+                                <div className="border-t border-gray-200 pt-6">
+                                    <p className="m-0 text-[0.85rem] text-text-muted mb-4">Ganti kode undangan jika menurutmu kode lama sudah tersebar luas ke orang yang tidak diinginkan.</p>
+                                    <Button variant="outline" className="border-error text-error" onClick={() => {
                                         MySwal.fire({
                                             html: (
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-                                                    <div style={{ padding: '1rem', backgroundColor: '#fef3c7', borderRadius: '50%', color: '#d97706' }}>
+                                                <div className="flex flex-col items-center gap-4 mt-4">
+                                                    <div className="p-4 bg-amber-100 rounded-full text-amber-600">
                                                         <AlertTriangle size={48} />
                                                     </div>
-                                                    <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Ganti Kode Undangan?</h2>
-                                                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Yakin ingin mengganti kode? Kode lama tidak akan berlaku lagi.</p>
+                                                    <h2 className="m-0 text-[1.25rem] font-bold text-text-main">Ganti Kode Undangan?</h2>
+                                                    <p className="m-0 text-[0.95rem] text-text-muted">Yakin ingin mengganti kode? Kode lama tidak akan berlaku lagi.</p>
                                                 </div>
                                             ),
                                             showCancelButton: true,

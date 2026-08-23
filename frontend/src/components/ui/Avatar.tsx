@@ -38,13 +38,10 @@ export function Avatar({ name, imageUrl, size = 40, fontSize = '1rem', backgroun
                 alt={name} 
                 onClick={handleViewImage}
                 referrerPolicy="no-referrer"
+                className="rounded-full object-cover shrink-0 cursor-pointer"
                 style={{ 
                     width: `${size}px`, 
                     height: `${size}px`, 
-                    borderRadius: '50%', 
-                    objectFit: 'cover',
-                    flexShrink: 0,
-                    cursor: 'pointer'
                 }} 
             />
         );
@@ -54,18 +51,12 @@ export function Avatar({ name, imageUrl, size = 40, fontSize = '1rem', backgroun
     const initial = name ? name.charAt(0).toUpperCase() : '?';
 
     return (
-        <div style={{ 
+        <div className="rounded-full flex items-center justify-center font-bold shrink-0" style={{ 
             width: `${size}px`, 
             height: `${size}px`, 
-            borderRadius: '50%', 
             backgroundColor: backgroundColor, 
             color: textColor, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontWeight: 'bold', 
             fontSize: fontSize,
-            flexShrink: 0
         }}>
             {initial}
         </div>

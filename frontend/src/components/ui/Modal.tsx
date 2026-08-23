@@ -24,19 +24,19 @@ export function Modal({ isOpen, onClose, title, description, children, maxWidth 
     if (!isOpen) return null;
 
     return (
-        <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-            <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', width: '90%', maxWidth: maxWidth, boxShadow: 'var(--shadow-lg)', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000]">
+            <div 
+                className="bg-surface p-8 rounded-xl w-[90%] shadow-lg relative max-h-[90vh] overflow-y-auto"
+                style={{ maxWidth }}
+            >
                 <button 
                     onClick={onClose} 
-                    style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
+                    className="absolute top-4 right-4 bg-transparent border-none cursor-pointer text-text-muted hover:text-text-main transition-colors"
                 >
                     <X size={24} />
                 </button>
-                <h3 style={{ margin: 0, marginBottom: '0.5rem', paddingRight: '2rem' }}>{title}</h3>
-                {description && <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', marginTop: 0 }}>{description}</p>}
+                <h3 className="m-0 mb-2 pr-8 text-text-main font-bold">{title}</h3>
+                {description && <p className="text-text-muted text-sm mb-6 mt-0">{description}</p>}
                 
                 <div>
                     {children}

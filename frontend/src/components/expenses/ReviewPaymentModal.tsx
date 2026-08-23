@@ -76,37 +76,44 @@ export function ReviewPaymentModal({ isOpen, onClose, payment, onSuccess }: Revi
             }} 
             title="Review Pembayaran"
         >
-            <div style={{ marginBottom: '1.5rem' }}>
-                <p style={{ margin: '0 0 0.5rem 0' }}><strong>Pengirim:</strong> {payment.from.name} ({payment.from.email})</p>
-                <p style={{ margin: '0 0 0.5rem 0' }}><strong>Untuk:</strong> {payment.expenseShare.expense.description} (Grup: {payment.expenseShare.expense.group.name})</p>
-                <p style={{ margin: '0 0 0.5rem 0' }}><strong>Nominal:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>Rp {Number(payment.amount).toLocaleString('id-ID')}</span></p>
+            <div className="mb-6">
+                <p className="m-0 mb-2"><strong>Pengirim:</strong> {payment.from.name} ({payment.from.email})</p>
+                <p className="m-0 mb-2"><strong>Untuk:</strong> {payment.expenseShare.expense.description} (Grup: {payment.expenseShare.expense.group.name})</p>
+                <p className="m-0 mb-2"><strong>Nominal:</strong> <span className="text-primary font-bold">Rp {Number(payment.amount).toLocaleString('id-ID')}</span></p>
                 
                 {payment.note && (
-                    <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'var(--color-surface-muted)', borderRadius: '8px', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                    <div className="mt-4 p-4 bg-surface-muted rounded-lg italic text-sm">
                         "{payment.note}"
                     </div>
                 )}
             </div>
 
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>
+            <label className="block mb-2 font-bold text-sm">
                 Catatan Penolakan <br/>
-                <span style={{fontWeight:'normal', fontSize: '0.8rem', color: 'var(--color-text-muted)'}}>(Opsional jika Approve, <span style={{color:'var(--color-error)'}}>Wajib jika Reject</span>)</span>
+                <span className="font-normal text-xs text-text-muted">(Opsional jika Approve, <span className="text-error">Wajib jika Reject</span>)</span>
             </label>
             <textarea 
-                className="input-field"
+                className="w-full p-3 rounded-lg border border-border mb-6 font-inherit resize-y bg-surface-hover text-text-main focus:border-primary focus:ring-[3px] focus:ring-primary/15 outline-none transition-all duration-200"
                 rows={2}
                 placeholder="Misal: Uangnya kurang 50rb bos!"
                 value={rejectionNote}
                 onChange={(e) => setRejectionNote(e.target.value)}
-                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', marginBottom: '1.5rem', fontFamily: 'inherit', resize: 'vertical' }}
             />
             
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                <Button onClick={() => handleAction('reject')} disabled={actionMutation.isPending} style={{ flex: 1, backgroundColor: 'var(--color-error)', border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <div className="flex gap-4 justify-center">
+                <Button 
+                    onClick={() => handleAction('reject')} 
+                    disabled={actionMutation.isPending} 
+                    className="flex-1 !bg-error hover:!bg-error-hover !border-none !text-white"
+                >
                     <X size={18} /> Tolak
                 </Button>
                 
-                <Button onClick={() => handleAction('approve')} disabled={actionMutation.isPending} style={{ flex: 1, backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <Button 
+                    onClick={() => handleAction('approve')} 
+                    disabled={actionMutation.isPending} 
+                    className="flex-1"
+                >
                     <Check size={18} /> Terima
                 </Button>
             </div>

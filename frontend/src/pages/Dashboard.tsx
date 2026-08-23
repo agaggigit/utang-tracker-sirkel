@@ -38,12 +38,12 @@ export const Dashboard = () => {
     const handleLogout = () => { 
         MySwal.fire({
             html: (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-                    <div style={{ padding: '1rem', backgroundColor: '#fee2e2', borderRadius: '50%', color: 'var(--color-error)' }}>
+                <div className="flex flex-col items-center gap-4 mt-4">
+                    <div className="p-4 bg-error-bg rounded-full text-error">
                         <LogOut size={48} />
                     </div>
-                    <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Keluar Akun?</h2>
-                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Apakah kamu yakin ingin keluar dari akun ini?</p>
+                    <h2 className="m-0 text-xl font-bold text-text-main">Keluar Akun?</h2>
+                    <p className="m-0 text-[0.95rem] text-text-muted">Apakah kamu yakin ingin keluar dari akun ini?</p>
                 </div>
             ),
             showCancelButton: true,
@@ -67,16 +67,16 @@ export const Dashboard = () => {
     const hasGroups = user?.memberships && user.memberships.length > 0;
 
     return (
-        <div style={{ display: 'flex' }}>
+        <div className="flex">
             {/* --- KONTEN UTAMA --- */}
-            <div className="app-main-content" style={{ minHeight: '100vh', backgroundColor: 'var(--color-dashboard-bg)', display: 'flex', flexDirection: 'column' }}>
+            <div className="app-main-content min-h-screen bg-[var(--color-dashboard-bg)] flex flex-col">
             {/* --- HERO HEADER: PROFIL --- */}
-            <div style={{ padding: '2rem 1.5rem 4rem 1.5rem' }}>
-                <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="pt-8 px-6 pb-16">
+                <div className="max-w-[800px] mx-auto flex justify-between items-center">
                     {/* Bagian Kiri: Profil & Nama */}
                     <div 
                         onClick={() => navigate('/profile')} 
-                        style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', maxWidth: '70%' }}
+                        className="flex items-center gap-4 cursor-pointer max-w-[70%]"
                         title="Buka Profil"
                     >
                         {isLoading ? (
@@ -93,17 +93,17 @@ export const Dashboard = () => {
                         {isLoading ? (
                             <Skeleton width={150} height={24} />
                         ) : (
-                            <h1 style={{ fontSize: '1.5rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--color-header-text)' }}>
+                            <h1 className="text-2xl m-0 whitespace-nowrap overflow-hidden text-ellipsis text-[var(--color-header-text)] font-bold">
                                 {user?.name || 'Sobat'}
                             </h1>
                         )}
                     </div>
                     
                     {/* Bagian Kanan: Toggle Tema, Inbox & Logout */}
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                    <div className="flex gap-6 items-center">
                         {/* TOGGLE TEMA */}
                         <div 
-                            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} 
+                            className="cursor-pointer flex items-center" 
                             onClick={toggleThemeQuick} 
                             title={isDark ? "Ubah ke Mode Terang" : "Ubah ke Mode Gelap"}
                         >
@@ -111,21 +111,17 @@ export const Dashboard = () => {
                         </div>
 
                         {/* INBOX */}
-                        <div style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={() => navigate('/notifications')} title="Kotak Masuk">
+                        <div className="relative cursor-pointer flex items-center" onClick={() => navigate('/notifications')} title="Kotak Masuk">
                             <Inbox size={24} color="var(--color-header-icon)" />
                             {notifications.length > 0 && (
-                                <span style={{
-                                    position: 'absolute', top: '-5px', right: '-10px',
-                                    backgroundColor: 'var(--color-error)', color: 'white',
-                                    borderRadius: '50%', padding: '2px 6px', fontSize: '0.75rem', fontWeight: 'bold', boxShadow: 'var(--shadow-sm)'
-                                }}>
+                                <span className="absolute -top-1.5 -right-2 bg-error text-white rounded-full px-1.5 py-0.5 text-xs font-bold shadow-sm">
                                     {notifications.length}
                                 </span>
                             )}
                         </div>
                         
                         {/* LOGOUT */}
-                        <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={handleLogout} title="Keluar">
+                        <div className="cursor-pointer flex items-center" onClick={handleLogout} title="Keluar">
                             <LogOut size={24} color="#fca5a5" />
                         </div>
                     </div>
@@ -133,31 +129,24 @@ export const Dashboard = () => {
             </div>
 
             {/* --- KONTEN UTAMA: SIRKEL --- */}
-            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem 7rem 1.5rem', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ 
-                    marginTop: '-2rem', /* Naik ke atas agar menimpa bg biru */
-                    backgroundColor: 'var(--color-surface)', 
-                    borderRadius: '16px', 
-                    padding: '2rem', 
-                    boxShadow: 'var(--shadow-lg)',
-                    flex: 1 /* Memaksa kartu putih stretch tapi tetap ada jarak di bawah */
-                }}>
+            <div className="max-w-[800px] mx-auto px-6 pb-28 w-full flex-1 flex flex-col">
+                <div className="-mt-8 bg-surface rounded-[24px] p-8 shadow-sm flex-1">
                     {/* KONDISI 1: JIKA SEDANG LOADING */}
                     {isLoading ? (
                         <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div className="flex justify-between items-center mb-6">
                                 <Skeleton width={150} height={28} />
                             </div>
                             <SkeletonList count={3} />
                         </div>
                     ) : !hasGroups ? (
-                        <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-                            <h2 style={{ marginBottom: '1rem' }}>Kamu belum memiliki Sirkel</h2>
-                            <p style={{ color: 'var(--color-text-light)', marginBottom: '2rem' }}>
+                        <div className="text-center py-8 px-4">
+                            <h2 className="mb-4 text-xl font-bold">Kamu belum memiliki Sirkel</h2>
+                            <p className="text-text-muted mb-8">
                                 Buat sirkel baru untuk mulai patungan, atau bergabung ke sirkel temanmu menggunakan kode undangan.
                             </p>
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                <Button style={{ padding: '1rem 2rem', fontSize: '1.1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={() => navigate('/create-group')}>
+                            <div className="flex gap-4 justify-center">
+                                <Button className="px-8 py-4 text-lg flex gap-2 items-center" onClick={() => navigate('/create-group')}>
                                     <Plus size={20} /> Buat Sirkel Baru
                                 </Button>
                             </div>
@@ -165,28 +154,20 @@ export const Dashboard = () => {
                     ) : (
                         /* KONDISI 2: JIKA SUDAH PUNYA GRUP */
                         <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <h2 style={{ margin: 0, fontSize: '1.4rem' }}>Sirkel Saya</h2>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="m-0 text-[1.4rem] font-bold">Sirkel Saya</h2>
                                 {/* Tombol buat/gabung dihapus, dipindah ke Bottom Nav Bar */}
                             </div>
                             
                             {/* DAFTAR GRUP YANG DIMILIKI */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div className="flex flex-col gap-4">
                                 {user.memberships.map((membership: any) => (
-                                    <div key={membership.group.id} style={{
-                                        padding: '1.25rem',
-                                        backgroundColor: 'var(--color-background)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: '12px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
-                                    }}>
+                                    <div key={membership.group.id} className="p-5 bg-surface border border-border rounded-xl flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
                                         <div>
-                                            <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--color-text-main)' }}>{membership.group.name}</h3>
-                                            <p style={{ margin: 0, marginTop: '0.25rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Peranmu: {membership.role}</p>
+                                            <h3 className="m-0 text-[1.15rem] font-bold text-text-main">{membership.group.name}</h3>
+                                            <p className="m-0 mt-1 text-[0.85rem] text-text-muted">Peranmu: {membership.role}</p>
                                             {membership.hasUnpaidDebt && (
-                                                <p style={{ margin: 0, marginTop: '0.25rem', fontSize: '0.85rem', color: 'var(--color-error)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                <p className="m-0 mt-1 text-[0.85rem] text-error font-bold flex items-center gap-1">
                                                     <AlertTriangle size={14} /> Ada utang belum lunas
                                                 </p>
                                             )}
@@ -204,7 +185,7 @@ export const Dashboard = () => {
             {/* --- RESPONSIVE NAVIGATION BAR (BOTTOM / SIDEBAR) --- */}
             <nav className="app-nav-bar">
                 {/* Home */}
-                <div className="app-nav-item" style={{ color: 'var(--color-primary)' }} onClick={() => navigate('/dashboard')}>
+                <div className="app-nav-item text-primary" onClick={() => navigate('/dashboard')}>
                     <Home size={24} />
                     <span className="app-nav-text">Beranda</span>
                 </div>
@@ -217,7 +198,7 @@ export const Dashboard = () => {
                 </div>
 
                 {/* Settings / Profile */}
-                <div className="app-nav-item" style={{ color: 'var(--color-text-muted)' }} onClick={() => navigate('/profile')}>
+                <div className="app-nav-item text-text-muted" onClick={() => navigate('/profile')}>
                     <Settings size={24} />
                     <span className="app-nav-text">Pengaturan</span>
                 </div>
@@ -225,23 +206,21 @@ export const Dashboard = () => {
 
             {/* --- MODAL TAMBAH SIRKEL (BOTTOM SHEET) --- */}
             {isAddModalOpen && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999,
-                    display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'
-                }} onClick={() => setIsAddModalOpen(false)}>
-                    <div style={{
-                        backgroundColor: 'var(--color-surface)', padding: '2rem',
-                        borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
-                        animation: 'slideUp 0.3s ease-out', paddingBottom: '3rem'
-                    }} onClick={e => e.stopPropagation()}>
-                        <div style={{ width: '40px', height: '5px', backgroundColor: 'var(--color-border)', borderRadius: '10px', margin: '0 auto 1.5rem auto' }}></div>
-                        <h3 style={{ margin: '0 0 1.5rem 0', textAlign: 'center', fontSize: '1.25rem' }}>Pilih Aksi</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <Button onClick={() => { setIsAddModalOpen(false); navigate('/create-group'); }} style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'center', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div 
+                    className="fixed inset-0 bg-black/50 z-[999] flex flex-col justify-end"
+                    onClick={() => setIsAddModalOpen(false)}
+                >
+                    <div 
+                        className="bg-surface p-8 rounded-t-[24px] pb-12 animate-[slideUp_0.3s_ease-out]"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="w-10 h-1.5 bg-border rounded-full mx-auto mb-6"></div>
+                        <h3 className="m-0 mb-6 text-center text-xl font-bold">Pilih Aksi</h3>
+                        <div className="flex flex-col gap-4">
+                            <Button onClick={() => { setIsAddModalOpen(false); navigate('/create-group'); }} className="p-4 text-lg justify-center flex gap-2 items-center">
                                 <Plus size={20} /> Buat Sirkel Baru
                             </Button>
-                            <Button variant="outline" onClick={() => { setIsAddModalOpen(false); navigate('/join-group'); }} style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'center', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <Button variant="outline" onClick={() => { setIsAddModalOpen(false); navigate('/join-group'); }} className="p-4 text-lg justify-center flex gap-2 items-center">
                                 <Users size={20} /> Gabung Sirkel
                             </Button>
                         </div>

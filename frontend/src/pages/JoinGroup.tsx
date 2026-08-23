@@ -48,19 +48,19 @@ export const JoinGroup = () => {
             <div className="auth-card">
                 <button 
                     onClick={() => navigate('/dashboard')}
-                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                    className="bg-transparent border-none text-2xl cursor-pointer p-0 text-primary"
                     title="Kembali ke Dashboard"
                 >
                     <ArrowLeft size={24} />
                 </button>
 
-                <div className="auth-header" style={{ marginTop: '1rem' }}>
+                <div className="auth-header mt-4">
                     <h2>Gabung Sirkel</h2>
                     <p>Mulai catat pengeluaran bersama teman-temanmu.</p>
                 </div>
                 
                 <form onSubmit={handleSubmit} className="auth-form">
-                    {errorMsg && <div className="auth-error-banner" style={{ backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)' }}>{errorMsg}</div>}
+                    {errorMsg && <div className="auth-error-banner bg-error-bg text-error border border-error-border">{errorMsg}</div>}
                     
                     <Input 
                         label="Kode Grup / Sirkel" 

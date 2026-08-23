@@ -16,48 +16,38 @@ interface ParticipantItemProps {
 
 export function ParticipantItem({ name, email, shareAmount, isPaid, isCurrentUser, isPayer, avatarUrl, payments, showReviewButton, onReviewClick }: ParticipantItemProps) {
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'var(--color-surface)', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0, paddingRight: '1rem' }}>
+        <div className="flex justify-between items-center p-4 bg-surface rounded-lg shadow-sm border border-border">
+            <div className="flex items-center gap-4 flex-1 min-w-0 pr-4">
                 <Avatar name={name} imageUrl={avatarUrl} size={40} />
-                <div style={{ minWidth: 0, flex: 1 }}>
-                    <p style={{ margin: 0, fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {isCurrentUser && <span style={{color: 'var(--color-primary)', fontWeight: 'normal', fontSize: '0.85rem', marginRight: '0.25rem'}}>(Kamu)</span>} {name}
+                <div className="min-w-0 flex-1">
+                    <p className="m-0 font-bold whitespace-nowrap overflow-hidden text-ellipsis">
+                        {isCurrentUser && <span className="text-primary font-normal text-[0.85rem] mr-1">(Kamu)</span>} {name}
                     </p>
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{email}</p>
+                    <p className="m-0 text-[0.85rem] text-text-muted whitespace-nowrap overflow-hidden text-ellipsis">{email}</p>
                 </div>
             </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <p style={{ margin: 0, fontWeight: 'bold' }}>Rp {Number(shareAmount).toLocaleString('id-ID')}</p>
+            <div className="text-right shrink-0">
+                <p className="m-0 font-bold">Rp {Number(shareAmount).toLocaleString('id-ID')}</p>
                 {isPayer ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', backgroundColor: 'var(--color-surface-muted)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>Ditalangi Sendiri</span>
+                    <span className="inline-flex items-center gap-1 mt-1 text-[0.8rem] text-text-muted bg-surface-muted px-2 py-0.5 rounded-full">Ditalangi Sendiri</span>
                 ) : isPaid ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-success-text)', backgroundColor: 'var(--color-success-bg)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}><CheckCircle size={12} /> Lunas</span>
+                    <span className="inline-flex items-center gap-1 mt-1 text-[0.8rem] text-success-text bg-success-bg px-2 py-0.5 rounded-full"><CheckCircle size={12} /> Lunas</span>
                 ) : payments && payments.length > 0 && payments[0].status === 'pending' ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', justifyContent: 'flex-end' }}>
+                    <div className="flex items-center gap-2 mt-1 justify-end">
                         {showReviewButton && onReviewClick && (
                             <button 
                                 onClick={() => onReviewClick(payments[0].id, payments[0].note)}
-                                style={{
-                                    backgroundColor: '#eab308',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    padding: '0.2rem 0.6rem',
-                                    fontSize: '0.75rem',
-                                    cursor: 'pointer',
-                                    fontWeight: 'bold'
-                                }}
-                                className="hover-brightness"
+                                className="bg-[#eab308] text-white border-none rounded-md px-2.5 py-1 text-[0.75rem] cursor-pointer font-bold hover:brightness-90 transition-all"
                             >
                                 Review
                             </button>
                         )}
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color: '#b45309', backgroundColor: '#fef3c7', padding: '0.2rem 0.5rem', borderRadius: '12px' }}><Clock size={12} /> Menunggu ACC</span>
+                        <span className="inline-flex items-center gap-1 text-[0.8rem] text-[#b45309] bg-[#fef3c7] px-2 py-0.5 rounded-full"><Clock size={12} /> Menunggu ACC</span>
                     </div>
                 ) : payments && payments.length > 0 && payments[0].status === 'rejected' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-error)', backgroundColor: 'var(--color-error-bg)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}><XCircle size={12} /> Ditolak</span>
+                    <span className="inline-flex items-center gap-1 mt-1 text-[0.8rem] text-error bg-error-bg px-2 py-0.5 rounded-full"><XCircle size={12} /> Ditolak</span>
                 ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--color-error)', backgroundColor: 'var(--color-error-bg)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}><XCircle size={12} /> Belum Bayar</span>
+                    <span className="inline-flex items-center gap-1 mt-1 text-[0.8rem] text-error bg-error-bg px-2 py-0.5 rounded-full"><XCircle size={12} /> Belum Bayar</span>
                 )}
             </div>
         </div>

@@ -80,12 +80,12 @@ export const ExpenseDetail = () => {
     const handleDelete = async () => {
         const result = await MySwal.fire({
             html: (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-                    <div style={{ padding: '1rem', backgroundColor: '#fee2e2', borderRadius: '50%', color: 'var(--color-error)' }}>
+                <div className="flex flex-col items-center gap-4 mt-4">
+                    <div className="p-4 bg-error-bg rounded-full text-error">
                         <Trash2 size={48} />
                     </div>
-                    <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Hapus Tagihan?</h2>
-                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Apakah kamu yakin ingin menghapus tagihan ini? (Tindakan ini tidak bisa dibatalkan)</p>
+                    <h2 className="m-0 text-xl font-bold text-text-main">Hapus Tagihan?</h2>
+                    <p className="m-0 text-[0.95rem] text-text-muted">Apakah kamu yakin ingin menghapus tagihan ini? (Tindakan ini tidak bisa dibatalkan)</p>
                 </div>
             ),
             showCancelButton: true,
@@ -133,8 +133,8 @@ export const ExpenseDetail = () => {
     };
 
     // Removed early return for isLoading to keep PageHeader visible
-    if (errorMsg) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem', color: 'var(--color-error)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}><AlertTriangle size={20} /> {errorMsg}</p></div>;
-    if (!isLoading && !expense) return <div className="dashboard-container"><p style={{textAlign: 'center', marginTop: '2rem'}}>Data tidak ditemukan</p></div>;
+    if (errorMsg) return <div className="pt-8 max-w-[1200px] mx-auto px-6"><p className="text-center mt-8 text-error flex items-center justify-center gap-2"><AlertTriangle size={20} /> {errorMsg}</p></div>;
+    if (!isLoading && !expense) return <div className="pt-8 max-w-[1200px] mx-auto px-6"><p className="text-center mt-8">Data tidak ditemukan</p></div>;
 
     const myShare = expense?.shares.find((s: any) => s.userId === currentUserId);
     const amIInvolvedAndUnpaid = myShare && !myShare.isPaid && expense?.paidBy !== currentUserId;
@@ -143,43 +143,43 @@ export const ExpenseDetail = () => {
     const isPending = myShare?.payments?.some((p: any) => p.status === 'pending');
 
     return (
-        <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
+        <div className="pt-8 max-w-[1200px] mx-auto px-6 pb-12">
             <PageHeader title="Detail Tagihan" />
 
-            <main className="dashboard-main" style={{ marginTop: '2rem', paddingBottom: '4rem' }}>
-                <div className="expense-detail-layout" style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)' }}>
+            <main className="mt-8 pb-16">
+                <div className="bg-surface p-8 rounded-xl border border-border shadow-sm flex flex-col md:flex-row gap-8">
                     
                     {isLoading || !expense ? (
                         <SkeletonForm />
                     ) : (
                         <>
-                            <div className="expense-detail-info">
+                            <div className="flex-1">
                         <div>
-                            <h1 style={{ margin: 0, fontSize: '1.75rem' }}>{expense.description}</h1>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', marginBottom: '2rem' }}>
+                            <h1 className="m-0 text-3xl font-bold">{expense.description}</h1>
+                            <div className="flex justify-between items-center mt-4 mb-8">
                                 <div>
-                                    <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>Grup: <strong>{expense.group.name}</strong></p>
-                                    <p style={{ color: 'var(--color-text-muted)', margin: '0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <p className="m-0 text-text-muted">Grup: <strong>{expense.group.name}</strong></p>
+                                    <p className="m-0 mt-1 text-text-muted flex items-center gap-2">
                                         <Calendar size={16} /> {new Date(expense.expenseDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                                     </p>
                                 </div>
-                                <div style={{ textAlign: 'right' }}>
-                                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Total Tagihan</p>
-                                    <h2 style={{ margin: 0, color: 'var(--color-primary)' }}>Rp {Number(expense.totalAmount).toLocaleString('id-ID')}</h2>
+                                <div className="text-right">
+                                    <p className="m-0 text-[0.9rem] text-text-muted">Total Tagihan</p>
+                                    <h2 className="m-0 text-primary">Rp {Number(expense.totalAmount).toLocaleString('id-ID')}</h2>
                                 </div>
                             </div>
                         </div>
 
                         {amIInvolvedAndUnpaid && (
-                            <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                            <div className="mt-2 flex justify-center">
                                 {isPending ? (
-                                    <div style={{ padding: '1rem 2rem', backgroundColor: '#fef3c7', color: '#92400e', borderRadius: '8px', border: '1px solid #fde68a', fontWeight: 'bold', width: '100%', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                    <div className="py-4 px-8 bg-[#fef3c7] text-[#92400e] rounded-lg border border-[#fde68a] font-bold w-full text-center flex items-center justify-center gap-2">
                                         <Clock size={20} /> Menunggu Konfirmasi Penombok
                                     </div>
                                 ) : (
                                     <Button 
                                         onClick={() => setIsModalOpen(true)} 
-                                        style={{ width: '100%', padding: '0.75rem 2rem', fontSize: '1.05rem', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                        className="w-full py-3 px-8 text-[1.05rem] shadow-md flex items-center justify-center gap-2"
                                     >
                                         <Wallet size={20} /> Ajukan Pembayaran ke {expense.paidByUser.name}
                                     </Button>
@@ -188,24 +188,24 @@ export const ExpenseDetail = () => {
                         )}
                         
                         {amIThePayer && (
-                            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                            <div className="mt-2 flex gap-4 justify-center">
                                 <Button 
                                     variant="outline" 
-                                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                    className="flex-1 flex items-center justify-center gap-2"
                                     onClick={() => navigate(`/expenses/${expenseId}/edit`)}
                                 >
                                     <Edit2 size={18} /> Edit Tagihan
                                 </Button>
                                 {!hasPaidShares ? (
                                     <Button 
-                                        style={{ flex: 1, backgroundColor: 'var(--color-error)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                        className="flex-1 bg-error flex items-center justify-center gap-2"
                                         onClick={handleDelete}
                                         disabled={deleteMutation.isPending}
                                     >
                                         {deleteMutation.isPending ? 'Menghapus...' : <><Trash2 size={18} /> Hapus</>}
                                     </Button>
                                 ) : (
-                                    <div style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>
+                                    <div className="flex-1 p-2 text-[0.8rem] text-text-muted text-center">
                                         (Hapus dimatikan)
                                     </div>
                                 )}
@@ -213,13 +213,13 @@ export const ExpenseDetail = () => {
                         )}
                     </div>
                     
-                    <div className="expense-detail-list">
-                        <div style={{ padding: '1.5rem', backgroundColor: 'var(--color-surface-hover)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
-                            <h3 style={{ margin: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-                                Ditalangi oleh: <span style={{ color: 'var(--color-primary)' }}>{expense.paidByUser.name}</span>
+                    <div className="flex-[0_0_350px]">
+                        <div className="p-6 bg-surface-hover rounded-xl border border-border">
+                            <h3 className="m-0 mb-6 border-b border-border pb-2 text-lg">
+                                Ditalangi oleh: <span className="text-primary">{expense.paidByUser.name}</span>
                             </h3>
                             
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div className="flex flex-col gap-4">
                                 {expense.shares.map(share => (
                                     <ParticipantItem 
                                         key={share.id}
@@ -254,17 +254,16 @@ export const ExpenseDetail = () => {
                     title="Ajukan Pembayaran"
                     description={<>Beri tahu <strong>{expense.paidByUser.name}</strong> kalau kamu sudah mentransfer uangnya.</>}
                 >
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Catatan (Opsional)</label>
+                <label className="block mb-2 font-bold text-[0.9rem]">Catatan (Opsional)</label>
                 <textarea 
-                    className="input-field"
+                    className="input-field w-full p-3 rounded-lg border border-border mb-6 font-inherit resize-y"
                     rows={3}
                     placeholder="Misal: Udah kutransfer via GoPay ya brok!"
                     value={paymentNote}
                     onChange={(e) => setPaymentNote(e.target.value)}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', marginBottom: '1.5rem', fontFamily: 'inherit', resize: 'vertical' }}
                 />
                 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.5rem' }}>
+                <div className="flex justify-end gap-2 mt-6">
                     <Button variant="outline" onClick={() => setIsModalOpen(false)}>Batal</Button>
                     <Button onClick={handleSubmitPayment} disabled={paymentMutation.isPending}>
                         {paymentMutation.isPending ? 'Mengirim...' : 'Kirim Pengajuan'}

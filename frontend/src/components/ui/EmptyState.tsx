@@ -9,26 +9,16 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
     return (
-        <div style={{ 
-            textAlign: 'center', 
-            padding: '3rem 2rem', 
-            backgroundColor: 'var(--color-surface)', 
-            borderRadius: '12px', 
-            border: '2px dashed var(--color-border)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '1rem'
-        }}>
-            <div style={{ color: 'var(--color-text-muted)', display: 'flex', justifyContent: 'center' }}>
+        <div className="text-center py-12 px-8 bg-surface rounded-xl border-2 border-dashed border-border flex flex-col items-center gap-4">
+            <div className="text-text-muted flex justify-center">
                 {icon}
             </div>
             <div>
-                <h3 style={{ margin: 0, marginBottom: '0.5rem', color: 'var(--color-text-main)' }}>{title}</h3>
-                <p style={{ color: 'var(--color-text-muted)', margin: 0, fontSize: '0.95rem' }}>{description}</p>
+                <h3 className="m-0 mb-2 text-text-main">{title}</h3>
+                <p className="text-text-muted m-0 text-[0.95rem]">{description}</p>
             </div>
             {action && (
-                <div style={{ marginTop: '0.5rem' }}>
+                <div className="mt-2">
                     {action}
                 </div>
             )}

@@ -63,13 +63,13 @@ export const CreateGroup = () => {
             <div className="auth-card">
                 <button 
                     onClick={() => navigate('/dashboard')}
-                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                    className="bg-transparent border-none text-2xl cursor-pointer p-0 text-primary"
                     title="Kembali ke Dashboard"
                 >
                     <ArrowLeft size={24} />
                 </button>
 
-                <div className="auth-header" style={{ marginTop: '1rem' }}>
+                <div className="auth-header mt-4">
                     <h2>Buat Sirkel Baru</h2>
                     <p>Mulai catat pengeluaran bersama teman-temanmu.</p>
                 </div>
@@ -78,7 +78,7 @@ export const CreateGroup = () => {
                 {!inviteCode ? (
                     /* Jika belum ada kode undangan, tampilkan form pengisian */
                     <form onSubmit={handleSubmit} className="auth-form">
-                        {errorMsg && <div className="auth-error-banner" style={{ backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)' }}>{errorMsg}</div>}
+                        {errorMsg && <div className="auth-error-banner bg-error-bg text-error border border-error-border">{errorMsg}</div>}
                         
                         <Input 
                             label="Nama Grup / Sirkel" 
@@ -99,15 +99,15 @@ export const CreateGroup = () => {
                     </form>
                 ) : (
                     /* Jika kode undangan sudah ada (sukses), tampilkan kotak rahasia! */
-                    <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-                        <div style={{ padding: '2rem', backgroundColor: '#f0f9ff', borderRadius: '12px', border: '1px dashed var(--color-primary)' }}>
-                            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-light)' }}>Kode Undangan Rahasia:</p>
-                            <h1 style={{ letterSpacing: '0.2em', color: 'var(--color-primary)', margin: '1rem 0' }}>{inviteCode}</h1>
-                            <Button variant={isCopied ? "outline" : "primary"} onClick={handleCopy} fullWidth style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <div className="text-center mt-8">
+                        <div className="p-8 bg-blue-50 rounded-xl border border-dashed border-primary">
+                            <p className="m-0 text-[0.875rem] text-text-muted">Kode Undangan Rahasia:</p>
+                            <h1 className="tracking-[0.2em] text-primary my-4">{inviteCode}</h1>
+                            <Button variant={isCopied ? "outline" : "primary"} onClick={handleCopy} fullWidth className="flex items-center justify-center gap-2">
                                 {isCopied ? <><Check size={18} /> Tersalin!</> : 'Copy Kode Undangan'}
                             </Button>
                         </div>
-                        <p style={{ marginTop: '2rem', fontSize: '0.875rem', color: 'var(--color-text-light)' }}>
+                        <p className="mt-8 text-[0.875rem] text-text-muted">
                             Bagikan kode ini ke temanmu agar mereka bisa bergabung.
                         </p>
                     </div>

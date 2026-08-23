@@ -165,10 +165,10 @@ export const Register = () => {
                         Daftar dengan Google
                     </Button>
 
-                    <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem' }}>
+                    <div className="mt-6 text-center text-[0.875rem]">
                         Sudah punya akun?
 
-                        <span style={{ color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 600 }} onClick={() => navigate('/login')}>
+                        <span className="text-primary cursor-pointer font-semibold hover:underline ml-1" onClick={() => navigate('/login')}>
                             Masuk di sini
                         </span>
                     </div>

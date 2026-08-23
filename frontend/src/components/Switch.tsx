@@ -8,28 +8,19 @@ interface SwitchProps {
 
 export const Switch: React.FC<SwitchProps> = ({ label, checked, onChange }) => {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 0', borderTop: '1px solid #eee', borderBottom: '1px solid #eee', margin: '0.5rem 0' }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--color-text)', marginRight: '1rem' }}>
+        <div className="flex items-center justify-between py-3 border-y border-gray-200 my-2">
+            <span className="text-[0.9rem] font-medium text-text-main mr-4">
                 {label}
             </span>
-            <label style={{ position: 'relative', display: 'inline-block', width: '48px', height: '26px', cursor: 'pointer', flexShrink: 0 }}>
+            <label className="relative inline-block w-12 h-[26px] cursor-pointer shrink-0">
                 <input 
                     type="checkbox" 
                     checked={checked}
                     onChange={(e) => onChange(e.target.checked)}
-                    style={{ opacity: 0, width: 0, height: 0 }} 
+                    className="opacity-0 w-0 h-0" 
                 />
-                <span style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: checked ? 'var(--color-primary)' : '#ccc',
-                    borderRadius: '34px', transition: '0.3s'
-                }}>
-                    <span style={{
-                        position: 'absolute', content: '""', height: '20px', width: '20px',
-                        left: checked ? '25px' : '3px', bottom: '3px',
-                        backgroundColor: 'white', borderRadius: '50%', transition: '0.3s',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }} />
+                <span className={`absolute inset-0 rounded-full transition-all duration-300 ${checked ? 'bg-primary' : 'bg-gray-300'}`}>
+                    <span className={`absolute h-5 w-5 bg-white rounded-full transition-all duration-300 shadow-md bottom-[3px] ${checked ? 'left-[25px]' : 'left-[3px]'}`} />
                 </span>
             </label>
         </div>

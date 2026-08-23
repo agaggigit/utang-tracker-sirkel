@@ -115,18 +115,18 @@ export const Profile = () => {
 
     return (
         <div className="auth-container">
-            <div className="auth-card profile-card" style={{ position: 'relative' }}>
+            <div className="auth-card profile-card relative">
                 
                 {/* Tombol Kembali ke Dashboard */}
                 <button 
                     onClick={() => navigate('/dashboard')}
-                    style={{ position: 'absolute', top: '2rem', left: '2rem', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                    className="absolute top-8 left-8 bg-transparent border-none text-2xl cursor-pointer p-0 text-primary"
                     title="Kembali ke Dashboard"
                 >
                     <ArrowLeft size={24} />
                 </button>
 
-                <div className="profile-layout" style={{ marginTop: '1.5rem' }}>
+                <div className="profile-layout mt-6">
                     
                     {/* --- KOLOM KIRI --- */}
                     <div>
@@ -135,7 +135,7 @@ export const Profile = () => {
                             <p>Atur nama dan foto profilmu</p>
                         </div>
                         {/* AREA FOTO PROFIL */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                        <div className="flex flex-col items-center gap-4">
                             <div className="avatar-preview">
                                 {previewUrl ? (
                                     <img 
@@ -156,7 +156,7 @@ export const Profile = () => {
                                                 }
                                             });
                                         }}
-                                        style={{ cursor: 'pointer' }}
+                                        className="cursor-pointer"
                                     />
                                 ) : (
                                     <div className="avatar-placeholder">
@@ -165,26 +165,13 @@ export const Profile = () => {
                                 )}
                             </div>
                             
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <label style={{
-                                    cursor: 'pointer',
-                                    padding: '0.5rem 1rem',
-                                    borderRadius: '8px',
-                                    border: '1px solid var(--color-border)',
-                                    fontSize: '0.9rem',
-                                    fontWeight: '500',
-                                    backgroundColor: 'var(--color-surface-muted)',
-                                    color: 'var(--color-text-main)',
-                                    transition: 'all 0.2s',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }} className="upload-btn-hover">
+                            <div className="flex gap-2">
+                                <label className="cursor-pointer px-4 py-2 rounded-lg border border-border text-[0.9rem] font-medium bg-surface-muted text-text-main transition-all flex items-center justify-center hover:brightness-95">
                                     Ubah Foto
                                     <input 
                                         type="file" 
                                         accept="image/*" 
-                                        style={{ display: 'none' }}
+                                        className="hidden"
                                         onChange={handleFileChange}
                                     />
                                 </label>
@@ -220,18 +207,7 @@ export const Profile = () => {
                                                 }
                                             });
                                         }}
-                                        style={{
-                                            cursor: 'pointer',
-                                            backgroundColor: 'var(--color-error-bg)',
-                                            color: 'var(--color-error)',
-                                            padding: '0.5rem',
-                                            border: '1px solid var(--color-error-border)',
-                                            borderRadius: '8px',
-                                            transition: 'all 0.2s',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}
+                                        className="cursor-pointer bg-error-bg text-error p-2 border border-error-border rounded-lg transition-all flex items-center justify-center hover:brightness-95"
                                         title="Hapus Foto"
                                     >
                                         <Trash2 size={18} />
@@ -241,17 +217,13 @@ export const Profile = () => {
                         </div>
                     </div>
                     {/* --- KOLOM KANAN --- */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div className="flex flex-col gap-8">
                         
                         {/* FORM PROFIL */}
                         <div>
                             <form onSubmit={handleSubmit} className="auth-form">
                                 {message.text && (
-                                    <div className="auth-error-banner" style={{ 
-                                        backgroundColor: message.type === 'success' ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
-                                        color: message.type === 'success' ? 'var(--color-success-text)' : 'var(--color-error)',
-                                        borderColor: message.type === 'success' ? 'var(--color-success-border)' : 'var(--color-error-border)'
-                                    }}>
+                                    <div className={`auth-error-banner ${message.type === 'success' ? 'bg-success-bg text-success-text border-success-border' : 'bg-error-bg text-error border-error-border'}`}>
                                         {message.text}
                                     </div>
                                 )}
@@ -270,19 +242,18 @@ export const Profile = () => {
                         </div>
 
                         {/* PENGATURAN TAMPILAN */}
-                        <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1.5rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                        <div className="border-t border-border pt-6">
+                            <div className="flex items-center gap-2 mb-4">
                                 <Moon size={20} color="var(--color-text-muted)" />
-                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--color-text-main)' }}>Pengaturan Tampilan</h3>
+                                <h3 className="m-0 text-[1.1rem] text-text-main">Pengaturan Tampilan</h3>
                             </div>
                             
                             <div className="input-wrapper">
                                 <label className="input-label">Pilih Tema</label>
                                 <select 
-                                    className="input-field" 
+                                    className="input-field font-inherit cursor-pointer" 
                                     value={themeMode}
                                     onChange={(e) => setThemeMode(e.target.value as 'light' | 'dark' | 'system' | 'schedule')}
-                                    style={{ fontFamily: 'inherit', cursor: 'pointer' }}
                                 >
                                     <option value="system">Otomatis (Ikuti Sistem)</option>
                                     <option value="light">Terang (Light Mode)</option>
@@ -292,25 +263,23 @@ export const Profile = () => {
                             </div>
 
                             {themeMode === 'schedule' && (
-                                <div style={{ display: 'flex', gap: '1rem', marginTop: '-0.5rem', backgroundColor: 'var(--color-background)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <label className="input-label" style={{ fontSize: '0.8rem' }}>Mulai Gelap</label>
+                                <div className="flex gap-4 -mt-2 bg-background p-4 rounded-lg border border-border">
+                                    <div className="flex-1">
+                                        <label className="input-label text-[0.8rem]">Mulai Gelap</label>
                                         <input 
                                             type="time" 
-                                            className="input-field"
+                                            className="input-field p-2 w-full"
                                             value={scheduleTime.start}
                                             onChange={(e) => setScheduleTime(e.target.value, scheduleTime.end)}
-                                            style={{ padding: '0.5rem', width: '100%' }}
                                         />
                                     </div>
-                                    <div style={{ flex: 1 }}>
-                                        <label className="input-label" style={{ fontSize: '0.8rem' }}>Kembali Terang</label>
+                                    <div className="flex-1">
+                                        <label className="input-label text-[0.8rem]">Kembali Terang</label>
                                         <input 
                                             type="time" 
-                                            className="input-field"
+                                            className="input-field p-2 w-full"
                                             value={scheduleTime.end}
                                             onChange={(e) => setScheduleTime(scheduleTime.start, e.target.value)}
-                                            style={{ padding: '0.5rem', width: '100%' }}
                                         />
                                     </div>
                                 </div>

@@ -217,25 +217,25 @@ export const EditExpense = () => {
     // Removed early return
 
     return (
-        <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
+        <div className="dashboard-container pt-8 max-w-[1200px] mx-auto px-6 pb-12">
             <PageHeader title="Edit Tagihan" />
 
-            <main className="dashboard-main" style={{ marginTop: '2rem' }}>
-                <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '12px', boxShadow: 'var(--shadow-sm)' }}>
+            <main className="dashboard-main mt-8">
+                <div className="bg-surface p-8 rounded-xl shadow-sm">
                     {isLocked && (
-                        <div style={{ padding: '1rem', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '8px', marginBottom: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="p-4 bg-sky-100 text-sky-700 rounded-lg mb-6 font-bold flex items-center gap-2">
                             <Lock size={20} /> Karena sudah ada anggota yang membayar lunas, kamu hanya bisa mengubah Judul dan Tanggal. Kolom nominal telah dikunci.
                         </div>
                     )}
                     {errorMsg && (
-                        <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="p-4 bg-error-bg text-error rounded-lg mb-6 flex items-center gap-2">
                             <AlertTriangle size={20} /> {errorMsg}
                         </div>
                     )}
 
                     <form className="expense-form-layout" onSubmit={handleSubmit}>
                         {isFetching ? (
-                            <div style={{ padding: '2rem' }}>
+                            <div className="p-8">
                                 <SkeletonForm />
                             </div>
                         ) : (
@@ -243,42 +243,25 @@ export const EditExpense = () => {
                                 {/* 1. SPLIT BILL (KIRI) */}
                         <div className="expense-form-split-wrapper">
                             <div className="expense-form-split">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexShrink: 0 }}>
-                                    <h3 style={{ margin: 0 }}>Siapa saja yang berutang padamu?</h3>
+                                <div className="flex justify-between items-center mb-4 shrink-0">
+                                    <h3 className="m-0">Siapa saja yang berutang padamu?</h3>
                                     {!isLocked && (
-                                        <Button type="button" variant="outline" onClick={handleSplitEqually} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        <Button type="button" variant="outline" onClick={handleSplitEqually} className="text-[0.85rem] px-4 py-2 flex gap-2 items-center">
                                             <Scale size={16} /> Bagi Rata
                                         </Button>
                                     )}
                                 </div>
 
                                 {/* Daftar Dinamis */}
-                                <div style={{ 
-                                    display: 'flex', 
-                                    flexDirection: 'column', 
-                                    gap: '1rem', 
-                                    marginBottom: '1rem',
-                                    flex: '0 1 auto',
-                                    minHeight: 0,
-                                    overflowY: 'auto',
-                                    paddingRight: '0.5rem'
-                                }}>
+                                <div className="flex flex-col gap-4 mb-4 flex-[0_1_auto] min-h-0 overflow-y-auto pr-2">
                                     {shares.map((share, index) => (
-                                        <div key={index} style={{ 
-                                            padding: '1.25rem', 
-                                            backgroundColor: 'var(--color-surface-hover)', 
-                                            borderRadius: '12px', 
-                                            border: '1px solid var(--color-border)',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '1rem'
-                                        }}>
+                                        <div key={index} className="p-5 bg-surface-hover rounded-xl border border-border flex flex-col gap-4">
                                         
                                         {/* Baris Atas: Nama dan Tombol Hapus */}
-                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                        <div className="flex gap-4 items-center">
                                             {/* Dropdown Anggota (Disabled/Read-only untuk yang sudah dipilih) */}
-                                            <div className="input-wrapper" style={{ flex: 1, marginBottom: 0, minWidth: 0 }}>
-                                                <div style={{ padding: '0.5rem', backgroundColor: 'var(--color-surface-muted)', borderRadius: '8px', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            <div className="input-wrapper flex-1 mb-0 min-w-0">
+                                                <div className="p-2 bg-surface-muted rounded-lg border border-border text-text-muted whitespace-nowrap overflow-hidden text-ellipsis">
                                                     {members.find(m => m.id === share.userId)?.name || 'Anggota'}
                                                 </div>
                                             </div>
@@ -288,13 +271,7 @@ export const EditExpense = () => {
                                                 <button 
                                                     type="button" 
                                                     onClick={() => handleRemoveShare(index)}
-                                                    style={{ 
-                                                        background: 'var(--color-error)', color: 'white', border: 'none', 
-                                                        borderRadius: '50%', width: '28px', height: '28px', 
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        fontSize: '0.8rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)',
-                                                        flexShrink: 0
-                                                    }}
+                                                    className="bg-error text-white border-none rounded-full w-7 h-7 flex items-center justify-center text-[0.8rem] cursor-pointer shadow-sm shrink-0"
                                                     title="Hapus baris ini"
                                                 >
                                                     <Trash2 size={16} />
@@ -303,13 +280,13 @@ export const EditExpense = () => {
                                         </div>
 
                                         {/* Baris Bawah: Input Nominal */}
-                                        <div className="input-wrapper" style={{ marginBottom: 0 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                                                <span style={{ position: 'absolute', left: '1rem', color: 'var(--color-text-muted)', fontWeight: 'bold' }}>Rp</span>
+                                        <div className="input-wrapper mb-0">
+                                            <div className="flex items-center relative">
+                                                <span className="absolute left-4 text-text-muted font-bold">Rp</span>
                                                 <input 
                                                     type="text" 
-                                                    className="input-field" 
-                                                    style={isLocked ? { backgroundColor: 'var(--color-surface-muted)', color: 'var(--color-text-muted)', paddingLeft: '3rem', width: '100%', fontWeight: 'bold' } : { paddingLeft: '3rem', width: '100%', fontWeight: 'bold' }}
+                                                    className={`input-field pl-12 w-full font-bold ${isLocked ? 'bg-surface-muted text-text-muted' : ''}`}
+
                                                     placeholder="0"
                                                     value={share.shareAmount}
                                                     disabled={isLocked}
@@ -330,7 +307,7 @@ export const EditExpense = () => {
 
                             {/* Dropdown Langsung Tambah Anggota */}
                             {!isLocked && members.filter(m => !shares.some(s => s.userId === m.id)).length > 0 && (
-                                <div style={{ position: 'relative', flexShrink: 0 }}>
+                                <div className="relative shrink-0">
                                     <select 
                                         value=""
                                         onChange={(e) => {
@@ -338,25 +315,14 @@ export const EditExpense = () => {
                                                 setShares([...shares, { userId: e.target.value, shareAmount: '' }]);
                                             }
                                         }}
-                                        className="input-field"
-                                        style={{ 
-                                            width: '100%', 
-                                            border: '2px dashed var(--color-border)', 
-                                            backgroundColor: 'transparent',
-                                            cursor: 'pointer',
-                                            fontWeight: 'bold',
-                                            color: 'var(--color-primary)',
-                                            textAlign: 'center',
-                                            appearance: 'none', 
-                                            padding: '0.75rem'
-                                        }}
+                                        className="input-field w-full border-2 border-dashed border-border bg-transparent cursor-pointer font-bold text-primary text-center appearance-none p-3"
                                     >
                                         <option value="" disabled>+ Klik untuk Tambah Anggota yang Ditagih...</option>
                                         {members.filter(m => !shares.some(s => s.userId === m.id)).map(m => (
                                             <option key={m.id} value={m.id}>{m.name}</option>
                                         ))}
                                     </select>
-                                    <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-primary)' }}>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-primary">
                                         <ChevronDown size={20} />
                                     </span>
                                 </div>
@@ -367,7 +333,7 @@ export const EditExpense = () => {
                     {/* 2. KANAN: INFO & SUBMIT */}
                     <div className="expense-form-right">
                         <div className="expense-form-info">
-                            <h3 style={{ marginBottom: '1rem' }}>Informasi Tagihan</h3>
+                            <h3 className="mb-4">Informasi Tagihan</h3>
                             
                             <div className="input-wrapper">
                                 <label className="input-label">Deskripsi / Judul</label>
@@ -384,11 +350,10 @@ export const EditExpense = () => {
                                 <label className="input-label">Total Nominal (Rp) - Cth: 50000+15000</label>
                                 <input 
                                     type="text" 
-                                    className="input-field" 
+                                    className={`input-field ${isLocked ? 'bg-surface-muted text-text-muted' : ''}`}
                                     placeholder="0"
                                     value={totalAmount}
                                     disabled={isLocked}
-                                    style={isLocked ? { backgroundColor: 'var(--color-surface-muted)', color: 'var(--color-text-muted)' } : {}}
                                     onChange={e => setTotalAmount(sanitizeMathInput(e.target.value))}
                                     onBlur={() => setTotalAmount(evaluateMath(totalAmount))}
                                     onKeyDown={(e) => {
@@ -408,7 +373,7 @@ export const EditExpense = () => {
                                     value={expenseDate}
                                     onChange={e => setExpenseDate(e.target.value)}
                                 />
-                                <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: 'var(--color-primary)', marginTop: '0.5rem' }}>
+                                <label className="text-[0.8rem] flex items-center gap-[0.4rem] cursor-pointer text-primary mt-2">
                                     <input 
                                         type="checkbox" 
                                         checked={isTimeSpecific}
@@ -431,18 +396,18 @@ export const EditExpense = () => {
                         </div>
 
                         <div className="expense-form-submit">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem' }}>
+                            <div className="flex justify-between text-[1.1rem]">
                                 <span>Total Tagihan:</span>
-                                <span style={{ fontWeight: 'bold' }}>Rp {totalAmount || 0}</span>
+                                <span className="font-bold">Rp {totalAmount || 0}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem' }}>
+                            <div className="flex justify-between text-[1.1rem]">
                                 <span>Total Alokasi (Split):</span>
-                                <span style={{ fontWeight: 'bold', color: shares.reduce((sum, s) => sum + Number(s.shareAmount || 0), 0) !== Number(totalAmount) ? 'var(--color-error)' : 'var(--color-primary)' }}>
+                                <span className={`font-bold ${shares.reduce((sum, s) => sum + Number(s.shareAmount || 0), 0) !== Number(totalAmount) ? 'text-error' : 'text-primary'}`}>
                                     Rp {shares.reduce((sum, s) => sum + Number(s.shareAmount || 0), 0)}
                                 </span>
                             </div>
 
-                            <Button type="submit" disabled={editExpenseMutation.isPending} style={{ marginTop: '1rem', width: '100%' }}>
+                            <Button type="submit" disabled={editExpenseMutation.isPending} className="mt-4 w-full">
                                 {editExpenseMutation.isPending ? 'Menyimpan...' : 'Simpan Perubahan!'}
                             </Button>
                         </div>

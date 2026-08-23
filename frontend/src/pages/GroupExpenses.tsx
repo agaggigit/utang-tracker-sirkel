@@ -129,20 +129,19 @@ export const GroupExpenses = () => {
     }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
     return (
-        <div className="dashboard-container" style={{ paddingTop: '2rem', maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '3rem' }}>
+        <div className="pt-8 max-w-[1200px] mx-auto px-6 pb-12">
             <div className="expenses-layout">
                 <div className="expenses-header">
                     <PageHeader 
                         title="Riwayat Tagihan" 
                         onBack={() => navigate('/dashboard')}
                         action={
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div className="flex items-center gap-2">
                                 <GroupActivityDropdown groupId={groupId || ''} />
                                 <button 
                                     onClick={() => navigate(`/groups/${groupId}`)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}
+                                    className="bg-transparent border-none cursor-pointer p-2 text-primary flex items-center justify-center rounded-full hover:bg-surface-muted transition-colors"
                                     title="Pengaturan Sirkel"
-                                    className="hover-bg-surface-muted"
                                 >
                                     <Settings size={24} />
                                 </button>
@@ -151,41 +150,40 @@ export const GroupExpenses = () => {
                     />
 
                 {/* --- BAR PENCARIAN & FILTER --- */}
-                <div style={{ display: 'flex', gap: '0.5rem', width: '100%', marginBottom: '1rem' }}>
-                    <div style={{ flex: 1, position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>
+                <div className="flex gap-2 w-full mb-4">
+                    <div className="flex-1 relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
                             <Search size={18} />
                         </span>
                         <input 
                             type="text" 
-                            className="input-field" 
+                            className="input-field w-full !pl-[2.75rem] rounded-lg border border-border focus:ring-[3px]" 
                             placeholder="Cari tagihan (cth: Nasi Padang)..."
                             value={searchKeyword}
                             onChange={(e) => setSearchKeyword(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-                            style={{ width: '100%', paddingLeft: '2.5rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
                         />
                     </div>
-                    <Button variant="outline" onClick={() => setIsFilterSheetOpen(true)} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Button variant="outline" onClick={() => setIsFilterSheetOpen(true)} className="px-4 py-2 flex items-center gap-2">
                         <Filter size={18} />
                         <span>Filter</span>
                         {(startDate || endDate || filterType !== 'all') && (
-                            <span style={{ width: '8px', height: '8px', backgroundColor: 'var(--color-primary)', borderRadius: '50%' }}></span>
+                            <span className="w-2 h-2 bg-primary rounded-full"></span>
                         )}
                     </Button>
                 </div>
 
                 {/* --- INDIKATOR FILTER AKTIF --- */}
                 {(startDate || endDate || filterType !== 'all') && (
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', width: '100%', marginBottom: '1rem' }}>
-                        {startDate && <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Mulai: {new Date(startDate).toLocaleDateString('id-ID')}</span>}
-                        {endDate && <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Hingga: {new Date(endDate).toLocaleDateString('id-ID')}</span>}
-                        {filterType === 'involved' && <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Terlibat</span>}
-                        {filterType === 'unpaid' && <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Belum Lunas</span>}
-                        {filterType === 'payer' && <span style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success-text)', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 'bold' }}>Status: Nalangin</span>}
+                    <div className="flex gap-2 flex-wrap w-full mb-4">
+                        {startDate && <span className="bg-[#e0f2fe] text-[#0369a1] px-3 py-1 rounded-full text-xs font-bold">Mulai: {new Date(startDate).toLocaleDateString('id-ID')}</span>}
+                        {endDate && <span className="bg-[#e0f2fe] text-[#0369a1] px-3 py-1 rounded-full text-xs font-bold">Hingga: {new Date(endDate).toLocaleDateString('id-ID')}</span>}
+                        {filterType === 'involved' && <span className="bg-[#fef3c7] text-[#b45309] px-3 py-1 rounded-full text-xs font-bold">Status: Terlibat</span>}
+                        {filterType === 'unpaid' && <span className="bg-error-bg text-error px-3 py-1 rounded-full text-xs font-bold">Status: Belum Lunas</span>}
+                        {filterType === 'payer' && <span className="bg-success-bg text-success-text px-3 py-1 rounded-full text-xs font-bold">Status: Nalangin</span>}
                         <span 
                             onClick={() => { setSearchKeyword(''); setStartDate(''); setEndDate(''); setFilterType('all'); }}
-                            style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', textDecoration: 'underline', cursor: 'pointer', padding: '0.25rem' }}
+                            className="text-text-muted text-xs underline cursor-pointer p-1 hover:text-text-main transition-colors"
                         >Hapus Semua Filter</span>
                     </div>
                 )}
@@ -196,7 +194,7 @@ export const GroupExpenses = () => {
             {/* --- TOMBOL CATAT TAGIHAN BARU --- */}
             <Button 
                 onClick={() => navigate(`/groups/${groupId}/expenses/create`)}
-                style={{ width: '100%', fontSize: '1.05rem', padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', boxShadow: 'var(--shadow-md)', marginBottom: '1.5rem' }}
+                className="w-full text-[1.05rem] p-4 flex justify-center items-center gap-2 shadow-md mb-6"
             >
                 <Plus size={20} /> Catat Tagihan Baru
             </Button>
@@ -205,34 +203,20 @@ export const GroupExpenses = () => {
             {!isBalanceLoading && balanceData && (
                 <div 
                     onClick={() => setIsBalanceModalOpen(true)}
-                    style={{
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        gap: '1rem',
-                        backgroundColor: 'var(--color-surface)',
-                        padding: '1.5rem',
-                        borderRadius: '12px',
-                        border: '1px solid var(--color-primary)',
-                        boxShadow: 'var(--shadow-md)',
-                        cursor: 'pointer',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                        marginBottom: '1.5rem'
-                    }}
+                    className="flex flex-col gap-4 bg-surface p-6 rounded-xl border border-primary shadow-md cursor-pointer relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg mb-6"
                 >
-                    <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '6px', backgroundColor: 'var(--color-primary)' }}></div>
+                    <div className="absolute left-0 right-0 top-0 h-1.5 bg-primary"></div>
                     
-                    <div style={{ marginTop: '0.5rem' }}>
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Piutang (Orang utang ke kamu)</p>
-                        <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')}</h3>
+                    <div className="mt-2">
+                        <p className="m-0 text-[0.9rem] text-text-muted">Piutang (Orang utang ke kamu)</p>
+                        <h3 className="m-0 text-primary">Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')}</h3>
                     </div>
                     <div>
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Utangmu (Kamu utang ke orang)</p>
-                        <h3 style={{ margin: 0, color: 'var(--color-error)' }}>Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
+                        <p className="m-0 text-[0.9rem] text-text-muted">Utangmu (Kamu utang ke orang)</p>
+                        <h3 className="m-0 text-error">Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
                     </div>
-                    <div style={{ alignSelf: 'flex-start', backgroundColor: 'var(--color-surface-muted)', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-                        Lihat Rincian <ArrowRight size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                    <div className="self-start bg-surface-muted px-4 py-2 rounded-full text-[0.85rem] mt-2 flex items-center gap-1 hover:bg-border transition-colors">
+                        Lihat Rincian <ArrowRight size={16} />
                     </div>
                 </div>
             )}
@@ -240,7 +224,7 @@ export const GroupExpenses = () => {
 
             <main className="expenses-list">
                 {errorMsg && (
-                    <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className="p-4 bg-error-bg text-error rounded-lg mb-6 flex items-center gap-2">
                         <AlertTriangle size={20} /> {errorMsg}
                     </div>
                 )}
@@ -255,7 +239,7 @@ export const GroupExpenses = () => {
                         action={<Button onClick={() => navigate(`/groups/${groupId}/expenses/create`)}>Catat Tagihan</Button>}
                     />
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="flex flex-col gap-4">
                         {expenses.map((expense, index) => {
                             const isLastElement = expenses.length === index + 1;
                             const currentDateHeader = formatDateHeader(expense.expenseDate);
@@ -265,7 +249,7 @@ export const GroupExpenses = () => {
                             return (
                                 <React.Fragment key={expense.id}>
                                     {showHeader && (
-                                        <div style={{ alignSelf: 'center', backgroundColor: 'var(--color-primary)', color: 'white', padding: '0.25rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', marginTop: '1rem' }}>
+                                        <div className="self-center bg-primary text-white px-4 py-1 rounded-full text-[0.85rem] font-bold mt-4 shadow-sm">
                                             {currentDateHeader}
                                         </div>
                                     )}
@@ -285,7 +269,7 @@ export const GroupExpenses = () => {
                             )
                         })}
                         {isFetchingNextPage && <SkeletonList count={1} />}
-                        {!hasNextPage && expenses.length > 0 && <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Tamat. Tidak ada histori lagi.</p>}
+                        {!hasNextPage && expenses.length > 0 && <p className="text-center text-text-muted">Tamat. Tidak ada histori lagi.</p>}
                     </div>
                 )}
             </main>
@@ -302,14 +286,14 @@ export const GroupExpenses = () => {
                         <div>
                             <button 
                                 onClick={() => setSelectedBalanceDetail(null)}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', padding: 0, marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                                className="flex items-center gap-2 bg-transparent border-none text-primary cursor-pointer p-0 mb-6 text-[0.9rem] font-bold hover:text-primary-hover transition-colors"
                             >
                                 <ArrowLeft size={16} /> Kembali
                             </button>
-                            <h4 style={{ margin: '0 0 1rem 0', color: selectedBalanceDetail.isDebt ? 'var(--color-error)' : 'var(--color-primary)' }}>
+                            <h4 className={`m-0 mb-4 ${selectedBalanceDetail.isDebt ? 'text-error' : 'text-primary'}`}>
                                 Total {selectedBalanceDetail.isDebt ? 'Utangmu' : 'Piutangmu'}: Rp {Number(selectedBalanceDetail.amount).toLocaleString('id-ID')}
                             </h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div className="flex flex-col gap-3">
                                 {selectedBalanceDetail.transactions.map(tx => (
                                     <div 
                                         key={tx.id} 
@@ -317,30 +301,30 @@ export const GroupExpenses = () => {
                                             setIsBalanceModalOpen(false);
                                             navigate(`/expenses/${tx.id}`);
                                         }}
-                                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'var(--color-surface-hover)', borderRadius: '8px', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+                                        className="flex justify-between items-center p-4 bg-surface-hover rounded-lg border border-border cursor-pointer hover:border-primary transition-colors"
                                     >
-                                        <span style={{ fontWeight: 'bold', color: 'var(--color-text-main)' }}>{tx.description}</span>
-                                        <span style={{ color: tx.iOweThem ? 'var(--color-error)' : 'var(--color-success-text)', fontWeight: 'bold' }}>Rp {Number(tx.amount).toLocaleString('id-ID')}</span>
+                                        <span className="font-bold text-text-main">{tx.description}</span>
+                                        <span className={`font-bold ${tx.iOweThem ? 'text-error' : 'text-success-text'}`}>Rp {Number(tx.amount).toLocaleString('id-ID')}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     ) : (
                         <>
-                            <div style={{ marginBottom: '2rem' }}>
-                                <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-error)' }}>Daftar Utangmu (Total: Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')})</h4>
+                            <div className="mb-8">
+                                <h4 className="m-0 mb-4 text-error">Daftar Utangmu (Total: Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')})</h4>
                                 {balanceData.iOwe.length === 0 ? (
-                                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><PartyPopper size={16} /> Kamu tidak punya utang ke siapapun!</p>
+                                    <p className="text-text-muted text-[0.9rem] flex items-center gap-2"><PartyPopper size={16} /> Kamu tidak punya utang ke siapapun!</p>
                                 ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <div className="flex flex-col gap-3">
                                         {balanceData.iOwe.map(item => (
                                             <div 
                                                 key={item.userId} 
                                                 onClick={() => setSelectedBalanceDetail({ ...item, isDebt: true })}
-                                                style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--color-surface-hover)', borderRadius: '8px', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+                                                className="flex justify-between p-3 bg-surface-hover rounded-lg border border-border cursor-pointer hover:border-error transition-colors"
                                             >
-                                                <span style={{ fontWeight: 'bold', color: 'var(--color-text-main)' }}>Ke {item.name}</span>
-                                                <span style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
+                                                <span className="font-bold text-text-main">Ke {item.name}</span>
+                                                <span className="text-error font-bold">Rp {Number(item.amount).toLocaleString('id-ID')}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -348,19 +332,19 @@ export const GroupExpenses = () => {
                             </div>
 
                             <div>
-                                <h4 style={{ margin: '0 0 1rem 0', color: 'var(--color-primary)' }}>Daftar Piutangmu (Total: Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')})</h4>
+                                <h4 className="m-0 mb-4 text-primary">Daftar Piutangmu (Total: Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')})</h4>
                                 {balanceData.owedToMe.length === 0 ? (
-                                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Wallet size={16} /> Belum ada yang utang ke kamu.</p>
+                                    <p className="text-text-muted text-[0.9rem] flex items-center gap-2"><Wallet size={16} /> Belum ada yang utang ke kamu.</p>
                                 ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <div className="flex flex-col gap-3">
                                         {balanceData.owedToMe.map(item => (
                                             <div 
                                                 key={item.userId} 
                                                 onClick={() => setSelectedBalanceDetail({ ...item, isDebt: false })}
-                                                style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--color-surface-hover)', borderRadius: '8px', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+                                                className="flex justify-between p-3 bg-surface-hover rounded-lg border border-border cursor-pointer hover:border-primary transition-colors"
                                             >
-                                                <span style={{ fontWeight: 'bold', color: 'var(--color-text-main)' }}>Dari {item.name}</span>
-                                                <span style={{ color: 'var(--color-success-text)', fontWeight: 'bold' }}>Rp {Number(item.amount).toLocaleString('id-ID')}</span>
+                                                <span className="font-bold text-text-main">Dari {item.name}</span>
+                                                <span className="text-success-text font-bold">Rp {Number(item.amount).toLocaleString('id-ID')}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -374,84 +358,72 @@ export const GroupExpenses = () => {
             {/* BOTTOM SHEET FILTER BIARKAN (KARENA SHEET BERBEDA DENGAN MODAL) */}
             {(isFilterSheetOpen || isClosingSheet) && (
                 <div 
-                    style={{
-                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999,
-                        display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                        opacity: isClosingSheet ? 0 : 1, transition: 'opacity 0.3s ease'
-                    }}
+                    className={`fixed inset-0 bg-black/50 z-[999] flex flex-col justify-end transition-opacity duration-300 ${isClosingSheet ? 'opacity-0' : 'opacity-100'}`}
                     onClick={closeFilterSheet}
                 >
                     <div 
-                        style={{
-                            backgroundColor: 'var(--color-surface)', padding: '2rem',
-                            borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
-                            animation: `${isClosingSheet ? 'slideDown' : 'slideUp'} 0.3s forwards ease-out`,
-                            paddingBottom: '3rem'
-                        }}
+                        className={`bg-surface p-8 rounded-t-[24px] pb-12 ${isClosingSheet ? 'animate-[slideDown_0.3s_ease-out_forwards]' : 'animate-[slideUp_0.3s_ease-out_forwards]'}`}
                         onClick={e => e.stopPropagation()}
                     >
-                        <div style={{ width: '40px', height: '5px', backgroundColor: 'var(--color-border)', borderRadius: '10px', margin: '0 auto 1.5rem auto' }}></div>
+                        <div className="w-10 h-1.5 bg-border rounded-full mx-auto mb-6"></div>
                         
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Filter Tagihan</h3>
-                            <button onClick={closeFilterSheet} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-muted)' }}>&times;</button>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="m-0 text-xl font-bold">Filter Tagihan</h3>
+                            <button onClick={closeFilterSheet} className="bg-transparent border-none text-2xl cursor-pointer text-text-muted hover:text-text-main transition-colors">&times;</button>
                         </div>
 
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Rentang Waktu</label>
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <div className="mb-6">
+                            <label className="block mb-2 font-bold">Rentang Waktu</label>
+                            <div className="flex gap-2 items-center">
                                 <input 
                                     type="date" 
-                                    className="input-field" 
+                                    className="input-field flex-1 p-2 rounded-lg border border-border focus:ring-[3px]" 
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
-                                    style={{ flex: 1, padding: '0.5rem' }}
                                 />
-                                <span style={{ color: 'var(--color-text-muted)' }}>-</span>
+                                <span className="text-text-muted">-</span>
                                 <input 
                                     type="date" 
-                                    className="input-field" 
+                                    className="input-field flex-1 p-2 rounded-lg border border-border focus:ring-[3px]" 
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
-                                    style={{ flex: 1, padding: '0.5rem' }}
                                 />
                             </div>
                         </div>
 
-                        <div style={{ marginBottom: '2rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Status Kamu</label>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                    <input type="radio" name="filterStatus" value="all" checked={filterType === 'all'} onChange={(e) => setFilterType(e.target.value)} />
+                        <div className="mb-8">
+                            <label className="block mb-2 font-bold">Status Kamu</label>
+                            <div className="flex flex-col gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-surface-hover rounded-lg transition-colors">
+                                    <input type="radio" name="filterStatus" value="all" checked={filterType === 'all'} onChange={(e) => setFilterType(e.target.value)} className="w-4 h-4" />
                                     <span>Tampilkan Semua</span>
                                 </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                    <input type="radio" name="filterStatus" value="involved" checked={filterType === 'involved'} onChange={(e) => setFilterType(e.target.value)} />
+                                <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-surface-hover rounded-lg transition-colors">
+                                    <input type="radio" name="filterStatus" value="involved" checked={filterType === 'involved'} onChange={(e) => setFilterType(e.target.value)} className="w-4 h-4" />
                                     <span>Ada Namaku (Terlibat)</span>
                                 </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                    <input type="radio" name="filterStatus" value="unpaid" checked={filterType === 'unpaid'} onChange={(e) => setFilterType(e.target.value)} />
-                                    <span style={{ color: 'var(--color-error)' }}>Belum Lunas</span>
+                                <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-surface-hover rounded-lg transition-colors">
+                                    <input type="radio" name="filterStatus" value="unpaid" checked={filterType === 'unpaid'} onChange={(e) => setFilterType(e.target.value)} className="w-4 h-4" />
+                                    <span className="text-error font-bold">Belum Lunas</span>
                                 </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                    <input type="radio" name="filterStatus" value="payer" checked={filterType === 'payer'} onChange={(e) => setFilterType(e.target.value)} />
-                                    <span style={{ color: 'var(--color-primary)' }}>Aku yang Nalangin</span>
+                                <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-surface-hover rounded-lg transition-colors">
+                                    <input type="radio" name="filterStatus" value="payer" checked={filterType === 'payer'} onChange={(e) => setFilterType(e.target.value)} className="w-4 h-4" />
+                                    <span className="text-primary font-bold">Aku yang Nalangin</span>
                                 </label>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div className="flex gap-4">
                             <Button 
                                 variant="outline" 
-                                style={{ flex: 1 }}
+                                className="flex-1 py-3 text-lg"
                                 onClick={() => {
                                     setSearchKeyword(''); setStartDate(''); setEndDate(''); setFilterType('all');
                                 }}
                             >
                                 Reset
                             </Button>
-                            <Button style={{ flex: 2 }} onClick={applyFilters}>
+                            <Button className="flex-[2] py-3 text-lg" onClick={applyFilters}>
                                 Terapkan Filter
                             </Button>
                         </div>

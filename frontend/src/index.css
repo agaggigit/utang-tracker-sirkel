@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
     /* Palet Warna Clean Corporate (Ala Livin / Banking) */
@@ -73,7 +76,7 @@ body.dark-theme, html.dark-theme {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   background-color: var(--color-background);
   color: var(--color-text-main);
   -webkit-font-smoothing: antialiased;
@@ -621,13 +624,13 @@ body {
    CUSTOM SWEETALERT2 STYLES
    ========================================= */
 .swal2-popup {
-  font-family: 'Inter', sans-serif !important;
   border-radius: var(--radius-lg) !important;
   box-shadow: var(--shadow-lg) !important;
-  padding: 2rem 1.5rem !important;
   background-color: var(--color-surface) !important;
   color: var(--color-text-main) !important;
   border: 1px solid var(--color-border) !important;
+  padding: 2rem 1.5rem !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
 .swal2-actions-custom {

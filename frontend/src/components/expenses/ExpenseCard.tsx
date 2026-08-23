@@ -18,50 +18,34 @@ export function ExpenseCard({ id, description, totalAmount, expenseDate, paidByU
     return (
         <div 
             onClick={() => navigate(`/expenses/${id}`)}
-            style={{ 
-                padding: '1.5rem', 
-                backgroundColor: 'var(--color-surface)', 
-                borderRadius: '12px', 
-                boxShadow: 'var(--shadow-sm)', 
-                border: '1px solid var(--color-border)',
-                cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-            }}
+            className="p-6 bg-surface rounded-xl shadow-sm border border-border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
         >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+            <div className="flex justify-between items-start mb-3">
                 <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', marginBottom: '0.25rem' }}>{description}</h3>
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <h3 className="m-0 text-[1.1rem] mb-1">{description}</h3>
+                    <p className="m-0 text-[0.85rem] text-text-muted flex items-center gap-1">
                         <Calendar size={14} />
                         {new Date(expenseDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                    <p style={{ margin: 0, fontWeight: 'bold', color: 'var(--color-primary)' }}>Rp {Number(totalAmount).toLocaleString('id-ID')}</p>
+                <div className="text-right">
+                    <p className="m-0 font-bold text-primary">Rp {Number(totalAmount).toLocaleString('id-ID')}</p>
                 </div>
             </div>
             
-            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>Ditalangi oleh: <strong style={{ color: 'var(--color-text-main)' }}>{paidByUserId === currentUserId ? 'Kamu' : paidByUserName}</strong></span>
+            <div className="text-[0.85rem] text-text-muted mt-4 pt-3 border-t border-border flex justify-between items-center">
+                <span>Ditalangi oleh: <strong className="text-text-main">{paidByUserId === currentUserId ? 'Kamu' : paidByUserName}</strong></span>
                 
                 {myShare && paidByUserId !== currentUserId && (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div className="flex items-center">
                         {myShare.isPaid ? (
-                            <span style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success-text)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>Lunas</span>
+                            <span className="bg-success-bg text-success-text py-1 px-2 rounded text-[0.75rem] font-bold">Lunas</span>
                         ) : myShare.payments && myShare.payments.length > 0 && myShare.payments[0].status === 'pending' ? (
-                            <span style={{ backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>Menunggu ACC</span>
+                            <span className="bg-amber-100 text-amber-700 border border-amber-200 py-1 px-2 rounded text-[0.75rem] font-bold">Menunggu ACC</span>
                         ) : myShare.payments && myShare.payments.length > 0 && myShare.payments[0].status === 'rejected' ? (
-                            <span style={{ backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>Ditolak</span>
+                            <span className="bg-error-bg text-error py-1 px-2 rounded text-[0.75rem] font-bold">Ditolak</span>
                         ) : (
-                            <span style={{ backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>Belum Lunas</span>
+                            <span className="bg-error-bg text-error py-1 px-2 rounded text-[0.75rem] font-bold">Belum Lunas</span>
                         )}
                     </div>
                 )}

@@ -64,46 +64,40 @@ export const Notifications = () => {
     });
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+        <div className="p-8 max-w-[800px] mx-auto w-full">
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
                     <button 
                         onClick={() => navigate(-1)}
-                        style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                        className="bg-transparent border-none text-[1.5rem] cursor-pointer p-0 text-primary"
                         title="Kembali"
                     >
                         <ArrowLeft size={24} />
                     </button>
-                    <h1 style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Kotak Masuk <Inbox size={24} /></h1>
+                    <h1 className="text-[1.5rem] m-0 flex items-center gap-2">Kotak Masuk <Inbox size={24} /></h1>
                 </div>
                 {generalNotifs.some((n: any) => !n.isRead) && (
                     <button 
                         onClick={() => markAllAsReadMutation.mutate()} 
-                        style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        className="bg-transparent border-none text-primary text-[0.9rem] cursor-pointer font-bold"
                     >
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={16} /> Tandai Semua Dibaca</span>
+                        <span className="flex items-center gap-1"><Check size={16} /> Tandai Semua Dibaca</span>
                     </button>
                 )}
             </div>
 
             {/* List Pesan */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="flex flex-col gap-4">
                 {isLoading ? (
                     <SkeletonList count={5} />
                 ) : errorMsg ? (
-                    <div style={{ padding: '1rem', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', borderRadius: '8px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <div className="p-4 bg-error-bg text-error rounded-lg text-center flex items-center justify-center gap-2">
                         <AlertTriangle size={20} /> {errorMsg}
                     </div>
                 ) : hasNoNotifications ? (
-                    <div style={{ 
-                        textAlign: 'center', 
-                        padding: '3rem 2rem', 
-                        backgroundColor: 'var(--color-surface)', 
-                        borderRadius: 'var(--radius-lg)',
-                        boxShadow: 'var(--shadow-sm)'
-                    }}>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <div className="text-center py-12 px-8 bg-surface rounded-lg shadow-sm">
+                        <p className="text-text-muted text-[1.1rem] m-0 flex items-center justify-center gap-2">
                             Hore! Belum ada pesan baru saat ini. <PartyPopper size={20} />
                         </p>
                     </div>
@@ -111,25 +105,16 @@ export const Notifications = () => {
                     <>
                         {/* --- LIST PENGAJUAN PEMBAYARAN (LANGKAH 2) --- */}
                         {incomingPayments.map((payment: any) => (
-                            <div key={payment.id} style={{
-                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                padding: '1.25rem 1.5rem', backgroundColor: 'var(--color-surface-hover)', 
-                                borderRadius: 'var(--radius-lg)', border: '1px solid #eab308', 
-                                boxShadow: 'var(--shadow-sm)', transition: 'all 0.2s ease',
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ 
-                                        width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#eab308', 
-                                        color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                        fontWeight: 'bold', fontSize: '1.2rem', boxShadow: 'var(--shadow-sm)', flexShrink: 0
-                                    }}>
+                            <div key={payment.id} className="flex justify-between items-center py-5 px-6 bg-surface-hover rounded-lg border border-yellow-500 shadow-sm transition-all duration-200">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold text-[1.2rem] shadow-sm shrink-0">
                                         {payment.from.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <p style={{ margin: 0, fontSize: '1rem' }}>
-                                            <span style={{ fontWeight: '600', color: 'var(--color-text-main)' }}>{payment.from.name}</span> mengajukan pelunasan untuk <span style={{ fontWeight: '600' }}>{payment.expenseShare.expense.description}</span>
+                                        <p className="m-0 text-[1rem]">
+                                            <span className="font-semibold text-text-main">{payment.from.name}</span> mengajukan pelunasan untuk <span className="font-semibold">{payment.expenseShare.expense.description}</span>
                                         </p>
-                                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#854d0e', marginTop: '0.25rem', fontWeight: 'bold' }}>
+                                        <p className="m-0 text-[0.85rem] text-yellow-800 mt-1 font-bold">
                                             Sebesar Rp {Number(payment.amount).toLocaleString('id-ID')}
                                         </p>
                                     </div>
@@ -138,7 +123,7 @@ export const Notifications = () => {
                                     <Button onClick={() => {
                                         setSelectedPayment(payment);
                                         setIsReviewModalOpen(true);
-                                    }} style={{ backgroundColor: '#eab308', color: '#fff', border: 'none' }}>
+                                    }} className="bg-yellow-500 text-white border-none hover:bg-yellow-600">
                                         Review
                                     </Button>
                                 </div>
@@ -147,25 +132,16 @@ export const Notifications = () => {
 
                         {/* --- LIST JOIN REQUESTS (YANG SUDAH ADA SEBELUMNYA) --- */}
                         {joinRequests.map((notif: any) => (
-                            <div key={notif.id} style={{
-                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                padding: '1.25rem 1.5rem', backgroundColor: 'var(--color-surface)',
-                                borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', 
-                                boxShadow: 'var(--shadow-sm)', transition: 'all 0.2s ease',
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ 
-                                        width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', 
-                                        color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                        fontWeight: 'bold', fontSize: '1.2rem', boxShadow: 'var(--shadow-sm)', flexShrink: 0
-                                    }}>
+                            <div key={notif.id} className="flex justify-between items-center py-5 px-6 bg-surface rounded-lg border border-border shadow-sm transition-all duration-200">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[1.2rem] shadow-sm shrink-0">
                                         {notif.user.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <p style={{ margin: 0, fontSize: '1rem' }}>
-                                            <span style={{ fontWeight: '600', color: 'var(--color-text-main)' }}>{notif.user.name}</span> ingin bergabung ke sirkel <span style={{ fontWeight: '600' }}>{notif.group.name}</span>
+                                        <p className="m-0 text-[1rem]">
+                                            <span className="font-semibold text-text-main">{notif.user.name}</span> ingin bergabung ke sirkel <span className="font-semibold">{notif.group.name}</span>
                                         </p>
-                                        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
+                                        <p className="m-0 text-[0.85rem] text-text-muted mt-1">
                                             {new Date(notif.requestedAt).toLocaleDateString('id-ID', { 
                                                 day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
                                             })}
@@ -184,37 +160,22 @@ export const Notifications = () => {
                         {generalNotifs.map((notif: any) => (
                             <div key={notif.id} 
                                 onClick={() => !notif.isRead && markAsReadMutation.mutate(notif.id)}
-                                style={{
-                                display: 'flex', alignItems: 'center', gap: '1rem',
-                                padding: '1.25rem 1.5rem', 
-                                backgroundColor: notif.isRead ? 'transparent' : 'var(--color-surface-hover)',
-                                borderRadius: 'var(--radius-lg)', 
-                                border: '1px solid',
-                                borderColor: notif.isRead ? 'var(--color-border)' : 'var(--color-primary)', 
-                                boxShadow: notif.isRead ? 'none' : 'var(--shadow-sm)', 
-                                transition: 'all 0.2s ease',
-                                cursor: notif.isRead ? 'default' : 'pointer',
-                                opacity: notif.isRead ? 0.7 : 1
-                            }}>
-                                <div style={{ 
-                                    width: '40px', height: '40px', borderRadius: '50%', 
-                                    backgroundColor: notif.isRead ? 'var(--color-border)' : '#38bdf8', 
-                                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                    fontSize: '1rem', flexShrink: 0
-                                }}>
+                                className={`flex items-center gap-4 py-5 px-6 rounded-lg border transition-all duration-200 ${notif.isRead ? 'bg-transparent border-border opacity-70 cursor-default shadow-none' : 'bg-surface-hover border-primary cursor-pointer shadow-sm'}`}
+                            >
+                                <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center text-[1rem] shrink-0 ${notif.isRead ? 'bg-border' : 'bg-sky-400'}`}>
                                     <Info size={20} />
                                 </div>
                                 <div>
-                                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>
+                                    <p className="m-0 text-[0.95rem] text-text-main">
                                         {notif.message}
                                     </p>
-                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
+                                    <p className="m-0 text-[0.8rem] text-text-muted mt-1">
                                         {new Date(notif.createdAt).toLocaleDateString('id-ID', { 
                                             day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
                                         })}
                                     </p>
                                 </div>
-                                {!notif.isRead && <div style={{ marginLeft: 'auto', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0ea5e9', flexShrink: 0 }}></div>}
+                                {!notif.isRead && <div className="ml-auto w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0"></div>}
                             </div>
                         ))}
                     </>

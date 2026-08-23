@@ -77,21 +77,16 @@ export const PWAPrompt = () => {
     if (!showPrompt) return null;
 
     return (
-        <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999,
-            backgroundColor: 'var(--color-primary)', color: 'white',
-            padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            boxShadow: 'var(--shadow-md)'
-        }}>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Instal Aplikasi?</span>
-                <span style={{ fontSize: '0.875rem', opacity: 0.9 }}>Buka lebih cepat langsung dari layar HP-mu.</span>
+        <div className="fixed top-0 left-0 right-0 z-[9999] bg-primary text-white p-4 flex justify-between items-center shadow-md">
+            <div className="flex flex-col">
+                <span className="font-bold text-[1rem]">Instal Aplikasi?</span>
+                <span className="text-[0.875rem] opacity-90">Buka lebih cepat langsung dari layar HP-mu.</span>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={handleDismiss} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
+            <div className="flex gap-2">
+                <button onClick={handleDismiss} className="bg-transparent border-none text-white cursor-pointer font-semibold">
                     Nanti Saja
                 </button>
-                <button onClick={handleInstall} style={{ background: 'white', color: 'var(--color-primary)', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 700 }}>
+                <button onClick={handleInstall} className="bg-white text-primary border-none py-2 px-4 rounded cursor-pointer font-bold">
                     Instal
                 </button>
             </div>

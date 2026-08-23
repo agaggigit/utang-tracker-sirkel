@@ -25,28 +25,28 @@ export function Skeleton({ width = '100%', height = '20px', borderRadius = '8px'
 
 // Komponen Pembantu untuk Layout Loading Umum
 export const SkeletonDashboard = () => (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '2rem 1.5rem', backgroundColor: 'var(--color-dashboard-bg)' }}>
-            <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+    <div className="flex flex-col">
+        <div className="py-8 px-6 bg-dashboard-bg">
+            <div className="max-w-[800px] mx-auto flex justify-between items-center">
+                <div className="flex items-center gap-4">
                     <Skeleton circle width={48} height={48} />
                     <Skeleton width={150} height={24} />
                 </div>
-                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                <div className="flex gap-6">
                     <Skeleton circle width={24} height={24} />
                     <Skeleton circle width={24} height={24} />
                 </div>
             </div>
         </div>
-        <div className="dashboard-content" style={{ marginTop: '-2rem' }}>
-            <div className="dashboard-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="dashboard-content -mt-8">
+            <div className="dashboard-card p-8 flex flex-col gap-4">
                 <Skeleton width={120} height={24} />
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                    <div style={{ flex: 1, padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
+                <div className="flex gap-4 mt-4">
+                    <div className="flex-1 p-6 border border-border rounded-xl">
                         <Skeleton width="60%" height={20} style={{ marginBottom: '0.5rem' }} />
                         <Skeleton width="40%" height={32} />
                     </div>
-                    <div style={{ flex: 1, padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
+                    <div className="flex-1 p-6 border border-border rounded-xl">
                         <Skeleton width="60%" height={20} style={{ marginBottom: '0.5rem' }} />
                         <Skeleton width="40%" height={32} />
                     </div>
@@ -57,11 +57,11 @@ export const SkeletonDashboard = () => (
 );
 
 export const SkeletonList = ({ count = 3 }: { count?: number }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div className="flex flex-col gap-4">
         {Array.from({ length: count }).map((_, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
+            <div key={i} className="flex items-center gap-4 p-4 border border-border rounded-xl">
                 <Skeleton circle width={48} height={48} />
-                <div style={{ flex: 1 }}>
+                <div className="flex-1">
                     <Skeleton width="40%" height={20} style={{ marginBottom: '0.5rem' }} />
                     <Skeleton width="20%" height={16} />
                 </div>
@@ -72,7 +72,7 @@ export const SkeletonList = ({ count = 3 }: { count?: number }) => (
 );
 
 export const SkeletonForm = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
+    <div className="flex flex-col gap-6 w-full">
         <div>
             <Skeleton width="20%" height={20} style={{ marginBottom: '0.5rem' }} />
             <Skeleton width="100%" height={48} />
