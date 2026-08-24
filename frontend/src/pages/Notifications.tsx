@@ -6,6 +6,8 @@ import { ReviewPaymentModal } from '../components/expenses/ReviewPaymentModal';
 import { Inbox, Check, AlertTriangle, PartyPopper, Info, ArrowLeft } from 'lucide-react';
 import api from '../lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getErrorMessage } from '../utils/errorHandler';
+import { Payment, JoinRequest, Notification as NotificationType } from '../types';
 
 export const Notifications = () => {
     const navigate = useNavigate();
@@ -13,7 +15,7 @@ export const Notifications = () => {
 
     // --- STATE UNTUK MODAL REVIEW (LANGKAH 3) ---
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-    const [selectedPayment, setSelectedPayment] = useState<any>(null);
+    const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
 
     const { data: joinRequests = [], isLoading: isLoadingJoin, error: joinError } = useQuery({
         queryKey: ['notifications', 'join-requests'],
@@ -40,7 +42,7 @@ export const Notifications = () => {
     });
 
     const isLoading = isLoadingJoin || isLoadingPayments || isLoadingNotifs;
-    const errorMsg = [joinError, paymentError, notifError].filter(Boolean).map(e => (e as any).response?.data?.message || (e as any).message).join(', ');
+    const errorMsg = [joinError, paymentError, notifError].filter(Boolean).map(e => getErrorMessage(e)).join(', ');
 
     const hasNoNotifications = joinRequests.length === 0 && incomingPayments.length === 0 && generalNotifs.length === 0;
 
@@ -77,7 +79,7 @@ export const Notifications = () => {
                     </button>
                     <h1 className="text-[1.5rem] m-0 flex items-center gap-2">Kotak Masuk <Inbox size={24} /></h1>
                 </div>
-                {generalNotifs.some((n: any) => !n.isRead) && (
+                {generalNotifs.some((n: NotificationType) => !n.isRead) && (
                     <button 
                         onClick={() => markAllAsReadMutation.mutate()} 
                         className="bg-transparent border-none text-primary text-[0.9rem] cursor-pointer font-bold"
@@ -104,7 +106,7 @@ export const Notifications = () => {
                 ) : (
                     <>
                         {/* --- LIST PENGAJUAN PEMBAYARAN (LANGKAH 2) --- */}
-                        {incomingPayments.map((payment: any) => (
+                        {incomingPayments.map((payment: Payment & { from: {name: string}; expenseShare: { expense: { description: string } } }) => (
                             <div key={payment.id} className="flex justify-between items-center py-5 px-6 bg-surface-hover rounded-lg border border-yellow-500 shadow-sm transition-all duration-200">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold text-[1.2rem] shadow-sm shrink-0">
@@ -131,7 +133,7 @@ export const Notifications = () => {
                         ))}
 
                         {/* --- LIST JOIN REQUESTS (YANG SUDAH ADA SEBELUMNYA) --- */}
-                        {joinRequests.map((notif: any) => (
+                        {joinRequests.map((notif: JoinRequest & { group: {name: string}, requestedAt: string }) => (
                             <div key={notif.id} className="flex justify-between items-center py-5 px-6 bg-surface rounded-lg border border-border shadow-sm transition-all duration-200">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[1.2rem] shadow-sm shrink-0">
@@ -157,7 +159,7 @@ export const Notifications = () => {
                         ))}
 
                         {/* --- LIST NOTIFIKASI UMUM (LANGKAH 4) --- */}
-                        {generalNotifs.map((notif: any) => (
+                        {generalNotifs.map((notif: NotificationType) => (
                             <div key={notif.id} 
                                 onClick={() => !notif.isRead && markAsReadMutation.mutate(notif.id)}
                                 className={`flex items-center gap-4 py-5 px-6 rounded-lg border transition-all duration-200 ${notif.isRead ? 'bg-transparent border-border opacity-70 cursor-default shadow-none' : 'bg-surface-hover border-primary cursor-pointer shadow-sm'}`}

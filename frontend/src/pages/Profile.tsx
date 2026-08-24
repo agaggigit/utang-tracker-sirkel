@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { Trash2, ArrowLeft, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { getErrorMessage } from '../utils/errorHandler';
 
 const MySwal = withReactContent(Swal);
 
@@ -91,18 +92,8 @@ export const Profile = () => {
             setMessage({ type: 'success', text: 'Profil berhasil diperbarui' });
             queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                if (data.errors) {
-                    const firstError = Object.values(data.errors)[0] as string[];
-                    setMessage({ type: 'error', text: firstError[0] });
-                } else {
-                    setMessage({ type: 'error', text: data.message || 'Gagal menyimpan' });
-                }
-            } else {
-                setMessage({ type: 'error', text: err.message });
-            }
+        onError: (err: unknown) => {
+            setMessage({ type: 'error', text: getErrorMessage(err) });
         }
     });
 

@@ -4,6 +4,7 @@ import { X, Check } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import api from '../../lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getErrorMessage } from '../../utils/errorHandler';
 import toast from 'react-hot-toast';
 
 interface ReviewPaymentModalProps {
@@ -51,8 +52,8 @@ export function ReviewPaymentModal({ isOpen, onClose, payment, onSuccess }: Revi
             if (onSuccess) onSuccess();
             onClose();
         },
-        onError: (err: any) => {
-            toast.error(err.response?.data?.message || 'Terjadi kesalahan saat memproses review.');
+        onError: (err: unknown) => {
+            toast.error(getErrorMessage(err));
         }
     });
 

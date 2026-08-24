@@ -4,6 +4,7 @@ import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../utils/errorHandler';
 import api from '../lib/api';
 import { useMutation } from '@tanstack/react-query';
 
@@ -39,21 +40,8 @@ export const Register = () => {
             // Nanti kita akan redirect ke halaman login di sini
             navigate('/login');
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                // Jika error berasal dari Zod (validasi form)
-                if (data.errors) {
-                    // Ambil pesan error pertama yang dikembalikan Zod
-                    const firstError = Object.values(data.errors)[0] as string[];
-                    setErrorMsg(firstError[0]);
-                } else {
-                    // Jika backend menolak (misal: email sudah dipakai)
-                    setErrorMsg(data.message || 'Gagal mendaftar');
-                }
-            } else {
-                setErrorMsg(err.message);
-            }
+        onError: (err: unknown) => {
+            setErrorMsg(getErrorMessage(err));
         }
     });
 
@@ -80,12 +68,8 @@ export const Register = () => {
             localStorage.setItem('token', data.token);
             navigate('/dashboard');
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                setErrorMsg(err.response.data.message || 'Gagal login dengan Google');
-            } else {
-                setErrorMsg(err.message);
-            }
+        onError: (err: unknown) => {
+            setErrorMsg(getErrorMessage(err));
         }
     });
 

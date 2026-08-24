@@ -12,6 +12,9 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import api from '../lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getErrorMessage } from '../utils/errorHandler';
+import { User, JoinRequest } from '../types';
+import { AxiosError } from 'axios';
 
 const MySwal = withReactContent(Swal);
 
@@ -54,7 +57,7 @@ export const GroupDetail = () => {
         },
         retry: false
     });
-    const errorMsg = requestError ? (requestError as any).response?.status === 403 ? 'Hanya Host (Pembuat Grup) yang dapat melihat antrean ini.' : (requestError as any).response?.data?.message || (requestError as any).message : '';
+    const errorMsg = requestError ? (requestError instanceof AxiosError && requestError.response?.status === 403) ? 'Hanya Host (Pembuat Grup) yang dapat melihat antrean ini.' : getErrorMessage(requestError) : '';
 
     const { data: members = [], isLoading: isMembersLoading, error: memberError } = useQuery({
         queryKey: ['groups', id, 'members'],
@@ -63,10 +66,10 @@ export const GroupDetail = () => {
             return response.data;
         }
     });
-    const membersErrorMsg = memberError ? (memberError as any).response?.data?.message || (memberError as any).message : '';
+    const membersErrorMsg = memberError ? getErrorMessage(memberError) : '';
 
     const editGroupMutation = useMutation({
-        mutationFn: async (updatedData: any) => {
+        mutationFn: async (updatedData: Partial<{name: string, joinApprovalRequired: boolean, regenerateInviteCode: boolean}>) => {
             const response = await api.patch(`/groups/${id}`, updatedData);
             return response.data;
         },
@@ -74,8 +77,8 @@ export const GroupDetail = () => {
             toast.success(data.message || 'Berhasil menyimpan perubahan!');
             queryClient.invalidateQueries({ queryKey: ['groups', id] });
         },
-        onError: (err: any) => {
-            toast.error(err.response?.data?.message || err.message);
+        onError: (err: unknown) => {
+            toast.error(getErrorMessage(err));
         }
     });
 
@@ -89,8 +92,8 @@ export const GroupDetail = () => {
             queryClient.invalidateQueries({ queryKey: ['groups', id, 'join-requests'] });
             queryClient.invalidateQueries({ queryKey: ['groups', id, 'members'] });
         },
-        onError: (err: any) => {
-            toast.error("Error: " + (err.response?.data?.message || err.message));
+        onError: (err: unknown) => {
+            toast.error("Error: " + getErrorMessage(err));
         }
     });
 
@@ -144,7 +147,7 @@ export const GroupDetail = () => {
                                 />
                             ) : (
                                 <div className="flex flex-col gap-4">
-                                    {members.map((member: any) => (
+                                    {members.map((member: User) => (
                                         <div key={member.id} className="flex justify-between items-center py-4 px-6 bg-background rounded-xl border border-gray-200">
                                             <div className="flex items-center gap-4">
                                                 <Avatar name={member.name} imageUrl={member.avatarUrl} />
@@ -177,7 +180,7 @@ export const GroupDetail = () => {
                                 />
                             ) : (
                                 <div className="flex flex-col gap-4">
-                                    {requests.map((req: any) => (
+                                    {requests.map((req: JoinRequest) => (
                                         <div key={req.id} className="flex justify-between items-center py-4 px-6 bg-background rounded-xl border border-gray-200">
                                             <div className="flex items-center gap-4">
                                                 <Avatar name={req.user.name} imageUrl={req.user.avatarUrl} />

@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 
 export const PWAPrompt = () => {
     // Menyimpan event asli dari browser
-    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
 
     // State untuk menampilkan/menyembunyikan banner kita
     const [showPrompt, setShowPrompt] = useState(false);
 
     // 1. Mencegat (Intercept) event bawaan browser
     useEffect(() => {
-        const interceptHandler = (e: any) => {
+        const interceptHandler = (e: Event) => {
             e.preventDefault();
             setDeferredPrompt(e);   // Simpan event-nya di dalam state
         };

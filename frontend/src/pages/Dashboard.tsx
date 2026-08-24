@@ -9,6 +9,7 @@ import withReactContent from 'sweetalert2-react-content';
 import api from '../lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '../contexts/ThemeContext';
+import { Notification, GroupMembership } from '../types';
 
 const MySwal = withReactContent(Swal);
 
@@ -33,7 +34,7 @@ export const Dashboard = () => {
     });
 
     const isLoading = isLoadingUser || isLoadingNotif;
-    const notifications = notificationsData ? notificationsData.filter((n: any) => !n.isRead) : [];
+    const notifications = notificationsData ? notificationsData.filter((n: Notification) => !n.isRead) : [];
 
     const handleLogout = () => { 
         MySwal.fire({
@@ -161,7 +162,7 @@ export const Dashboard = () => {
                             
                             {/* DAFTAR GRUP YANG DIMILIKI */}
                             <div className="flex flex-col gap-4">
-                                {user.memberships.map((membership: any) => (
+                                {user.memberships.map((membership: GroupMembership & { role: string; hasUnpaidDebt?: boolean }) => (
                                     <div key={membership.group.id} className="p-5 bg-surface border border-border rounded-xl flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
                                         <div>
                                             <h3 className="m-0 text-[1.15rem] font-bold text-text-main">{membership.group.name}</h3>

@@ -5,7 +5,9 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { AlertTriangle, Scale, Trash2, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { getErrorMessage } from '../utils/errorHandler';
+import { User } from '../types';
 
 // Tipe data untuk daftar anggota yang bisa dipilih
 interface Member {
@@ -101,7 +103,7 @@ export const CreateExpense = () => {
     };
 
     const createExpenseMutation = useMutation({
-        mutationFn: async (payload: any) => {
+        mutationFn: async (payload: { description: string, totalAmount: number, expenseDate: string, groupId: string, shares: { userId: string, shareAmount: number }[] }) => {
             const response = await api.post(`/groups/${groupId}/expenses`, payload);
             return response.data;
         },
@@ -111,18 +113,8 @@ export const CreateExpense = () => {
             queryClient.invalidateQueries({ queryKey: ['groups', groupId, 'balance'] });
             navigate(`/groups/${groupId}/expenses`);
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                if (data.errors) {
-                    const firstError = Object.values(data.errors)[0] as string[];
-                    setErrorMsg(firstError[0]);
-                } else {
-                    setErrorMsg(data.message || 'Gagal membuat tagihan');
-                }
-            } else {
-                setErrorMsg(err.message);
-            }
+        onError: (err: unknown) => {
+            setErrorMsg(getErrorMessage(err));
         }
     });
 
@@ -161,8 +153,8 @@ export const CreateExpense = () => {
             
             createExpenseMutation.mutate(payload);
 
-        } catch (err: any) {
-            setErrorMsg(err.message);
+        } catch (err: unknown) {
+            setErrorMsg(getErrorMessage(err));
         }
     };
 

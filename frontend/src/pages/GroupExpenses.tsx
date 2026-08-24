@@ -7,7 +7,9 @@ import { ExpenseCard } from '../components/expenses/ExpenseCard';
 import { Modal } from '../components/ui/Modal';
 import { Settings, Search, Plus, AlertTriangle, Receipt, Filter, ArrowRight, Wallet, PartyPopper, ArrowLeft } from 'lucide-react';
 import api from '../lib/api';
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getErrorMessage } from '../utils/errorHandler';
+import { Expense } from '../types';
 import { SkeletonList } from '../components/ui/Skeleton';
 import { GroupActivityDropdown } from '../components/ui/GroupActivityDropdown';
 
@@ -112,7 +114,7 @@ export const GroupExpenses = () => {
     });
 
     const expenses = data ? data.pages.flatMap(page => page) : [];
-    const errorMsg = isError ? (error as any).response?.data?.message || (error as any).message : '';
+    const errorMsg = isError ? getErrorMessage(error) : '';
 
     const observer = useRef<IntersectionObserver | null>(null);
     const lastElementRef = useCallback((node: HTMLDivElement | null) => {

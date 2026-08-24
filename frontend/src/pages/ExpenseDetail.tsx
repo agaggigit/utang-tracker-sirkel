@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import api from '../lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getErrorMessage } from '../utils/errorHandler';
 
 const MySwal = withReactContent(Swal);
 
@@ -62,7 +63,7 @@ export const ExpenseDetail = () => {
         enabled: !!expenseId
     });
 
-    const errorMsg = expenseError ? (expenseError as any).response?.data?.message || (expenseError as any).message : '';
+    const errorMsg = expenseError ? getErrorMessage(expenseError) : '';
 
     const deleteMutation = useMutation({
         mutationFn: async () => {
@@ -72,8 +73,8 @@ export const ExpenseDetail = () => {
             toast.success('Tagihan berhasil dihapus!');
             navigate(`/groups/${expense?.groupId}/expenses`, { replace: true });
         },
-        onError: (err: any) => {
-            toast.error(err.response?.data?.message || err.message);
+        onError: (err: unknown) => {
+            toast.error(getErrorMessage(err));
         }
     });
 
@@ -123,8 +124,8 @@ export const ExpenseDetail = () => {
             queryClient.invalidateQueries({ queryKey: ['expenses', expenseId] });
             queryClient.invalidateQueries({ queryKey: ['groups', expense?.groupId, 'activity'] }); // Invalidate activity log too
         },
-        onError: (err: any) => {
-            toast.error(err.response?.data?.message || 'Terjadi kesalahan jaringan saat mengirim pengajuan.');
+        onError: (err: unknown) => {
+            toast.error(getErrorMessage(err));
         }
     });
 
@@ -136,11 +137,11 @@ export const ExpenseDetail = () => {
     if (errorMsg) return <div className="pt-8 max-w-[1200px] mx-auto px-6"><p className="text-center mt-8 text-error flex items-center justify-center gap-2"><AlertTriangle size={20} /> {errorMsg}</p></div>;
     if (!isLoading && !expense) return <div className="pt-8 max-w-[1200px] mx-auto px-6"><p className="text-center mt-8">Data tidak ditemukan</p></div>;
 
-    const myShare = expense?.shares.find((s: any) => s.userId === currentUserId);
+    const myShare = expense?.shares.find((s) => s.userId === currentUserId);
     const amIInvolvedAndUnpaid = myShare && !myShare.isPaid && expense?.paidBy !== currentUserId;
     const amIThePayer = expense?.paidBy === currentUserId;
-    const hasPaidShares = expense?.shares.some((s: any) => s.isPaid && s.userId !== expense?.paidBy);
-    const isPending = myShare?.payments?.some((p: any) => p.status === 'pending');
+    const hasPaidShares = expense?.shares.some((s) => s.isPaid && s.userId !== expense?.paidBy);
+    const isPending = myShare?.payments?.some((p) => p.status === 'pending');
 
     return (
         <div className="pt-8 max-w-[1200px] mx-auto px-6 pb-12">

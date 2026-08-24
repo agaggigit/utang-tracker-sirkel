@@ -5,6 +5,7 @@ import { Input } from "../components/Input";
 import { Switch } from "../components/Switch";
 import { Check, ArrowLeft } from 'lucide-react';
 import api from '../lib/api';
+import { getErrorMessage } from '../utils/errorHandler';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const CreateGroup = () => {
@@ -28,18 +29,8 @@ export const CreateGroup = () => {
             setInviteCode(data.group.inviteCode);
             queryClient.invalidateQueries({ queryKey: ['groups'] });
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                if (data.errors) {
-                    const firstError = Object.values(data.errors)[0] as string[];
-                    setErrorMsg(firstError[0]);
-                } else {
-                    setErrorMsg(data.message || 'Gagal membuat grup');
-                }
-            } else {
-                setErrorMsg(err.message);
-            }
+        onError: (err: unknown) => {
+            setErrorMsg(getErrorMessage(err));
         }
     });
 

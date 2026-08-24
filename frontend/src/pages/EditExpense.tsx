@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import api from '../lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SkeletonForm } from '../components/ui/Skeleton';
+import { getErrorMessage } from '../utils/errorHandler';
+import { ExpenseShare } from '../types';
 
 // Tipe data untuk daftar anggota yang bisa dipilih
 interface Member {
@@ -77,7 +79,7 @@ export const EditExpense = () => {
                     throw new Error("Akses ditolak. Kamu bukan penombok tagihan ini.");
                 }
 
-                const hasPaid = expenseData.shares.some((s: any) => s.isPaid && s.userId !== currentUserId);
+                const hasPaid = expenseData.shares.some((s: ExpenseShare) => s.isPaid && s.userId !== currentUserId);
                 setIsLocked(hasPaid);
                 setDescription(expenseData.description);
                 setTotalAmount(expenseData.totalAmount);
@@ -96,16 +98,16 @@ export const EditExpense = () => {
                     setExpenseDate(localISOTime);
                 }
 
-                setShares(expenseData.shares.map((s: any) => ({
-                    userId: s.user.id || s.userId, // jika API mereturn include user
+                setShares(expenseData.shares.map((s: ExpenseShare) => ({
+                    userId: s.user?.id || s.userId, // jika API mereturn include user
                     shareAmount: s.shareAmount
                 })));
 
                 // 2. Ambil data member grup
                 const membersRes = await api.get(`/groups/${expenseData.groupId}/members`);
                 setMembers(membersRes.data);
-            } catch (err: any) {
-                setErrorMsg(err.message);
+            } catch (err: unknown) {
+                setErrorMsg(getErrorMessage(err));
             } finally {
                 setIsFetching(false);
             }
@@ -149,7 +151,7 @@ export const EditExpense = () => {
     };
 
     const editExpenseMutation = useMutation({
-        mutationFn: async (payload: any) => {
+        mutationFn: async (payload: { description: string, totalAmount: number, expenseDate: string, shares: { userId: string, shareAmount: number }[] }) => {
             const response = await api.put(`/expenses/${expenseId}`, payload);
             return response.data;
         },
@@ -159,18 +161,8 @@ export const EditExpense = () => {
             queryClient.invalidateQueries({ queryKey: ['groups'] });
             navigate(`/expenses/${expenseId}`, { replace: true });
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                if (data.errors) {
-                    const firstError = Object.values(data.errors)[0] as string[];
-                    setErrorMsg(firstError[0]);
-                } else {
-                    setErrorMsg(data.message || 'Gagal memperbarui tagihan');
-                }
-            } else {
-                setErrorMsg(err.message);
-            }
+        onError: (err: unknown) => {
+            setErrorMsg(getErrorMessage(err));
         }
     });
 
@@ -209,8 +201,8 @@ export const EditExpense = () => {
             
             editExpenseMutation.mutate(payload);
 
-        } catch (err: any) {
-            setErrorMsg(err.message);
+        } catch (err: unknown) {
+            setErrorMsg(getErrorMessage(err));
         }
     };
 

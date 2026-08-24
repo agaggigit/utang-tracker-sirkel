@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
+import { getErrorMessage } from '../utils/errorHandler';
 import { useMutation } from '@tanstack/react-query';
 
 export const Login = () => {
@@ -33,15 +34,10 @@ export const Login = () => {
             localStorage.setItem('token', data.token);
             toast.success('Login Berhasil!');
             
-            // Nanti kita arahkan ke halaman Home/Dashboard menggunakan:
             navigate('/dashboard');
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                setErrorMsg(err.response.data.message || 'Gagal login');
-            } else {
-                setErrorMsg(err.message);
-            }
+        onError: (err: unknown) => {
+            setErrorMsg(getErrorMessage(err));
         }
     });
 
@@ -60,12 +56,8 @@ export const Login = () => {
             localStorage.setItem('token', data.token);
             navigate('/dashboard');
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                setErrorMsg(err.response.data.message || 'Gagal login dengan Google');
-            } else {
-                setErrorMsg(err.message);
-            }
+        onError: (err: unknown) => {
+            setErrorMsg(getErrorMessage(err));
         }
     });
 

@@ -4,6 +4,7 @@ import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { ArrowLeft } from 'lucide-react';
 import api from '../lib/api';
+import { getErrorMessage } from '../utils/errorHandler';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const JoinGroup = () => {
@@ -22,18 +23,8 @@ export const JoinGroup = () => {
             queryClient.invalidateQueries({ queryKey: ['groups'] });
             navigate('/dashboard');
         },
-        onError: (err: any) => {
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                if (data.errors) {
-                    const firstError = Object.values(data.errors)[0] as string[];
-                    setErrorMsg(firstError[0]);
-                } else {
-                    setErrorMsg(data.message || 'Gagal bergabung ke grup');
-                }
-            } else {
-                setErrorMsg(err.message);
-            }
+        onError: (err: unknown) => {
+            setErrorMsg(getErrorMessage(err));
         }
     });
 
