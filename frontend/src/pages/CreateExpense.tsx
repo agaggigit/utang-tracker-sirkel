@@ -178,11 +178,11 @@ export const CreateExpense = () => {
                         </div>
                     )}
 
-                    <form className="expense-form-layout" onSubmit={handleSubmit}>
+                    <form className="flex flex-col gap-6 lg:grid lg:grid-cols-[1.2fr_1fr] lg:gap-12 lg:items-stretch" onSubmit={handleSubmit}>
                         
                         {/* 1. SPLIT BILL (KIRI) */}
-                        <div className="expense-form-split-wrapper">
-                            <div className="expense-form-split">
+                        <div className="relative">
+                            <div className="lg:absolute lg:inset-0 flex flex-col">
                                 <div className="flex justify-between items-center mb-4 shrink-0">
                                     <h3 className="m-0">Siapa saja yang berutang padamu?</h3>
                                     <Button type="button" variant="outline" onClick={handleSplitEqually} className="text-[0.85rem] px-4 py-2 flex gap-2 items-center">
@@ -198,7 +198,7 @@ export const CreateExpense = () => {
                                         {/* Baris Atas: Nama dan Tombol Hapus */}
                                         <div className="flex gap-4 items-center">
                                             {/* Dropdown Anggota (Disabled/Read-only untuk yang sudah dipilih) */}
-                                            <div className="input-wrapper flex-1 mb-0 min-w-0">
+                                            <div className="flex flex-col flex-1 min-w-0">
                                                 <div className="p-2 bg-surface-muted rounded-lg border border-border text-text-main whitespace-nowrap overflow-hidden text-ellipsis">
                                                     {members.find(m => m.id === share.userId)?.name || 'Anggota'}
                                                 </div>
@@ -216,12 +216,12 @@ export const CreateExpense = () => {
                                         </div>
 
                                         {/* Baris Bawah: Input Nominal */}
-                                        <div className="input-wrapper mb-0">
+                                        <div className="flex flex-col">
                                             <div className="flex items-center relative">
                                                 <span className="absolute left-4 text-text-muted font-bold">Rp</span>
                                                 <input 
                                                     type="text" 
-                                                    className="input-field pl-12 w-full font-bold" 
+                                                    className="p-3 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 pl-12 w-full font-bold" 
                                                     placeholder="0"
                                                     value={share.shareAmount}
                                                     onChange={e => handleShareChange(index, 'shareAmount', sanitizeMathInput(e.target.value))}
@@ -249,7 +249,7 @@ export const CreateExpense = () => {
                                                     setShares([...shares, { userId: e.target.value, shareAmount: '' }]);
                                                 }
                                             }}
-                                            className="input-field w-full border-2 border-dashed border-border bg-transparent cursor-pointer font-bold text-primary text-center appearance-none p-3"
+                                            className="p-3 w-full border-2 border-dashed border-border rounded-lg text-base bg-transparent text-primary transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 cursor-pointer font-bold text-center appearance-none"
                                         >
                                             <option value="" disabled>+ Klik untuk Tambah Anggota yang Ditagih...</option>
                                             {members.filter(m => !shares.some(s => s.userId === m.id)).map(m => (
@@ -265,26 +265,26 @@ export const CreateExpense = () => {
                         </div>
 
                         {/* 2. KANAN: INFO & SUBMIT */}
-                        <div className="expense-form-right">
-                            <div className="expense-form-info">
+                        <div className="lg:flex lg:flex-col lg:justify-between">
+                            <div className="pb-6 border-b border-border">
                                 <h3 className="mb-4">Informasi Tagihan</h3>
                                 
-                                <div className="input-wrapper">
-                                    <label className="input-label">Deskripsi / Judul</label>
+                                <div className="flex flex-col mb-4">
+                                    <label className="text-sm font-medium text-text-main mb-2">Deskripsi / Judul</label>
                                     <input 
                                         type="text" 
-                                        className="input-field" 
+                                        className="p-3 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15" 
                                         placeholder="Bayar apa hari ini?"
                                         value={description}
                                         onChange={e => setDescription(e.target.value)}
                                     />
                                 </div>
 
-                                <div className="input-wrapper">
-                                    <label className="input-label">Total Nominal (Rp) - Cth: 50000+15000</label>
+                                <div className="flex flex-col mb-4">
+                                    <label className="text-sm font-medium text-text-main mb-2">Total Nominal (Rp) - Cth: 50000+15000</label>
                                     <input 
                                         type="text" 
-                                        className="input-field" 
+                                        className="p-3 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15" 
                                         placeholder="0"
                                         value={totalAmount}
                                         onChange={e => setTotalAmount(sanitizeMathInput(e.target.value))}
@@ -297,11 +297,11 @@ export const CreateExpense = () => {
                                         }}
                                     />
                                 </div>
-                                <div className="input-wrapper">
-                                    <label className="input-label">Tanggal Transaksi</label>
+                                <div className="flex flex-col mb-4">
+                                    <label className="text-sm font-medium text-text-main mb-2">Tanggal Transaksi</label>
                                     <input 
                                         type={isTimeSpecific ? "datetime-local" : "date"} 
-                                        className="input-field" 
+                                        className="p-3 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15" 
                                         value={expenseDate}
                                         onChange={e => setExpenseDate(e.target.value)}
                                     />
@@ -327,7 +327,7 @@ export const CreateExpense = () => {
                                 </div>
                             </div>
 
-                            <div className="expense-form-submit">
+                            <div className="mt-4 pt-6 border-t border-border flex flex-col gap-4">
                                 <div className="flex justify-between text-[1.1rem]">
                                     <span>Total Tagihan:</span>
                                     <span className="font-bold">Rp {totalAmount || 0}</span>

@@ -103,7 +103,7 @@ export const GroupDetail = () => {
                 onBack={() => navigate(`/groups/${id}/expenses`)}
             />
 
-            <div className="group-detail-layout mt-8">
+            <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[250px_1fr] lg:gap-12 lg:items-start mt-8">
                 <div className="flex flex-col gap-2">
                     <button 
                         className={`text-left py-4 px-6 rounded-lg border-none text-[1.05rem] cursor-pointer flex items-center justify-between transition-all duration-200 ${activeTab === 'members' ? 'bg-primary font-bold text-white' : 'bg-transparent font-normal text-text-main'}`}
@@ -205,11 +205,11 @@ export const GroupDetail = () => {
                         <div>
                             <div className="bg-surface p-8 rounded-xl shadow-sm mb-8">
                                 <h3 className="mb-6">Pengaturan Grup</h3>
-                                <div className="input-wrapper">
-                                    <label className="input-label">Nama Grup</label>
+                                <div className="flex flex-col mb-4">
+                                    <label className="text-sm font-medium text-text-main mb-2">Nama Grup</label>
                                     <input 
                                         type="text" 
-                                        className="input-field" 
+                                        className="p-3 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15" 
                                         value={groupName}
                                         onChange={(e) => setGroupName(e.target.value)}
                                     />

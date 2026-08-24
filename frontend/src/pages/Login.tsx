@@ -83,15 +83,15 @@ export const Login = () => {
     const isSubmitting = loginMutation.isPending || googleLoginMutation.isPending;
 
     return (
-    <div className="auth-container">
-        <div className="auth-card">
-            <div className="auth-header">
-                <h2>Selamat Datang Kembali</h2>
-                <p>Masuk untuk melihat daftar utangmu</p>
+    <div className="w-full p-8 animate-[fadeIn_0.5s_ease-out]">
+        <div className="bg-surface rounded-[1rem] py-10 px-8 shadow-lg max-w-[500px] mx-auto">
+            <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-primary mb-2">Selamat Datang Kembali</h2>
+                <p className="text-text-muted text-sm m-0">Masuk untuk melihat daftar utangmu</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="auth-form">
-                {errorMsg && <div className="auth-error-banner">{errorMsg}</div>}
+            <form onSubmit={handleSubmit} className="flex flex-col">
+                {errorMsg && <div className="bg-error-bg text-error p-3 rounded-lg text-sm text-center mb-4 border border-error-border">{errorMsg}</div>}
 
                 <Input 
                     label="Alamat Email" 
@@ -117,8 +117,8 @@ export const Login = () => {
                     {loginMutation.isPending ? 'Mengecek data...' : 'Masuk'}
                 </Button>
                 
-                <div className="auth-divider">
-                    <span>atau</span>
+                <div className="flex items-center text-center my-6 text-text-muted text-sm before:flex-1 before:border-b before:border-border after:flex-1 after:border-b after:border-border">
+                    <span className="px-4">atau</span>
                 </div>
                 
                 <Button type="button" variant="outline" fullWidth onClick={() => handleGoogleLogin()}>

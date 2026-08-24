@@ -130,8 +130,8 @@ export const GroupExpenses = () => {
 
     return (
         <div className="pt-8 max-w-[1200px] mx-auto px-6 pb-12">
-            <div className="expenses-layout">
-                <div className="expenses-header">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr] lg:items-start">
+                <div className="flex flex-col">
                     <PageHeader 
                         title="Riwayat Tagihan" 
                         onBack={() => navigate('/dashboard')}
@@ -157,7 +157,7 @@ export const GroupExpenses = () => {
                         </span>
                         <input 
                             type="text" 
-                            className="input-field w-full !pl-[2.75rem] rounded-lg border border-border focus:ring-[3px]" 
+                            className="p-3 w-full !pl-[2.75rem] rounded-lg border-[1.5px] border-border bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15" 
                             placeholder="Cari tagihan (cth: Nasi Padang)..."
                             value={searchKeyword}
                             onChange={(e) => setSearchKeyword(e.target.value)}
@@ -190,7 +190,7 @@ export const GroupExpenses = () => {
                 </div>
 
             {/* --- 3. PANEL STATS (Kanan) --- */}
-            <div className="expenses-stats">
+            <div className="flex flex-col gap-6 lg:sticky lg:top-8">
             {/* --- TOMBOL CATAT TAGIHAN BARU --- */}
             <Button 
                 onClick={() => navigate(`/groups/${groupId}/expenses/create`)}
@@ -222,7 +222,7 @@ export const GroupExpenses = () => {
             )}
             </div>
 
-            <main className="expenses-list">
+            <main className="flex flex-col">
                 {errorMsg && (
                     <div className="p-4 bg-error-bg text-error rounded-lg mb-6 flex items-center gap-2">
                         <AlertTriangle size={20} /> {errorMsg}
@@ -377,14 +377,14 @@ export const GroupExpenses = () => {
                             <div className="flex gap-2 items-center">
                                 <input 
                                     type="date" 
-                                    className="input-field flex-1 p-2 rounded-lg border border-border focus:ring-[3px]" 
+                                    className="flex-1 p-2 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15" 
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
                                 />
                                 <span className="text-text-muted">-</span>
                                 <input 
                                     type="date" 
-                                    className="input-field flex-1 p-2 rounded-lg border border-border focus:ring-[3px]" 
+                                    className="flex-1 p-2 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15" 
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
                                 />

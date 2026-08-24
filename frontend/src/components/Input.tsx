@@ -9,14 +9,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
     ({ label, error, ...props }, ref) => {
         return (
-            <div className="input-wrapper">
-                <label className="input-label">
+            <div className="flex flex-col mb-4">
+                <label className="text-sm font-medium text-text-main mb-2">
                     {label}
                 </label>
 
-                <input ref={ref} className={`input-field ${error ? 'input-error' : ''}`} {...props}/>
+                <input ref={ref} className={`p-3 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 ${error ? '!border-error focus:!border-error focus:!ring-error/15' : ''} ${props.className || ''}`} {...props}/>
 
-                {error && <span className="input-error-msg">{error}</span>}
+                {error && <span className="text-error text-xs mt-2 font-medium">{error}</span>}
             </div>
         );
     }

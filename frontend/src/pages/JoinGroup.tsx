@@ -44,8 +44,8 @@ export const JoinGroup = () => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
+        <div className="w-full p-8 animate-[fadeIn_0.5s_ease-out]">
+            <div className="bg-surface rounded-[1rem] py-10 px-8 shadow-lg max-w-[500px] mx-auto">
                 <button 
                     onClick={() => navigate('/dashboard')}
                     className="bg-transparent border-none text-2xl cursor-pointer p-0 text-primary"
@@ -54,13 +54,13 @@ export const JoinGroup = () => {
                     <ArrowLeft size={24} />
                 </button>
 
-                <div className="auth-header mt-4">
-                    <h2>Gabung Sirkel</h2>
-                    <p>Mulai catat pengeluaran bersama teman-temanmu.</p>
+                <div className="text-center mb-8 mt-4">
+                    <h2 className="text-2xl font-bold text-primary mb-2">Gabung Sirkel</h2>
+                    <p className="text-text-muted text-sm m-0">Mulai catat pengeluaran bersama teman-temanmu.</p>
                 </div>
                 
-                <form onSubmit={handleSubmit} className="auth-form">
-                    {errorMsg && <div className="auth-error-banner bg-error-bg text-error border border-error-border">{errorMsg}</div>}
+                <form onSubmit={handleSubmit} className="flex flex-col">
+                    {errorMsg && <div className="p-3 rounded-lg text-sm text-center mb-4 bg-error-bg text-error border border-error-border">{errorMsg}</div>}
                     
                     <Input 
                         label="Kode Grup / Sirkel" 

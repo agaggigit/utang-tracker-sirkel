@@ -114,8 +114,8 @@ export const Profile = () => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card profile-card relative">
+        <div className="w-full p-8 animate-[fadeIn_0.5s_ease-out]">
+            <div className="bg-surface rounded-[1rem] py-10 px-8 shadow-lg max-w-[900px] mx-auto relative">
                 
                 {/* Tombol Kembali ke Dashboard */}
                 <button 
@@ -126,17 +126,17 @@ export const Profile = () => {
                     <ArrowLeft size={24} />
                 </button>
 
-                <div className="profile-layout mt-6">
+                <div className="flex flex-col gap-8 md:grid md:grid-cols-2 md:gap-12 md:items-center mt-6">
                     
                     {/* --- KOLOM KIRI --- */}
                     <div>
-                        <div className="auth-header">
-                            <h2>Profil Pribadi</h2>
-                            <p>Atur nama dan foto profilmu</p>
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-bold text-primary mb-2">Profil Pribadi</h2>
+                            <p className="text-text-muted text-sm m-0">Atur nama dan foto profilmu</p>
                         </div>
                         {/* AREA FOTO PROFIL */}
                         <div className="flex flex-col items-center gap-4">
-                            <div className="avatar-preview">
+                            <div className="w-[100px] h-[100px] rounded-full overflow-hidden bg-border flex justify-center items-center border-4 border-white shadow-md">
                                 {previewUrl ? (
                                     <img 
                                         src={previewUrl} 
@@ -159,7 +159,7 @@ export const Profile = () => {
                                         className="cursor-pointer"
                                     />
                                 ) : (
-                                    <div className="avatar-placeholder">
+                                    <div className="text-[2.5rem] font-bold text-white bg-primary w-full h-full flex justify-center items-center">
                                         {formData.name ? formData.name.charAt(0).toUpperCase() : '?'}
                                     </div>
                                 )}
@@ -221,9 +221,9 @@ export const Profile = () => {
                         
                         {/* FORM PROFIL */}
                         <div>
-                            <form onSubmit={handleSubmit} className="auth-form">
+                            <form onSubmit={handleSubmit} className="flex flex-col">
                                 {message.text && (
-                                    <div className={`auth-error-banner ${message.type === 'success' ? 'bg-success-bg text-success-text border-success-border' : 'bg-error-bg text-error border-error-border'}`}>
+                                    <div className={`p-3 rounded-lg text-sm text-center mb-4 border ${message.type === 'success' ? 'bg-success-bg text-success-text border-success-border' : 'bg-error-bg text-error border-error-border'}`}>
                                         {message.text}
                                     </div>
                                 )}
@@ -248,10 +248,10 @@ export const Profile = () => {
                                 <h3 className="m-0 text-[1.1rem] text-text-main">Pengaturan Tampilan</h3>
                             </div>
                             
-                            <div className="input-wrapper">
-                                <label className="input-label">Pilih Tema</label>
+                            <div className="flex flex-col mb-4">
+                                <label className="text-sm font-medium text-text-main mb-2">Pilih Tema</label>
                                 <select 
-                                    className="input-field font-inherit cursor-pointer" 
+                                    className="p-3 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 font-inherit cursor-pointer"
                                     value={themeMode}
                                     onChange={(e) => setThemeMode(e.target.value as 'light' | 'dark' | 'system' | 'schedule')}
                                 >
@@ -265,19 +265,19 @@ export const Profile = () => {
                             {themeMode === 'schedule' && (
                                 <div className="flex gap-4 -mt-2 bg-background p-4 rounded-lg border border-border">
                                     <div className="flex-1">
-                                        <label className="input-label text-[0.8rem]">Mulai Gelap</label>
+                                        <label className="text-[0.8rem] font-medium text-text-main mb-2 block">Mulai Gelap</label>
                                         <input 
                                             type="time" 
-                                            className="input-field p-2 w-full"
+                                            className="p-2 w-full border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
                                             value={scheduleTime.start}
                                             onChange={(e) => setScheduleTime(e.target.value, scheduleTime.end)}
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <label className="input-label text-[0.8rem]">Kembali Terang</label>
+                                        <label className="text-[0.8rem] font-medium text-text-main mb-2 block">Kembali Terang</label>
                                         <input 
                                             type="time" 
-                                            className="input-field p-2 w-full"
+                                            className="p-2 w-full border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
                                             value={scheduleTime.end}
                                             onChange={(e) => setScheduleTime(scheduleTime.start, e.target.value)}
                                         />

@@ -256,7 +256,7 @@ export const ExpenseDetail = () => {
                 >
                 <label className="block mb-2 font-bold text-[0.9rem]">Catatan (Opsional)</label>
                 <textarea 
-                    className="input-field w-full p-3 rounded-lg border border-border mb-6 font-inherit resize-y"
+                    className="w-full p-3 border-[1.5px] border-border rounded-lg text-base bg-surface-hover text-text-main transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 mb-6 font-inherit resize-y"
                     rows={3}
                     placeholder="Misal: Udah kutransfer via GoPay ya brok!"
                     value={paymentNote}

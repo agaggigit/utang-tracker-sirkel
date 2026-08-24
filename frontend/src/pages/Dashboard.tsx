@@ -69,7 +69,7 @@ export const Dashboard = () => {
     return (
         <div className="flex">
             {/* --- KONTEN UTAMA --- */}
-            <div className="app-main-content min-h-screen bg-[var(--color-dashboard-bg)] flex flex-col">
+            <div className="w-full transition-[padding-left] duration-300 md:pl-[240px] min-h-screen bg-[var(--color-dashboard-bg)] flex flex-col">
             {/* --- HERO HEADER: PROFIL --- */}
             <div className="pt-8 px-6 pb-16">
                 <div className="max-w-[800px] mx-auto flex justify-between items-center">
@@ -183,24 +183,24 @@ export const Dashboard = () => {
             </div> {/* END app-main-content */}
 
             {/* --- RESPONSIVE NAVIGATION BAR (BOTTOM / SIDEBAR) --- */}
-            <nav className="app-nav-bar">
+            <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] bg-surface border-t border-border flex justify-around items-center pt-2 pb-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-[100] transition-all duration-300 md:top-0 md:left-0 md:bottom-0 md:w-[240px] md:h-screen md:transform-none md:border-t-0 md:border-r md:flex-col md:justify-start md:py-8 md:shadow-md">
                 {/* Home */}
-                <div className="app-nav-item text-primary" onClick={() => navigate('/dashboard')}>
+                <div className="flex flex-col items-center cursor-pointer flex-1 md:flex-row md:w-full md:py-4 md:px-8 md:gap-4 md:flex-none md:justify-start hover:bg-background text-primary" onClick={() => navigate('/dashboard')}>
                     <Home size={24} />
-                    <span className="app-nav-text">Beranda</span>
+                    <span className="text-xs font-semibold mt-1 md:text-base md:mt-0">Beranda</span>
                 </div>
 
                 {/* Center FAB (Buat/Gabung) */}
-                <div className="app-nav-fab-wrapper">
-                    <div className="app-nav-fab" onClick={() => setIsAddModalOpen(true)}>
+                <div className="flex-1 flex justify-center md:w-full md:py-4 md:px-6 md:flex-none md:mb-8 md:-order-1">
+                    <div className="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center text-3xl -translate-y-5 shadow-lg cursor-pointer border-4 border-primary transition-all duration-200 md:w-full md:rounded-xl md:h-12 md:transform-none md:border-none md:text-xl md:gap-2 after:md:content-['Sirkel_Baru'] after:md:text-base after:md:font-semibold" onClick={() => setIsAddModalOpen(true)}>
                         <Plus size={32} />
                     </div>
                 </div>
 
                 {/* Settings / Profile */}
-                <div className="app-nav-item text-text-muted" onClick={() => navigate('/profile')}>
+                <div className="flex flex-col items-center cursor-pointer flex-1 md:flex-row md:w-full md:py-4 md:px-8 md:gap-4 md:flex-none md:justify-start hover:bg-background text-text-muted" onClick={() => navigate('/profile')}>
                     <Settings size={24} />
-                    <span className="app-nav-text">Pengaturan</span>
+                    <span className="text-xs font-semibold mt-1 md:text-base md:mt-0">Pengaturan</span>
                 </div>
             </nav>
 
