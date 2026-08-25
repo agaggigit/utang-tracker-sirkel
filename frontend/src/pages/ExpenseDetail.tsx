@@ -127,7 +127,7 @@ export const ExpenseDetail = () => {
                             <h1 className="m-0 text-3xl font-bold">{expense.description}</h1>
                             <div className="flex justify-between items-center mt-4 mb-8">
                                 <div>
-                                    <p className="m-0 text-text-muted">Grup: <strong>{expense.group.name}</strong></p>
+                                    <p className="m-0 text-text-muted">Grup: <strong>{expense.group?.name || 'Grup'}</strong></p>
                                     <p className="m-0 mt-1 text-text-muted flex items-center gap-2">
                                         <Calendar size={16} /> {new Date(expense.expenseDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                                     </p>
@@ -150,7 +150,7 @@ export const ExpenseDetail = () => {
                                         onClick={() => setIsModalOpen(true)} 
                                         className="w-full py-3 px-8 text-[1.05rem] shadow-md flex items-center justify-center gap-2"
                                     >
-                                        <Wallet size={20} /> Ajukan Pembayaran ke {expense.paidByUser.name}
+                                        <Wallet size={20} /> Ajukan Pembayaran ke {expense.paidByUser?.name || 'Penombok'}
                                     </Button>
                                 )}
                             </div>
@@ -185,15 +185,15 @@ export const ExpenseDetail = () => {
                     <div className="flex-[0_0_350px]">
                         <div className="p-6 bg-surface-hover rounded-xl border border-border">
                             <h3 className="m-0 mb-6 border-b border-border pb-2 text-lg">
-                                Ditalangi oleh: <span className="text-primary">{expense.paidByUser.name}</span>
+                                Ditalangi oleh: <span className="text-primary">{expense.paidByUser?.name || 'Seseorang'}</span>
                             </h3>
                             
                             <div className="flex flex-col gap-4">
                                 {expense.shares.map(share => (
                                     <ParticipantItem 
                                         key={share.id}
-                                        name={share.user.name}
-                                        email={share.user.email}
+                                        name={share.user?.name || 'Anggota'}
+                                        email={share.user?.email || ''}
                                         shareAmount={String(share.shareAmount)}
                                         isPaid={share.isPaid}
                                         isCurrentUser={share.userId === currentUserId}
@@ -204,7 +204,7 @@ export const ExpenseDetail = () => {
                                             id: paymentId, 
                                             amount: share.shareAmount,
                                             note, 
-                                            from: { name: share.user.name, email: share.user.email } 
+                                            from: { name: share.user?.name || 'Anggota', email: share.user?.email || '' } 
                                         })}
                                     />
                                 ))}
@@ -221,7 +221,7 @@ export const ExpenseDetail = () => {
                     isOpen={isModalOpen} 
                     onClose={() => setIsModalOpen(false)} 
                     title="Ajukan Pembayaran"
-                    description={<>Beri tahu <strong>{expense.paidByUser.name}</strong> kalau kamu sudah mentransfer uangnya.</>}
+                    description={<>Beri tahu <strong>{expense.paidByUser?.name || 'Penombok'}</strong> kalau kamu sudah mentransfer uangnya.</>}
                 >
                 <label className="block mb-2 font-bold text-[0.9rem]">Catatan (Opsional)</label>
                 <textarea 
@@ -254,8 +254,8 @@ export const ExpenseDetail = () => {
                             expense: {
                                 id: expense.id,
                                 description: expense.description,
-                                groupId: expense.group.id,
-                                group: { name: expense.group.name }
+                                groupId: expense.group?.id || expense.groupId,
+                                group: { name: expense.group?.name || 'Grup' }
                             }
                         }
                     } : null}

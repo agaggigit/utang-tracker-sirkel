@@ -7,7 +7,7 @@ import { ExpenseCard } from '../components/expenses/ExpenseCard';
 import { Modal } from '../components/ui/Modal';
 import { Settings, Search, Plus, AlertTriangle, Receipt, Filter, ArrowRight, Wallet, PartyPopper, ArrowLeft } from 'lucide-react';
 import { getErrorMessage } from '../utils/errorHandler';
-import type { Expense } from '../types';
+
 import { SkeletonList } from '../components/ui/Skeleton';
 import { GroupActivityDropdown } from '../components/ui/GroupActivityDropdown';
 import { useExpenses } from '../hooks/useExpenses';
@@ -271,7 +271,7 @@ export const GroupExpenses = () => {
                                     <p className="text-text-muted text-[0.9rem] flex items-center gap-2"><PartyPopper size={16} /> Kamu tidak punya utang ke siapapun!</p>
                                 ) : (
                                     <div className="flex flex-col gap-3">
-                                        {balanceData.iOwe.map(item => (
+                                        {balanceData.iOwe.map((item: any) => (
                                             <div 
                                                 key={item.userId} 
                                                 onClick={() => setSelectedBalanceDetail({ ...item, isDebt: true })}
@@ -291,7 +291,7 @@ export const GroupExpenses = () => {
                                     <p className="text-text-muted text-[0.9rem] flex items-center gap-2"><Wallet size={16} /> Belum ada yang utang ke kamu.</p>
                                 ) : (
                                     <div className="flex flex-col gap-3">
-                                        {balanceData.owedToMe.map(item => (
+                                        {balanceData.owedToMe.map((item: any) => (
                                             <div 
                                                 key={item.userId} 
                                                 onClick={() => setSelectedBalanceDetail({ ...item, isDebt: false })}

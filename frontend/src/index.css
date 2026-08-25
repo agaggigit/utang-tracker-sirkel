@@ -4,33 +4,33 @@
 @tailwind utilities;
 
 :root {
-    /* Palet Warna Clean Corporate (Ala Livin / Banking) */
-  --color-background: #f4f7fb; /* Putih sedikit kebiruan agar mata tidak sakit */
-  --color-surface: #ffffff;    /* Putih murni untuk kotak/kartu form */
+    /* Palet Warna Clean Corporate (Ala Livin / Banking) dalam format RGB (R G B) */
+  --color-background: 244 247 251; /* #f4f7fb */
+  --color-surface: 255 255 255;    /* #ffffff */
   
-  --color-primary: #005baa;    /* Biru Corporate yang terpercaya */
-  --color-primary-hover: #004588; 
+  --color-primary: 0 91 170;       /* #005baa */
+  --color-primary-hover: 0 69 136; /* #004588 */
   
-  --color-text-main: #1e293b;  /* Abu-abu sangat gelap (bukan hitam murni) */
-  --color-text-muted: #64748b; /* Abu-abu lembut untuk teks pendukung */
+  --color-text-main: 30 41 59;     /* #1e293b */
+  --color-text-muted: 100 116 139; /* #64748b */
   
-  --color-border: #e2e8f0;     /* Warna garis pembatas yang samar */
-  --color-error: #ef4444;      /* Merah untuk peringatan error */
+  --color-border: 226 232 240;     /* #e2e8f0 */
+  --color-error: 239 68 68;        /* #ef4444 */
   
-  --color-surface-hover: #f9fafb;
-  --color-surface-muted: #f3f4f6;
-  --color-error-bg: #fef2f2;
-  --color-error-border: #fecaca;
-  --color-success-bg: #dcfce7;
-  --color-success-border: #bbf7d0;
-  --color-success-text: #166534;
+  --color-surface-hover: 249 250 251; /* #f9fafb */
+  --color-surface-muted: 243 244 246; /* #f3f4f6 */
+  --color-error-bg: 254 242 242;      /* #fef2f2 */
+  --color-error-border: 254 202 202;  /* #fecaca */
+  --color-success-bg: 220 252 231;    /* #dcfce7 */
+  --color-success-border: 187 247 208;/* #bbf7d0 */
+  --color-success-text: 22 101 52;    /* #166534 */
   
-  --color-skeleton-start: #e2e8f0;
-  --color-skeleton-end: #cbd5e1;
+  --color-skeleton-start: 226 232 240; /* #e2e8f0 */
+  --color-skeleton-end: 203 213 225;   /* #cbd5e1 */
 
-  --color-dashboard-bg: var(--color-primary); /* Background khusus dashboard (Biru di Light Mode) */
-  --color-header-text: #ffffff; /* Putih di atas biru */
-  --color-header-icon: #ffffff;
+  --color-dashboard-bg: var(--color-primary);
+  --color-header-text: 255 255 255; /* #ffffff */
+  --color-header-icon: 255 255 255; /* #ffffff */
 
   /* Efek Bayangan (Shadow) ala Apple/Bank */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -44,27 +44,27 @@
 
 body.dark-theme, html.dark-theme {
   color-scheme: dark;
-  --color-background: #0f172a; 
-  --color-surface: #1e293b;    
-  --color-primary: #3b82f6;    
-  --color-primary-hover: #2563eb; 
-  --color-text-main: #f8fafc;  
-  --color-text-muted: #94a3b8; 
-  --color-border: #334155;     
-  --color-error: #f87171;      
+  --color-background: 15 23 42;    /* #0f172a */
+  --color-surface: 30 41 59;       /* #1e293b */
+  --color-primary: 59 130 246;     /* #3b82f6 */
+  --color-primary-hover: 37 99 235;/* #2563eb */
+  --color-text-main: 248 250 252;  /* #f8fafc */
+  --color-text-muted: 148 163 184; /* #94a3b8 */
+  --color-border: 51 65 85;        /* #334155 */
+  --color-error: 248 113 113;      /* #f87171 */
 
-  --color-surface-hover: #334155;
-  --color-surface-muted: #0f172a;
-  --color-error-bg: #450a0a;
-  --color-error-border: #7f1d1d;
-  --color-success-bg: #052e16;
-  --color-success-border: #14532d;
-  --color-success-text: #4ade80;
+  --color-surface-hover: 51 65 85;   /* #334155 */
+  --color-surface-muted: 15 23 42;   /* #0f172a */
+  --color-error-bg: 69 10 10;        /* #450a0a */
+  --color-error-border: 127 29 29;   /* #7f1d1d */
+  --color-success-bg: 5 46 22;       /* #052e16 */
+  --color-success-border: 20 83 45;  /* #14532d */
+  --color-success-text: 74 222 128;  /* #4ade80 */
 
-  --color-skeleton-start: #1e293b;
-  --color-skeleton-end: #334155;
+  --color-skeleton-start: 30 41 59;  /* #1e293b */
+  --color-skeleton-end: 51 65 85;    /* #334155 */
 
-  --color-dashboard-bg: var(--color-background); /* Background dashboard gelap di Dark Mode */
+  --color-dashboard-bg: var(--color-background);
   --color-header-text: var(--color-text-main);
   --color-header-icon: var(--color-text-muted);
 }
@@ -77,8 +77,8 @@ body.dark-theme, html.dark-theme {
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: var(--color-background);
-  color: var(--color-text-main);
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-text-main));
   -webkit-font-smoothing: antialiased;
 
   /* Agar layar HP penuh, layar Laptop memusat ke tengah */
@@ -92,7 +92,7 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
-  background-color: var(--color-background);
+  background-color: rgb(var(--color-background));
   position: relative;
 }
 
@@ -120,9 +120,9 @@ body {
 .swal2-popup {
   border-radius: var(--radius-lg) !important;
   box-shadow: var(--shadow-lg) !important;
-  background-color: var(--color-surface) !important;
-  color: var(--color-text-main) !important;
-  border: 1px solid var(--color-border) !important;
+  background-color: rgb(var(--color-surface)) !important;
+  color: rgb(var(--color-text-main)) !important;
+  border: 1px solid rgb(var(--color-border)) !important;
   padding: 2rem 1.5rem !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
@@ -139,7 +139,7 @@ body {
   100% { opacity: 1; } 
 }
 .skeleton-loading { 
-  background-color: var(--color-skeleton-start);
+  background-color: rgb(var(--color-skeleton-start));
   animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; 
 }
 

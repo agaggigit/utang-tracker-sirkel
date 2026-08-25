@@ -55,8 +55,9 @@ export const PWAPrompt = () => {
     const handleInstall = async () => {
         if (!deferredPrompt) return;
 
-        deferredPrompt.prompt();    // Lepaskan event bawaan browser
-        const { outcome } = await deferredPrompt.userChoice;
+        const promptEvent = deferredPrompt as any;
+        promptEvent.prompt();
+        const { outcome } = await promptEvent.userChoice;
 
         console.log(`User memilih: ${outcome}`);    // 'accepted' atau 'dismissed'
 

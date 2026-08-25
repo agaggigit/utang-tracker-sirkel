@@ -152,10 +152,11 @@ export const Dashboard = () => {
                             
                             {/* DAFTAR GRUP YANG DIMILIKI */}
                             <div className="flex flex-col gap-4">
-                                {user.memberships.map((membership: GroupMembership & { role: string; hasUnpaidDebt?: boolean }) => (
-                                    <div key={membership.group.id} className="p-5 bg-surface border border-border rounded-xl flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
+                                {user?.memberships?.map((membership: GroupMembership & { role: string; hasUnpaidDebt?: boolean }) => (
+                                    <div key={membership.group?.id} className="p-5 bg-surface border border-border rounded-xl flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
                                         <div>
-                                            <h3 className="m-0 text-[1.15rem] font-bold text-text-main">{membership.group.name}</h3>
+                                            <div className="w-12 h-12 bg-surface text-primary rounded-xl flex items-center justify-center font-bold text-xl shadow-sm border border-border group-hover:bg-primary group-hover:text-white transition-colors">{membership.group?.name?.charAt(0) || 'G'}</div>
+                                            <h3 className="m-0 text-[1.15rem] font-bold text-text-main">{membership.group?.name || 'Grup'}</h3>
                                             <p className="m-0 mt-1 text-[0.85rem] text-text-muted">Peranmu: {membership.role}</p>
                                             {membership.hasUnpaidDebt && (
                                                 <p className="m-0 mt-1 text-[0.85rem] text-error font-bold flex items-center gap-1">
@@ -163,7 +164,7 @@ export const Dashboard = () => {
                                                 </p>
                                             )}
                                         </div>
-                                        <Button onClick={() => navigate('/groups/' + membership.group.id + '/expenses')}>Buka Sirkel</Button>
+                                        <Button onClick={() => membership.group?.id && navigate('/groups/' + membership.group.id + '/expenses')}>Buka Sirkel</Button>
                                     </div>
                                 ))}
                             </div>

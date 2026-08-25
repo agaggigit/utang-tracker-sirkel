@@ -35,10 +35,10 @@ export const GroupDetail = () => {
     useEffect(() => {
         if (groupDetail) {
             setGroupName(groupDetail.name);
-            setJoinApprovalRequired(groupDetail.joinApprovalRequired);
+            setJoinApprovalRequired(groupDetail.joinApprovalRequired ?? false);
             setInitialGroupName(groupDetail.name);
-            setInitialJoinApprovalRequired(groupDetail.joinApprovalRequired);
-            setInviteCode(groupDetail.inviteCode);
+            setInitialJoinApprovalRequired(groupDetail.joinApprovalRequired ?? false);
+            setInviteCode(groupDetail.inviteCode ?? '');
         }
     }, [groupDetail]);
 
