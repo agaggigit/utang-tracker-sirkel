@@ -94,13 +94,13 @@ export function GroupActivityDropdown({ groupId }: { groupId: string }) {
                                     else actionText = `${activity.from.name} mengajukan pelunasan ke ${activity.to.name}`;
                                 } else if (activity.status === 'approved') {
                                     statusIcon = <CheckCircle size={16} />;
-                                    statusColor = 'var(--color-success-text)';
+                                    statusColor = 'rgb(var(--color-success-text))';
                                     if (isForMe) actionText = `Kamu mengkonfirmasi pelunasan ${activity.from.name}`;
                                     else if (isFromMe) actionText = `${activity.to.name} mengkonfirmasi pelunasanmu`;
                                     else actionText = `${activity.to.name} mengkonfirmasi pelunasan ${activity.from.name}`;
                                 } else {
                                     statusIcon = <XCircle size={16} />;
-                                    statusColor = 'var(--color-error)';
+                                    statusColor = 'rgb(var(--color-error))';
                                     if (isForMe) actionText = `Kamu menolak pelunasan ${activity.from.name}`;
                                     else if (isFromMe) actionText = `${activity.to.name} menolak pelunasanmu`;
                                     else actionText = `${activity.to.name} menolak pelunasan ${activity.from.name}`;

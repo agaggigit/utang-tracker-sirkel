@@ -122,95 +122,97 @@ export const ExpenseDetail = () => {
                         <SkeletonForm />
                     ) : (
                         <>
-                            <div className="flex-1">
-                        <div>
-                            <h1 className="m-0 text-3xl font-bold">{expense.description}</h1>
-                            <div className="flex justify-between items-center mt-4 mb-8">
-                                <div>
-                                    <p className="m-0 text-text-muted">Grup: <strong>{expense.group?.name || 'Grup'}</strong></p>
-                                    <p className="m-0 mt-1 text-text-muted flex items-center gap-2">
-                                        <Calendar size={16} /> {new Date(expense.expenseDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="m-0 text-[0.9rem] text-text-muted">Total Tagihan</p>
-                                    <h2 className="m-0 text-primary">Rp {Number(expense.totalAmount).toLocaleString('id-ID')}</h2>
-                                </div>
-                            </div>
-                        </div>
-
-                        {amIInvolvedAndUnpaid && (
-                            <div className="mt-2 flex justify-center">
-                                {isPending ? (
-                                    <div className="py-4 px-8 bg-[#fef3c7] text-[#92400e] rounded-lg border border-[#fde68a] font-bold w-full text-center flex items-center justify-center gap-2">
-                                        <Clock size={20} /> Menunggu Konfirmasi Penombok
+                            {/* KOLOM KIRI: Daftar Anggota Ditalangi */}
+                            <div className="flex-[1.2]">
+                                <div className="p-6 bg-surface-hover rounded-xl border border-border">
+                                    <h3 className="m-0 mb-6 border-b border-border pb-2 text-lg">
+                                        Ditalangi oleh: <span className="text-primary">{expense.paidByUser?.name || 'Seseorang'}</span>
+                                    </h3>
+                                    
+                                    <div className="flex flex-col gap-4">
+                                        {expense.shares.map(share => (
+                                            <ParticipantItem 
+                                                key={share.id}
+                                                name={share.user?.name || 'Anggota'}
+                                                email={share.user?.email || ''}
+                                                shareAmount={String(share.shareAmount)}
+                                                isPaid={share.isPaid}
+                                                isCurrentUser={share.userId === currentUserId}
+                                                isPayer={share.userId === expense.paidBy}
+                                                payments={share.payments}
+                                                showReviewButton={amIThePayer}
+                                                onReviewClick={(paymentId, note) => setReviewPayment({ 
+                                                    id: paymentId, 
+                                                    amount: share.shareAmount,
+                                                    note, 
+                                                    from: { name: share.user?.name || 'Anggota', email: share.user?.email || '' } 
+                                                })}
+                                            />
+                                        ))}
                                     </div>
-                                ) : (
-                                    <Button 
-                                        onClick={() => setIsModalOpen(true)} 
-                                        className="w-full py-3 px-8 text-[1.05rem] shadow-md flex items-center justify-center gap-2"
-                                    >
-                                        <Wallet size={20} /> Ajukan Pembayaran ke {expense.paidByUser?.name || 'Penombok'}
-                                    </Button>
-                                )}
+                                </div>
                             </div>
-                        )}
-                        
-                        {amIThePayer && (
-                            <div className="mt-2 flex gap-4 justify-center">
-                                <Button 
-                                    variant="outline" 
-                                    className="flex-1 flex items-center justify-center gap-2"
-                                    onClick={() => navigate(`/expenses/${expenseId}/edit`)}
-                                >
-                                    <Edit2 size={18} /> Edit Tagihan
-                                </Button>
-                                {!hasPaidShares ? (
-                                    <Button 
-                                        className="flex-1 bg-error flex items-center justify-center gap-2"
-                                        onClick={handleDelete}
-                                        disabled={deleteMutation.isPending}
-                                    >
-                                        {deleteMutation.isPending ? 'Menghapus...' : <><Trash2 size={18} /> Hapus</>}
-                                    </Button>
-                                ) : (
-                                    <div className="flex-1 p-2 text-[0.8rem] text-text-muted text-center">
-                                        (Hapus dimatikan)
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                    
-                    <div className="flex-[0_0_350px]">
-                        <div className="p-6 bg-surface-hover rounded-xl border border-border">
-                            <h3 className="m-0 mb-6 border-b border-border pb-2 text-lg">
-                                Ditalangi oleh: <span className="text-primary">{expense.paidByUser?.name || 'Seseorang'}</span>
-                            </h3>
                             
-                            <div className="flex flex-col gap-4">
-                                {expense.shares.map(share => (
-                                    <ParticipantItem 
-                                        key={share.id}
-                                        name={share.user?.name || 'Anggota'}
-                                        email={share.user?.email || ''}
-                                        shareAmount={String(share.shareAmount)}
-                                        isPaid={share.isPaid}
-                                        isCurrentUser={share.userId === currentUserId}
-                                        isPayer={share.userId === expense.paidBy}
-                                        payments={share.payments}
-                                        showReviewButton={amIThePayer}
-                                        onReviewClick={(paymentId, note) => setReviewPayment({ 
-                                            id: paymentId, 
-                                            amount: share.shareAmount,
-                                            note, 
-                                            from: { name: share.user?.name || 'Anggota', email: share.user?.email || '' } 
-                                        })}
-                                    />
-                                ))}
+                            {/* KOLOM KANAN: Informasi Tagihan & Tombol */}
+                            <div className="flex-1 md:max-w-[400px]">
+                                <div>
+                                    <h1 className="m-0 text-3xl font-bold">{expense.description}</h1>
+                                    <div className="flex justify-between items-center mt-4 mb-8">
+                                        <div>
+                                            <p className="m-0 text-text-muted">Grup: <strong>{expense.group?.name || 'Grup'}</strong></p>
+                                            <p className="m-0 mt-1 text-text-muted flex items-center gap-2">
+                                                <Calendar size={16} /> {new Date(expense.expenseDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="m-0 text-[0.9rem] text-text-muted">Total Tagihan</p>
+                                            <h2 className="m-0 text-primary">Rp {Number(expense.totalAmount).toLocaleString('id-ID')}</h2>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {amIInvolvedAndUnpaid && (
+                                    <div className="mt-2 flex justify-center">
+                                        {isPending ? (
+                                            <div className="py-4 px-8 bg-[#fef3c7] text-[#92400e] rounded-lg border border-[#fde68a] font-bold w-full text-center flex items-center justify-center gap-2">
+                                                <Clock size={20} /> Menunggu Konfirmasi Penombok
+                                            </div>
+                                        ) : (
+                                            <Button 
+                                                onClick={() => setIsModalOpen(true)} 
+                                                className="w-full py-3 px-8 text-[1.05rem] shadow-md flex items-center justify-center gap-2"
+                                            >
+                                                <Wallet size={20} /> Ajukan Pembayaran ke {expense.paidByUser?.name || 'Penombok'}
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
+                                
+                                {amIThePayer && (
+                                    <div className="mt-2 flex gap-4 justify-center">
+                                        <Button 
+                                            variant="outline" 
+                                            className="flex-1 flex items-center justify-center gap-2"
+                                            onClick={() => navigate(`/expenses/${expenseId}/edit`)}
+                                        >
+                                            <Edit2 size={18} /> Edit Tagihan
+                                        </Button>
+                                        {!hasPaidShares ? (
+                                            <Button 
+                                                className="flex-1 bg-error flex items-center justify-center gap-2"
+                                                onClick={handleDelete}
+                                                disabled={deleteMutation.isPending}
+                                            >
+                                                {deleteMutation.isPending ? 'Menghapus...' : <><Trash2 size={18} /> Hapus</>}
+                                            </Button>
+                                        ) : (
+                                            <div className="flex-1 p-2 text-[0.8rem] text-text-muted text-center">
+                                                (Hapus dimatikan)
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                        </div>
                         </>
                     )}
                     </div>

@@ -12,7 +12,7 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-export function Avatar({ name, imageUrl, size = 40, fontSize = '1rem', backgroundColor = 'var(--color-primary)', textColor = 'white' }: AvatarProps) {
+export function Avatar({ name, imageUrl, size = 40, fontSize = '1rem', backgroundColor = 'rgb(var(--color-primary))', textColor = 'white' }: AvatarProps) {
     if (imageUrl) {
         const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000';
         const fullUrl = imageUrl.startsWith('http') ? imageUrl : `${backendUrl}${imageUrl}`;

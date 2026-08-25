@@ -82,23 +82,23 @@ function App() {
         toastOptions={{
           style: {
             borderRadius: '12px',
-            background: 'var(--color-surface)',
-            color: 'var(--color-text-main)',
+            background: 'rgb(var(--color-surface))',
+            color: 'rgb(var(--color-text-main))',
             boxShadow: 'var(--shadow-md)',
             padding: '16px',
             fontSize: '0.95rem',
             fontWeight: 500,
-            border: '1px solid var(--color-border)',
+            border: '1px solid rgb(var(--color-border))',
           },
           success: {
             iconTheme: {
-              primary: 'var(--color-primary)',
+              primary: 'rgb(var(--color-primary))',
               secondary: 'white',
             },
           },
           error: {
             iconTheme: {
-              primary: 'var(--color-error)',
+              primary: 'rgb(var(--color-error))',
               secondary: 'white',
             },
           }

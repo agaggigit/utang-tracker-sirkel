@@ -7,5 +7,10 @@ Direktori ini berisi modul pembantu (Helper / Utilities) yang menunjang aplikasi
   - **Fungsi Utama**: Bertugas menengahi semua komunikasi HTTP dari Frontend ke Backend.
   - **Alur Kerja Interceptor**:
     1. **Request Interceptor**: Sebelum request dikirim, ia secara otomatis mengambil Token JWT dari `localStorage` dan menyisipkannya pada Header `Authorization: Bearer <token>`.
-    2. **Response Interceptor**: Saat respons kembali, jika Backend mengirimkan status error HTTP `401 Unauthorized` (artinya token kedaluwarsa atau tidak valid), Axios akan otomatis menendang pengguna ke halaman `/login` dan menghapus token lama, mencegah kebocoran keamanan.
   - **Manfaat**: Halaman (Pages) tidak perlu lagi repot mengatur *Header* secara berulang-ulang setiap kali melakukan operasi *fetch*. Cukup gunakan `api.get()`, `api.post()`, dst.
+
+---
+
+### React Query (`queryClient.ts`)
+Mengonfigurasi pengaturan baku pencadangan dan penyegaran *cache* untuk modul `@tanstack/react-query`.
+- Memberikan perilaku kustom terkait dengan `staleTime` dan pengaturan _retry_ agar aplikasi tidak memberondong server secara otomatis bila panggilan mengalami _error_ sesaat.

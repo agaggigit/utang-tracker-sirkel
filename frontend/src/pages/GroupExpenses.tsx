@@ -141,92 +141,91 @@ export const GroupExpenses = () => {
                         >Hapus Semua Filter</span>
                     </div>
                 )}
-                </div>
+                    <main className="flex flex-col mt-2">
+                        {errorMsg && (
+                            <div className="p-4 bg-error-bg text-error rounded-lg mb-6 flex items-center gap-2">
+                                <AlertTriangle size={20} /> {errorMsg}
+                            </div>
+                        )}
 
-            {/* --- 3. PANEL STATS (Kanan) --- */}
-            <div className="flex flex-col gap-6 lg:sticky lg:top-8">
-            {/* --- TOMBOL CATAT TAGIHAN BARU --- */}
-            <Button 
-                onClick={() => navigate(`/groups/${groupId}/expenses/create`)}
-                className="w-full text-[1.05rem] p-4 flex justify-center items-center gap-2 shadow-md mb-6"
-            >
-                <Plus size={20} /> Catat Tagihan Baru
-            </Button>
+                        {isLoading ? (
+                            <SkeletonList count={4} />
+                        ) : expenses.length === 0 ? (
+                            <EmptyState 
+                                icon={<Receipt size={48} />}
+                                title="Belum ada tagihan"
+                                description="Ayo mulai patungan dengan mencatat pengeluaran pertama!"
+                                action={<Button onClick={() => navigate(`/groups/${groupId}/expenses/create`)}>Catat Tagihan</Button>}
+                            />
+                        ) : (
+                            <div className="flex flex-col gap-4">
+                                {expenses.map((expense, index) => {
+                                    const isLastElement = expenses.length === index + 1;
+                                    const currentDateHeader = formatDateHeader(expense.expenseDate);
+                                    const prevExpense = index > 0 ? expenses[index - 1] : null;
+                                    const showHeader = !prevExpense || formatDateHeader(prevExpense.expenseDate) !== currentDateHeader;
+                                    
+                                    return (
+                                        <React.Fragment key={expense.id}>
+                                            {showHeader && (
+                                                <div className="self-center bg-primary text-white px-4 py-1 rounded-full text-[0.85rem] font-bold mt-4 shadow-sm">
+                                                    {currentDateHeader}
+                                                </div>
+                                            )}
+                                            <div ref={isLastElement ? lastElementRef : null}>
+                                                <ExpenseCard 
+                                                    id={expense.id}
+                                                    description={expense.description}
+                                                    totalAmount={String(expense.totalAmount)}
+                                                    expenseDate={expense.expenseDate}
+                                                    paidByUserName={expense.paidByUser?.name || 'Seseorang'}
+                                                    paidByUserId={expense.paidBy}
+                                                    currentUserId={currentUserId}
+                                                    myShare={expense.shares.find(s => s.userId === currentUserId)}
+                                                />
+                                            </div>
+                                        </React.Fragment>
+                                    )
+                                })}
+                                {isFetchingNextPage && <SkeletonList count={1} />}
+                                {!hasNextPage && expenses.length > 0 && <p className="text-center text-text-muted">Tamat. Tidak ada histori lagi.</p>}
+                            </div>
+                        )}
+                    </main>
+                </div> {/* END KIRI */}
 
-            {/* --- BANNER RINGKASAN UTANG --- */}
-            {!isBalanceLoading && balanceData && (
-                <div 
-                    onClick={() => setIsBalanceModalOpen(true)}
-                    className="flex flex-col gap-4 bg-surface p-6 rounded-xl border border-primary shadow-md cursor-pointer relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg mb-6"
-                >
-                    <div className="absolute left-0 right-0 top-0 h-1.5 bg-primary"></div>
-                    
-                    <div className="mt-2">
-                        <p className="m-0 text-[0.9rem] text-text-muted">Piutang (Orang utang ke kamu)</p>
-                        <h3 className="m-0 text-primary">Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')}</h3>
-                    </div>
-                    <div>
-                        <p className="m-0 text-[0.9rem] text-text-muted">Utangmu (Kamu utang ke orang)</p>
-                        <h3 className="m-0 text-error">Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
-                    </div>
-                    <div className="self-start bg-surface-muted px-4 py-2 rounded-full text-[0.85rem] mt-2 flex items-center gap-1 hover:bg-border transition-colors">
-                        Lihat Rincian <ArrowRight size={16} />
-                    </div>
-                </div>
-            )}
-            </div>
+                {/* --- 3. PANEL STATS (Kanan) --- */}
+                <div className="flex flex-col gap-6 lg:sticky lg:top-8">
+                    {/* --- TOMBOL CATAT TAGIHAN BARU --- */}
+                    <Button 
+                        onClick={() => navigate(`/groups/${groupId}/expenses/create`)}
+                        className="w-full text-[1.05rem] p-4 flex justify-center items-center gap-2 shadow-md mb-6"
+                    >
+                        <Plus size={20} /> Catat Tagihan Baru
+                    </Button>
 
-            <main className="flex flex-col">
-                {errorMsg && (
-                    <div className="p-4 bg-error-bg text-error rounded-lg mb-6 flex items-center gap-2">
-                        <AlertTriangle size={20} /> {errorMsg}
-                    </div>
-                )}
-
-                {isLoading ? (
-                    <SkeletonList count={4} />
-                ) : expenses.length === 0 ? (
-                    <EmptyState 
-                        icon={<Receipt size={48} />}
-                        title="Belum ada tagihan"
-                        description="Ayo mulai patungan dengan mencatat pengeluaran pertama!"
-                        action={<Button onClick={() => navigate(`/groups/${groupId}/expenses/create`)}>Catat Tagihan</Button>}
-                    />
-                ) : (
-                    <div className="flex flex-col gap-4">
-                        {expenses.map((expense, index) => {
-                            const isLastElement = expenses.length === index + 1;
-                            const currentDateHeader = formatDateHeader(expense.expenseDate);
-                            const prevExpense = index > 0 ? expenses[index - 1] : null;
-                            const showHeader = !prevExpense || formatDateHeader(prevExpense.expenseDate) !== currentDateHeader;
+                    {/* --- BANNER RINGKASAN UTANG --- */}
+                    {!isBalanceLoading && balanceData && (
+                        <div 
+                            onClick={() => setIsBalanceModalOpen(true)}
+                            className="flex flex-col gap-4 bg-surface p-6 rounded-xl border border-primary shadow-md cursor-pointer relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg mb-6"
+                        >
+                            <div className="absolute left-0 right-0 top-0 h-1.5 bg-primary"></div>
                             
-                            return (
-                                <React.Fragment key={expense.id}>
-                                    {showHeader && (
-                                        <div className="self-center bg-primary text-white px-4 py-1 rounded-full text-[0.85rem] font-bold mt-4 shadow-sm">
-                                            {currentDateHeader}
-                                        </div>
-                                    )}
-                                    <div ref={isLastElement ? lastElementRef : null}>
-                                        <ExpenseCard 
-                                            id={expense.id}
-                                            description={expense.description}
-                                            totalAmount={String(expense.totalAmount)}
-                                            expenseDate={expense.expenseDate}
-                                            paidByUserName={expense.paidByUser?.name || 'Seseorang'}
-                                            paidByUserId={expense.paidBy}
-                                            currentUserId={currentUserId}
-                                            myShare={expense.shares.find(s => s.userId === currentUserId)}
-                                        />
-                                    </div>
-                                </React.Fragment>
-                            )
-                        })}
-                        {isFetchingNextPage && <SkeletonList count={1} />}
-                        {!hasNextPage && expenses.length > 0 && <p className="text-center text-text-muted">Tamat. Tidak ada histori lagi.</p>}
-                    </div>
-                )}
-            </main>
+                            <div className="mt-2">
+                                <p className="m-0 text-[0.9rem] text-text-muted">Piutang (Orang utang ke kamu)</p>
+                                <h3 className="m-0 text-primary">Rp {Number(balanceData.totalOwedToMe).toLocaleString('id-ID')}</h3>
+                            </div>
+                            <div>
+                                <p className="m-0 text-[0.9rem] text-text-muted">Utangmu (Kamu utang ke orang)</p>
+                                <h3 className="m-0 text-error">Rp {Number(balanceData.totalIOwe).toLocaleString('id-ID')}</h3>
+                            </div>
+                            <div className="self-start bg-surface-muted px-4 py-2 rounded-full text-[0.85rem] mt-2 flex items-center gap-1 hover:bg-border transition-colors">
+                                Lihat Rincian <ArrowRight size={16} />
+                            </div>
+                        </div>
+                    )}
+                </div> {/* END KANAN */}
             </div>
 
             {/* MODAL RINGKASAN MENGGUNAKAN GENERIC MODAL */}

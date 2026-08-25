@@ -36,3 +36,15 @@ Pastikan kamu sudah berada di dalam folder `backend`, lalu jalankan:
    npm run dev
    ```
    *Server akan menyala dengan fitur Auto-Restart (menggunakan `tsx watch`) dan siap mendengarkan request dari Frontend.*
+
+---
+
+## Arsitektur Tambahan (Modular Monolith)
+
+Direktori `src/` dibagi menjadi beberapa sub-domain fungsional untuk mencegah *Spaghetti Code*:
+- `expenses/`: Pencatatan pengeluaran, tagihan, dan rincian alokasi tagihan (*Split Bill*).
+- `groups/`: Pengelolaan grup dan *Invite Code*.
+- `middleware/`: Validasi _token JWT_ (*Authentication*) dan _error handlers_.
+- `notifications/`: Sistem *feed* notifikasi (*polling*).
+- `payments/`: Pengajuan dan konfirmasi pelunasan utang.
+- `users/`: Pendaftaran, otentikasi login (JWT), dan profil pribadi.

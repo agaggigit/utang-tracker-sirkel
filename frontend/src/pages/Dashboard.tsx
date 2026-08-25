@@ -60,7 +60,7 @@ export const Dashboard = () => {
     return (
         <div className="flex">
             {/* --- KONTEN UTAMA --- */}
-            <div className="w-full transition-[padding-left] duration-300 md:pl-[240px] min-h-screen bg-[var(--color-dashboard-bg)] flex flex-col">
+            <div className="w-full transition-[padding-left] duration-300 md:pl-[240px] min-h-screen bg-[rgb(var(--color-dashboard-bg))] flex flex-col">
             {/* --- HERO HEADER: PROFIL --- */}
             <div className="pt-8 px-6 pb-16">
                 <div className="max-w-[800px] mx-auto flex justify-between items-center">
@@ -77,14 +77,14 @@ export const Dashboard = () => {
                                 name={user?.name || 'Sobat'} 
                                 imageUrl={user?.avatarUrl} 
                                 size={48} 
-                                backgroundColor="var(--color-surface)"
-                                textColor="var(--color-primary)"
+                                backgroundColor="rgb(var(--color-surface))"
+                                textColor="rgb(var(--color-primary))"
                             />
                         )}
                         {isLoading ? (
                             <Skeleton width={150} height={24} />
                         ) : (
-                            <h1 className="text-2xl m-0 whitespace-nowrap overflow-hidden text-ellipsis text-[var(--color-header-text)] font-bold">
+                            <h1 className="text-2xl m-0 whitespace-nowrap overflow-hidden text-ellipsis text-[rgb(var(--color-header-text))] font-bold">
                                 {user?.name || 'Sobat'}
                             </h1>
                         )}
@@ -98,12 +98,12 @@ export const Dashboard = () => {
                             onClick={toggleThemeQuick} 
                             title={isDark ? "Ubah ke Mode Terang" : "Ubah ke Mode Gelap"}
                         >
-                            {isDark ? <Sun size={24} color="var(--color-header-icon)" /> : <Moon size={24} color="var(--color-header-icon)" />}
+                            {isDark ? <Sun size={24} color="rgb(var(--color-header-icon))" /> : <Moon size={24} color="rgb(var(--color-header-icon))" />}
                         </div>
 
                         {/* INBOX */}
                         <div className="relative cursor-pointer flex items-center" onClick={() => navigate('/notifications')} title="Kotak Masuk">
-                            <Inbox size={24} color="var(--color-header-icon)" />
+                            <Inbox size={24} color="rgb(var(--color-header-icon))" />
                             {notifications.length > 0 && (
                                 <span className="absolute -top-1.5 -right-2 bg-error text-white rounded-full px-1.5 py-0.5 text-xs font-bold shadow-sm">
                                     {notifications.length}
@@ -155,7 +155,6 @@ export const Dashboard = () => {
                                 {user?.memberships?.map((membership: GroupMembership & { role: string; hasUnpaidDebt?: boolean }) => (
                                     <div key={membership.group?.id} className="p-5 bg-surface border border-border rounded-xl flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
                                         <div>
-                                            <div className="w-12 h-12 bg-surface text-primary rounded-xl flex items-center justify-center font-bold text-xl shadow-sm border border-border group-hover:bg-primary group-hover:text-white transition-colors">{membership.group?.name?.charAt(0) || 'G'}</div>
                                             <h3 className="m-0 text-[1.15rem] font-bold text-text-main">{membership.group?.name || 'Grup'}</h3>
                                             <p className="m-0 mt-1 text-[0.85rem] text-text-muted">Peranmu: {membership.role}</p>
                                             {membership.hasUnpaidDebt && (

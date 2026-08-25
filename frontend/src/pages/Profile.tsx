@@ -216,7 +216,7 @@ export const Profile = () => {
                         {/* PENGATURAN TAMPILAN */}
                         <div className="border-t border-border pt-6">
                             <div className="flex items-center gap-2 mb-4">
-                                <Moon size={20} color="var(--color-text-muted)" />
+                                <Moon size={20} color="rgb(var(--color-text-muted))" />
                                 <h3 className="m-0 text-[1.1rem] text-text-main">Pengaturan Tampilan</h3>
                             </div>
                             

@@ -20,11 +20,13 @@ Aplikasi ini adalah platform pencatatan utang (patungan) yang dirancang khusus u
 ## Tech Stack
 
 ### Frontend & PWA Layer
-- **Core Framework:** React 19 + Vite
-- **Styling:** Vanilla CSS Variables (untuk kebebasan kustomisasi *theme*) + Lucide React (Icons)
+- **Core Framework:** React 19 + Vite + TypeScript
+- **Styling:** Tailwind CSS. Semua warna kustom diatur menggunakan **format RGB dengan sintaks `<alpha-value>`** agar mendukung *opacity modifier* (contoh: `bg-primary/50`).
+- **Icons:** Lucide React
 - **PWA Builders:** Vite PWA
-- **Client-Side Database:** Dexie.js (untuk kapabilitas *offline*)
 - **Server State Management:** TanStack Query (React Query) untuk *caching* data dari API dan sinkronisasi otomatis.
+- **Custom Hooks Architecture:** Semua logika *fetching* API dan mutasi data **wajib dipisahkan** dari komponen UI (Presentational) dan dienkapsulasi di dalam folder `src/hooks`. Tidak boleh ada halaman yang menjadi *Fat Component*.
+- **Client-Side Database:** Dexie.js (untuk kapabilitas *offline*)
 - **UX Enhancements:** React Hot Toast & SweetAlert2 (Notifikasi & Popup)
 
 ### Backend & API Layer
@@ -37,6 +39,17 @@ Aplikasi ini adalah platform pencatatan utang (patungan) yang dirancang khusus u
 ### Database & Storage
 - **Database Utama:** PostgreSQL
 - **ORM:** Prisma
+
+---
+
+## Standardisasi Kode (Code Conventions)
+
+> [!IMPORTANT]
+> Kontributor yang ingin berpartisipasi diharapkan mematuhi aturan berikut:
+
+1. **Strict Null Checks (TypeScript)**: TypeScript dikonfigurasi sangat ketat. Hindari penggunaan tipe `any`. Gunakan **Optional Chaining (`?.`)** dan **Nullish Coalescing (`??`)** untuk memastikan aplikasi tidak *crash* jika menemukan data *undefined*.
+2. **Error Handling Terpusat**: Semua penanganan *error* dari API **wajib** diproses menggunakan fungsi pembantu `getErrorMessage` yang ada di `frontend/src/utils/errorHandler.ts` agar pesan error tampil seragam.
+3. **Pemisahan Logika (Separation of Concerns)**: Komponen UI (React Component) hanya bertugas untuk **merender tampilan**. Logika bisnis, _fetching_, dan pengiriman formulir diserahkan sepenuhnya kepada *Custom Hooks*.
 
 ---
 

@@ -92,3 +92,15 @@ index.html
 - gatau juga buat apa
 
 Jadi nanti konsep nya bakal kaya bubble aplikasi chat, dimana untuk setiap bubble merepresentasikan patungan atau tindakan transaksi, dan dibangun berdasarkan timeline, tanggal berapa tanggal berapa, dan nanti yang nalangin palanya muncul di atas, pas bubble nya diteken bakal masuk ke detail utang per orang nya
+
+---
+
+## Arsitektur Tambahan (Terbaru)
+
+Aplikasi ini menggunakan **React Query (`@tanstack/react-query`)** untuk *caching* dan *infinite scroll*.
+Konfigurasi **Tailwind CSS** diatur menggunakan variabel format RGB murni (seperti `0 91 170`) tanpa `rgb()` di `index.css`. Tujuannya agar mendukung utilitas _opacity_ (contoh: `bg-primary/50`).
+
+Struktur folder utama tambahan:
+- `src/components/`: Komponen murni (Presentational) tanpa logika *fetching*.
+- `src/hooks/`: Tempat berkumpulnya *Custom Hooks* (logika API).
+- `src/pages/`: Menyambungkan Hooks dan Components (dilarang *Fat Component*).

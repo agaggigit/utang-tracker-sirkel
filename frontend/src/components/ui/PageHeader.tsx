@@ -27,7 +27,7 @@ export function PageHeader({ title, showBackButton = true, onBack, action, subti
                 {showBackButton && (
                     <button 
                         onClick={handleBack}
-                        style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }}
+                        style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'rgb(var(--color-primary))' }}
                         title="Kembali"
                     >
                         <ArrowLeft size={24} />
@@ -35,7 +35,7 @@ export function PageHeader({ title, showBackButton = true, onBack, action, subti
                 )}
                 <div>
                     <h2 style={{ margin: 0 }}>{title}</h2>
-                    {subtitle && <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: '0.2rem' }}>{subtitle}</p>}
+                    {subtitle && <p style={{ margin: 0, color: 'rgb(var(--color-text-muted))', fontSize: '0.9rem', marginTop: '0.2rem' }}>{subtitle}</p>}
                 </div>
             </div>
             {action && <div>{action}</div>}
