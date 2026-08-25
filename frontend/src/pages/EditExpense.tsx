@@ -4,11 +4,10 @@ import { Button } from '../components/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { AlertTriangle, Scale, Trash2, ChevronDown, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SkeletonForm } from '../components/ui/Skeleton';
 import { getErrorMessage } from '../utils/errorHandler';
-import { ExpenseShare } from '../types';
+import type { ExpenseShare } from '../types';
+import { useExpenses } from '../hooks/useExpenses';
 
 // Tipe data untuk daftar anggota yang bisa dipilih
 interface Member {
@@ -62,7 +61,6 @@ export const EditExpense = () => {
     const [members, setMembers] = useState<Member[]>([]);
 
     const [errorMsg, setErrorMsg] = useState('');
-    const queryClient = useQueryClient();
 
     // --- EFFECT ---
     useEffect(() => {
@@ -71,8 +69,10 @@ export const EditExpense = () => {
                 const token = localStorage.getItem('token');
                 
                 // 1. Ambil data expense
-                const expenseRes = await api.get(`/expenses/${expenseId}`);
-                const expenseData = expenseRes.data;
+                const expenseRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/expenses/${expenseId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const expenseData = await expenseRes.json();
                 
                 const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).userId : '';
                 if (expenseData.paidBy !== currentUserId) {
@@ -104,8 +104,11 @@ export const EditExpense = () => {
                 })));
 
                 // 2. Ambil data member grup
-                const membersRes = await api.get(`/groups/${expenseData.groupId}/members`);
-                setMembers(membersRes.data);
+                const membersRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/groups/${expenseData.groupId}/members`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const membersData = await membersRes.json();
+                setMembers(membersData);
             } catch (err: unknown) {
                 setErrorMsg(getErrorMessage(err));
             } finally {
@@ -150,19 +153,14 @@ export const EditExpense = () => {
         setShares(newShares);
     };
 
-    const editExpenseMutation = useMutation({
-        mutationFn: async (payload: { description: string, totalAmount: number, expenseDate: string, shares: { userId: string, shareAmount: number }[] }) => {
-            const response = await api.put(`/expenses/${expenseId}`, payload);
-            return response.data;
-        },
+    const { useEditExpense } = useExpenses();
+    const editExpenseMutation = useEditExpense(expenseId, '', {
         onSuccess: () => {
             toast.success("Berhasil memperbarui tagihan!");
-            queryClient.invalidateQueries({ queryKey: ['expenses', expenseId] });
-            queryClient.invalidateQueries({ queryKey: ['groups'] });
             navigate(`/expenses/${expenseId}`, { replace: true });
         },
-        onError: (err: unknown) => {
-            setErrorMsg(getErrorMessage(err));
+        onError: (err: any) => {
+            setErrorMsg(err.response?.data?.message || err.message || 'Gagal memperbarui tagihan');
         }
     });
 

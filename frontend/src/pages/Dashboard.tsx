@@ -6,10 +6,10 @@ import { Avatar } from '../components/ui/Avatar';
 import { SkeletonList, Skeleton } from '../components/ui/Skeleton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import api from '../lib/api';
-import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '../hooks/useAuth';
+import { useNotifications } from '../hooks/useNotifications';
 import { useTheme } from '../contexts/ThemeContext';
-import { Notification, GroupMembership } from '../types';
+import type { Notification, GroupMembership } from '../types';
 
 const MySwal = withReactContent(Swal);
 
@@ -17,21 +17,11 @@ export const Dashboard = () => {
     const navigate = useNavigate();
     const { isDark, toggleThemeQuick } = useTheme();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const { data: user, isLoading: isLoadingUser } = useQuery({
-        queryKey: ['users', 'me'],
-        queryFn: async () => {
-            const response = await api.get('/users/me');
-            return response.data;
-        }
-    });
+    const { useProfile } = useAuth();
+    const { useGeneralNotifs } = useNotifications();
 
-    const { data: notificationsData, isLoading: isLoadingNotif } = useQuery({
-        queryKey: ['notifications'],
-        queryFn: async () => {
-            const response = await api.get('/notifications');
-            return response.data;
-        }
-    });
+    const { data: user, isLoading: isLoadingUser } = useProfile();
+    const { data: notificationsData, isLoading: isLoadingNotif } = useGeneralNotifs();
 
     const isLoading = isLoadingUser || isLoadingNotif;
     const notifications = notificationsData ? notificationsData.filter((n: Notification) => !n.isRead) : [];

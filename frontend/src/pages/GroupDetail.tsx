@@ -10,11 +10,10 @@ import { Bell, Settings, AlertTriangle, Users, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import api from '../lib/api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getErrorMessage } from '../utils/errorHandler';
-import { User, JoinRequest } from '../types';
+import type { User, JoinRequest } from '../types';
 import { AxiosError } from 'axios';
+import { useGroups } from '../hooks/useGroups';
 
 const MySwal = withReactContent(Swal);
 
@@ -29,15 +28,9 @@ export const GroupDetail = () => {
     const [initialGroupName, setInitialGroupName] = useState('');
     const [initialJoinApprovalRequired, setInitialJoinApprovalRequired] = useState(false);
     const [inviteCode, setInviteCode] = useState('KODE123');
-    const queryClient = useQueryClient();
+    const { useGroupDetail, useGroupRequests, useGroupMembers, useUpdateGroup, useReviewJoinRequest } = useGroups();
     
-    const { data: groupDetail } = useQuery({
-        queryKey: ['groups', id],
-        queryFn: async () => {
-            const response = await api.get(`/groups/${id}`);
-            return response.data;
-        }
-    });
+    const { data: groupDetail } = useGroupDetail(id);
 
     useEffect(() => {
         if (groupDetail) {
@@ -49,51 +42,27 @@ export const GroupDetail = () => {
         }
     }, [groupDetail]);
 
-    const { data: requests = [], isLoading, error: requestError } = useQuery({
-        queryKey: ['groups', id, 'join-requests'],
-        queryFn: async () => {
-            const response = await api.get(`/groups/${id}/join-requests`);
-            return response.data;
-        },
-        retry: false
-    });
+    const { data: requests = [], isLoading, error: requestError } = useGroupRequests(id);
     const errorMsg = requestError ? (requestError instanceof AxiosError && requestError.response?.status === 403) ? 'Hanya Host (Pembuat Grup) yang dapat melihat antrean ini.' : getErrorMessage(requestError) : '';
 
-    const { data: members = [], isLoading: isMembersLoading, error: memberError } = useQuery({
-        queryKey: ['groups', id, 'members'],
-        queryFn: async () => {
-            const response = await api.get(`/groups/${id}/members`);
-            return response.data;
-        }
-    });
+    const { data: members = [], isLoading: isMembersLoading, error: memberError } = useGroupMembers(id);
     const membersErrorMsg = memberError ? getErrorMessage(memberError) : '';
 
-    const editGroupMutation = useMutation({
-        mutationFn: async (updatedData: Partial<{name: string, joinApprovalRequired: boolean, regenerateInviteCode: boolean}>) => {
-            const response = await api.patch(`/groups/${id}`, updatedData);
-            return response.data;
-        },
+    const editGroupMutation = useUpdateGroup(id, {
         onSuccess: (data) => {
             toast.success(data.message || 'Berhasil menyimpan perubahan!');
-            queryClient.invalidateQueries({ queryKey: ['groups', id] });
         },
-        onError: (err: unknown) => {
-            toast.error(getErrorMessage(err));
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || err.message || 'Gagal menyimpan perubahan');
         }
     });
 
-    const approvalMutation = useMutation({
-        mutationFn: async ({ requestId, status }: { requestId: string, status: 'approved' | 'rejected' }) => {
-            const response = await api.patch(`/groups/${id}/join-requests/${requestId}`, { status });
-            return response.data;
-        },
+    const approvalMutation = useReviewJoinRequest(id, {
         onSuccess: (data) => {
             toast.success(data.message || 'Berhasil mengubah status');
-            queryClient.invalidateQueries({ queryKey: ['groups', id, 'join-requests'] });
-            queryClient.invalidateQueries({ queryKey: ['groups', id, 'members'] });
         },
-        onError: (err: unknown) => {
-            toast.error("Error: " + getErrorMessage(err));
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || err.message || 'Gagal mengubah status');
         }
     });
 

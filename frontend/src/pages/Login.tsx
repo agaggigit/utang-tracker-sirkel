@@ -4,9 +4,7 @@ import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
-import { getErrorMessage } from '../utils/errorHandler';
-import { useMutation } from '@tanstack/react-query';
+import { useAuth } from '../hooks/useAuth';
 
 export const Login = () => {
     const navigate = useNavigate();
@@ -24,20 +22,25 @@ export const Login = () => {
         });
     };
 
-    const loginMutation = useMutation({
-        mutationFn: async (credentials: typeof formData) => {
-            const response = await api.post('/auth/login', credentials);
-            return response.data;
-        },
+    const loginMutation = useAuth().useLogin({
         onSuccess: (data) => {
             // MISI RAHASIA: Simpan "Kunci" (Token JWT) dari Backend ke Brankas Browser
             localStorage.setItem('token', data.token);
             toast.success('Login Berhasil!');
-            
             navigate('/dashboard');
         },
-        onError: (err: unknown) => {
-            setErrorMsg(getErrorMessage(err));
+        onError: (err: any) => {
+            setErrorMsg(err.response?.data?.message || err.message || 'Gagal login');
+        }
+    });
+
+    const googleLoginMutation = useAuth().useGoogleLoginMutation({
+        onSuccess: (data) => {
+            localStorage.setItem('token', data.token);
+            navigate('/dashboard');
+        },
+        onError: (err: any) => {
+            setErrorMsg(err.response?.data?.message || err.message || 'Gagal login Google');
         }
     });
 
@@ -46,20 +49,6 @@ export const Login = () => {
         setErrorMsg('');
         loginMutation.mutate(formData);
     };
-
-    const googleLoginMutation = useMutation({
-        mutationFn: async (code: string) => {
-            const response = await api.post('/auth/google', { code });
-            return response.data;
-        },
-        onSuccess: (data) => {
-            localStorage.setItem('token', data.token);
-            navigate('/dashboard');
-        },
-        onError: (err: unknown) => {
-            setErrorMsg(getErrorMessage(err));
-        }
-    });
 
     const handleGoogleLogin = useGoogleLogin({
         flow: 'auth-code',

@@ -4,9 +4,7 @@ import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { Switch } from "../components/Switch";
 import { Check, ArrowLeft } from 'lucide-react';
-import api from '../lib/api';
-import { getErrorMessage } from '../utils/errorHandler';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useGroups } from '../hooks/useGroups';
 
 export const CreateGroup = () => {
     const navigate = useNavigate();
@@ -18,19 +16,12 @@ export const CreateGroup = () => {
     const [isCopied, setIsCopied] = useState(false);
     const [joinApprovalRequired, setJoinApprovalRequired] = useState(false);
     
-    const queryClient = useQueryClient();
-
-    const createMutation = useMutation({
-        mutationFn: async (payload: { name: string, joinApprovalRequired: boolean }) => {
-            const response = await api.post('/groups', payload);
-            return response.data;
-        },
+    const createMutation = useGroups().useCreateGroup({
         onSuccess: (data) => {
             setInviteCode(data.group.inviteCode);
-            queryClient.invalidateQueries({ queryKey: ['groups'] });
         },
-        onError: (err: unknown) => {
-            setErrorMsg(getErrorMessage(err));
+        onError: (err: any) => {
+            setErrorMsg(err.response?.data?.message || err.message || 'Gagal membuat grup');
         }
     });
 

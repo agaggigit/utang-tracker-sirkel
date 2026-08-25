@@ -10,30 +10,12 @@ import { ReviewPaymentModal } from '../components/expenses/ReviewPaymentModal';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import api from '../lib/api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getErrorMessage } from '../utils/errorHandler';
+import { useExpenses } from '../hooks/useExpenses';
 
 const MySwal = withReactContent(Swal);
 
-interface ExpenseDetailData {
-    id: string;
-    description: string;
-    totalAmount: string;
-    expenseDate: string;
-    groupId: string;
-    paidBy: string; 
-    paidByUser: { name: string, email: string };
-    group: { name: string, id: string };
-    shares: {
-        id: string;
-        userId: string;
-        shareAmount: string;
-        isPaid: boolean;
-        user: { name: string, email: string, avatarUrl?: string };
-        payments?: { id: string; status: string; note?: string }[];
-    }[];
-}
+import { useQueryClient } from '@tanstack/react-query';
 
 export const ExpenseDetail = () => {
     const { id: expenseId } = useParams();
@@ -45,7 +27,7 @@ export const ExpenseDetail = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [paymentNote, setPaymentNote] = useState('');
 
-    const [reviewPayment, setReviewPayment] = useState<{ id: string, amount: string, note?: string, from: { name: string, email: string } } | null>(null);
+    const [reviewPayment, setReviewPayment] = useState<{ id: string, amount: string | number, note?: string, from: { name: string, email: string } } | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -54,27 +36,18 @@ export const ExpenseDetail = () => {
         }
     }, []);
 
-    const { data: expense, isLoading, error: expenseError } = useQuery({
-        queryKey: ['expenses', expenseId],
-        queryFn: async () => {
-            const response = await api.get(`/expenses/${expenseId}`);
-            return response.data as ExpenseDetailData;
-        },
-        enabled: !!expenseId
-    });
+    const { useExpenseDetail, useDeleteExpense, useCreatePayment } = useExpenses();
+    const { data: expense, isLoading, error: expenseError } = useExpenseDetail(expenseId);
 
     const errorMsg = expenseError ? getErrorMessage(expenseError) : '';
 
-    const deleteMutation = useMutation({
-        mutationFn: async () => {
-            await api.delete(`/expenses/${expenseId}`);
-        },
+    const deleteMutation = useDeleteExpense(expenseId, expense?.groupId, {
         onSuccess: () => {
             toast.success('Tagihan berhasil dihapus!');
             navigate(`/groups/${expense?.groupId}/expenses`, { replace: true });
         },
-        onError: (err: unknown) => {
-            toast.error(getErrorMessage(err));
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || err.message || 'Gagal menghapus tagihan');
         }
     });
 
@@ -107,30 +80,25 @@ export const ExpenseDetail = () => {
         deleteMutation.mutate();
     };
 
-    const paymentMutation = useMutation({
-        mutationFn: async (note: string) => {
-            const share = expense?.shares.find(s => s.userId === currentUserId);
-            if (!share) throw new Error('No share found');
-            const response = await api.post(`/payments`, {
-                expenseShareId: share.id,
-                note
-            });
-            return response.data;
-        },
+    const paymentMutation = useCreatePayment(expenseId, {
         onSuccess: () => {
             toast.success('Pengajuan pelunasan berhasil dikirim!');
             setIsModalOpen(false);
             setPaymentNote('');
-            queryClient.invalidateQueries({ queryKey: ['expenses', expenseId] });
-            queryClient.invalidateQueries({ queryKey: ['groups', expense?.groupId, 'activity'] }); // Invalidate activity log too
+            queryClient.invalidateQueries({ queryKey: ['groups', expense?.groupId, 'activity'] });
         },
-        onError: (err: unknown) => {
-            toast.error(getErrorMessage(err));
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || err.message || 'Gagal mengirim pembayaran');
         }
     });
 
     const handleSubmitPayment = () => {
-        paymentMutation.mutate(paymentNote);
+        const share = expense?.shares.find(s => s.userId === currentUserId);
+        if (!share) return;
+        paymentMutation.mutate({
+            expenseShareId: share.id,
+            note: paymentNote,
+        });
     };
 
     // Removed early return for isLoading to keep PageHeader visible
@@ -226,7 +194,7 @@ export const ExpenseDetail = () => {
                                         key={share.id}
                                         name={share.user.name}
                                         email={share.user.email}
-                                        shareAmount={share.shareAmount}
+                                        shareAmount={String(share.shareAmount)}
                                         isPaid={share.isPaid}
                                         isCurrentUser={share.userId === currentUserId}
                                         isPayer={share.userId === expense.paidBy}

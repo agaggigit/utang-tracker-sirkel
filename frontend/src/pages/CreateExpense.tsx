@@ -4,16 +4,9 @@ import { Button } from '../components/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { AlertTriangle, Scale, Trash2, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { getErrorMessage } from '../utils/errorHandler';
-import { User } from '../types';
-
-// Tipe data untuk daftar anggota yang bisa dipilih
-interface Member {
-    id: string;
-    name: string;
-}
+import { useExpenses } from '../hooks/useExpenses';
+import { useGroups } from '../hooks/useGroups';
 
 // Helper Kalkulator Cepat
 const evaluateMath = (expression: string | number): number | string => {
@@ -56,17 +49,10 @@ export const CreateExpense = () => {
     const [shares, setShares] = useState<{ userId: string, shareAmount: number | string }[]>([]);
     
     // State untuk daftar pilihan anggota grup (didapat dari Backend)
-    const { data: members = [] } = useQuery({
-        queryKey: ['groups', groupId, 'members'],
-        queryFn: async () => {
-            const response = await api.get(`/groups/${groupId}/members`);
-            return response.data as Member[];
-        },
-        enabled: !!groupId
-    });
+    const { useGroupMembers } = useGroups();
+    const { data: members = [] } = useGroupMembers(groupId);
 
     const [errorMsg, setErrorMsg] = useState('');
-    const queryClient = useQueryClient();
 
     // --- HANDLER UNTUK SPLIT BILL ---
 
@@ -102,19 +88,14 @@ export const CreateExpense = () => {
         setShares(newShares);
     };
 
-    const createExpenseMutation = useMutation({
-        mutationFn: async (payload: { description: string, totalAmount: number, expenseDate: string, groupId: string, shares: { userId: string, shareAmount: number }[] }) => {
-            const response = await api.post(`/groups/${groupId}/expenses`, payload);
-            return response.data;
-        },
+    const { useCreateExpense } = useExpenses();
+    const createExpenseMutation = useCreateExpense(groupId, {
         onSuccess: () => {
             toast.success("Berhasil mencatat tagihan!");
-            queryClient.invalidateQueries({ queryKey: ['groups', groupId, 'expenses'] });
-            queryClient.invalidateQueries({ queryKey: ['groups', groupId, 'balance'] });
             navigate(`/groups/${groupId}/expenses`);
         },
-        onError: (err: unknown) => {
-            setErrorMsg(getErrorMessage(err));
+        onError: (err: any) => {
+            setErrorMsg(err.response?.data?.message || err.message || 'Gagal membuat tagihan');
         }
     });
 

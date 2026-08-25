@@ -3,28 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { ArrowLeft } from 'lucide-react';
-import api from '../lib/api';
-import { getErrorMessage } from '../utils/errorHandler';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useGroups } from '../hooks/useGroups';
 
 export const JoinGroup = () => {
     const navigate = useNavigate();
     const [inviteCode, setInviteCode] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
 
-    const queryClient = useQueryClient();
-    
-    const joinMutation = useMutation({
-        mutationFn: async (code: string) => {
-            const response = await api.post('/groups/join', { inviteCode: code });
-            return response.data;
-        },
+    const joinMutation = useGroups().useJoinGroup({
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['groups'] });
             navigate('/dashboard');
         },
-        onError: (err: unknown) => {
-            setErrorMsg(getErrorMessage(err));
+        onError: (err: any) => {
+            setErrorMsg(err.response?.data?.message || err.message || 'Gagal bergabung ke grup');
         }
     });
 

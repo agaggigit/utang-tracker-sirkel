@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { Button } from '../Button';
 import { X, Check } from 'lucide-react';
 import { Modal } from '../ui/Modal';
-import api from '../../lib/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getErrorMessage } from '../../utils/errorHandler';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { useExpenses } from '../../hooks/useExpenses';
 
 interface ReviewPaymentModalProps {
     isOpen: boolean;
@@ -30,21 +29,14 @@ interface ReviewPaymentModalProps {
 export function ReviewPaymentModal({ isOpen, onClose, payment, onSuccess }: ReviewPaymentModalProps) {
     const [rejectionNote, setRejectionNote] = useState('');
     const queryClient = useQueryClient();
-
-    const actionMutation = useMutation({
-        mutationFn: async ({ id, action, note }: { id: string, action: 'approve' | 'reject', note?: string }) => {
-            const payload = action === 'reject' ? { rejectionNote: note } : {};
-            await api.patch(`/payments/${id}/${action}`, payload);
-        },
+    const { useReviewPayment } = useExpenses();
+    const actionMutation = useReviewPayment(payment?.expenseShare.expense.id, payment?.id, {
         onSuccess: () => {
             toast.success('Review berhasil disimpan!');
             setRejectionNote('');
             
-            // Invalidate relevant queries
+            // Invalidate relevant queries (activity log needs separate invalidation)
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            if (payment?.expenseShare?.expense?.id) {
-                queryClient.invalidateQueries({ queryKey: ['expenses', payment.expenseShare.expense.id] });
-            }
             if (payment?.expenseShare?.expense?.groupId) {
                 queryClient.invalidateQueries({ queryKey: ['groups', payment.expenseShare.expense.groupId, 'activity'] });
             }
@@ -52,8 +44,8 @@ export function ReviewPaymentModal({ isOpen, onClose, payment, onSuccess }: Revi
             if (onSuccess) onSuccess();
             onClose();
         },
-        onError: (err: unknown) => {
-            toast.error(getErrorMessage(err));
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || err.message || 'Gagal menyimpan review');
         }
     });
 
@@ -63,7 +55,7 @@ export function ReviewPaymentModal({ isOpen, onClose, payment, onSuccess }: Revi
             toast.error("Harap masukkan alasan penolakan!");
             return;
         }
-        actionMutation.mutate({ id: payment.id, action, note: rejectionNote });
+        actionMutation.mutate({ action, note: rejectionNote });
     };
 
     if (!payment) return null;

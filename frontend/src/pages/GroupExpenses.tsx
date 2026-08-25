@@ -6,38 +6,11 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { ExpenseCard } from '../components/expenses/ExpenseCard';
 import { Modal } from '../components/ui/Modal';
 import { Settings, Search, Plus, AlertTriangle, Receipt, Filter, ArrowRight, Wallet, PartyPopper, ArrowLeft } from 'lucide-react';
-import api from '../lib/api';
-import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getErrorMessage } from '../utils/errorHandler';
-import { Expense } from '../types';
+import type { Expense } from '../types';
 import { SkeletonList } from '../components/ui/Skeleton';
 import { GroupActivityDropdown } from '../components/ui/GroupActivityDropdown';
-
-
-interface ExpenseShare {
-    id: string;
-    userId: string;
-    shareAmount: string;
-    isPaid: boolean;
-    payments?: { status: string }[];
-}
-
-interface Expense {
-    id: string;
-    description: string;
-    totalAmount: string;
-    expenseDate: string;
-    paidBy: string;
-    paidByUser?: { name: string };
-    shares: ExpenseShare[];
-}
-
-interface BalanceData {
-    totalIOwe: number;
-    totalOwedToMe: number;
-    iOwe: { userId: string, name: string, amount: number, transactions: { id: string, description: string, amount: number, iOweThem: boolean }[] }[];
-    owedToMe: { userId: string, name: string, amount: number, transactions: { id: string, description: string, amount: number, iOweThem: boolean }[] }[];
-}
+import { useExpenses } from '../hooks/useExpenses';
 
 const formatDateHeader = (dateString: string) => {
     const date = new Date(dateString);
@@ -79,13 +52,8 @@ export const GroupExpenses = () => {
         }, 300);
     };
 
-    const { data: balanceData, isLoading: isBalanceLoading } = useQuery({
-        queryKey: ['groups', groupId, 'balance'],
-        queryFn: async () => {
-            const response = await api.get(`/groups/${groupId}/balance`);
-            return response.data as BalanceData;
-        }
-    });
+    const { useGroupBalance, useInfiniteExpenses } = useExpenses();
+    const { data: balanceData, isLoading: isBalanceLoading } = useGroupBalance(groupId);
 
     const {
         data,
@@ -95,23 +63,7 @@ export const GroupExpenses = () => {
         isLoading,
         isError,
         error
-    } = useInfiniteQuery({
-        queryKey: ['groups', groupId, 'expenses', searchKeyword, startDate, endDate, filterType],
-        queryFn: async ({ pageParam = 1 }) => {
-            let url = `/groups/${groupId}/expenses?page=${pageParam}&limit=10`;
-            if (searchKeyword) url += `&keyword=${encodeURIComponent(searchKeyword)}`;
-            if (startDate) url += `&startDate=${startDate}`;
-            if (endDate) url += `&endDate=${endDate}`;
-            if (filterType !== 'all') url += `&filterType=${filterType}`;
-
-            const response = await api.get(url);
-            return response.data as Expense[];
-        },
-        getNextPageParam: (lastPage, allPages) => {
-            return lastPage.length === 10 ? allPages.length + 1 : undefined;
-        },
-        initialPageParam: 1
-    });
+    } = useInfiniteExpenses(groupId, searchKeyword, startDate, endDate, filterType);
 
     const expenses = data ? data.pages.flatMap(page => page) : [];
     const errorMsg = isError ? getErrorMessage(error) : '';
@@ -259,7 +211,7 @@ export const GroupExpenses = () => {
                                         <ExpenseCard 
                                             id={expense.id}
                                             description={expense.description}
-                                            totalAmount={expense.totalAmount}
+                                            totalAmount={String(expense.totalAmount)}
                                             expenseDate={expense.expenseDate}
                                             paidByUserName={expense.paidByUser?.name || 'Seseorang'}
                                             paidByUserId={expense.paidBy}

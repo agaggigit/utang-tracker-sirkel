@@ -4,66 +4,30 @@ import { Button } from '../components/Button';
 import { SkeletonList } from '../components/ui/Skeleton';
 import { ReviewPaymentModal } from '../components/expenses/ReviewPaymentModal';
 import { Inbox, Check, AlertTriangle, PartyPopper, Info, ArrowLeft } from 'lucide-react';
-import api from '../lib/api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getErrorMessage } from '../utils/errorHandler';
-import { Payment, JoinRequest, Notification as NotificationType } from '../types';
+import type { Payment, JoinRequest, Notification as NotificationType } from '../types';
+import { useNotifications } from '../hooks/useNotifications';
 
 export const Notifications = () => {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
+    const { useGeneralNotifs, useJoinRequests, useIncomingPayments, useMarkAsRead, useMarkAllAsRead } = useNotifications();
 
-    // --- STATE UNTUK MODAL REVIEW (LANGKAH 3) ---
-    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-    const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
-
-    const { data: joinRequests = [], isLoading: isLoadingJoin, error: joinError } = useQuery({
-        queryKey: ['notifications', 'join-requests'],
-        queryFn: async () => {
-            const response = await api.get('/notifications/join-requests');
-            return response.data;
-        }
-    });
-
-    const { data: incomingPayments = [], isLoading: isLoadingPayments, error: paymentError } = useQuery({
-        queryKey: ['payments', 'incoming'],
-        queryFn: async () => {
-            const response = await api.get('/payments/incoming');
-            return response.data;
-        }
-    });
-
-    const { data: generalNotifs = [], isLoading: isLoadingNotifs, error: notifError } = useQuery({
-        queryKey: ['notifications', 'general'],
-        queryFn: async () => {
-            const response = await api.get('/notifications');
-            return response.data;
-        }
-    });
+    const { data: joinRequests = [], isLoading: isLoadingJoin, error: joinError } = useJoinRequests();
+    const { data: incomingPayments = [], isLoading: isLoadingPayments, error: paymentError } = useIncomingPayments();
+    const { data: generalNotifs = [], isLoading: isLoadingNotifs, error: notifError } = useGeneralNotifs();
 
     const isLoading = isLoadingJoin || isLoadingPayments || isLoadingNotifs;
     const errorMsg = [joinError, paymentError, notifError].filter(Boolean).map(e => getErrorMessage(e)).join(', ');
 
     const hasNoNotifications = joinRequests.length === 0 && incomingPayments.length === 0 && generalNotifs.length === 0;
 
-    // --- LOGIKA READ NOTIFIKASI (LANGKAH 4) ---
-    const markAsReadMutation = useMutation({
-        mutationFn: async (id: string) => {
-            await api.patch(`/notifications/${id}/read`);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['notifications', 'general'] });
-        }
-    });
+    // --- STATE UNTUK MODAL REVIEW (LANGKAH 3) ---
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
-    const markAllAsReadMutation = useMutation({
-        mutationFn: async () => {
-            await api.patch(`/notifications/read-all`);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['notifications', 'general'] });
-        }
-    });
+    // --- LOGIKA READ NOTIFIKASI (LANGKAH 4) ---
+    const markAsReadMutation = useMarkAsRead();
+    const markAllAsReadMutation = useMarkAllAsRead();
 
     return (
         <div className="p-8 max-w-[800px] mx-auto w-full">

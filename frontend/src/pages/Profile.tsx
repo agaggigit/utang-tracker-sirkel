@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import api from '../lib/api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../hooks/useAuth';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { Trash2, ArrowLeft, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { getErrorMessage } from '../utils/errorHandler';
+
 
 const MySwal = withReactContent(Swal);
 
@@ -23,20 +22,14 @@ export const Profile = () => {
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-    const queryClient = useQueryClient();
+    const { useProfile, useUpdateProfile, useDeleteAvatar } = useAuth();
 
     const [message, setMessage] = useState({
         type: '',
         text: ''
     });
 
-    const { data: profile, isLoading: isFetching } = useQuery({
-        queryKey: ['users', 'me'],
-        queryFn: async () => {
-            const response = await api.get('/users/me');
-            return response.data;
-        }
-    });
+    const { data: profile, isLoading: isFetching } = useProfile();
 
     // --- MENGISI FORM SAAT DATA SELESAI DIAMBIL ---
     useEffect(() => {
@@ -73,27 +66,23 @@ export const Profile = () => {
         });
     };
 
-    const mutation = useMutation({
-        mutationFn: async () => {
-            // 1. Upload file jika ada
-            if (avatarFile) {
-                const form = new FormData();
-                form.append('avatar', avatarFile);
-                await api.post('/users/me/avatar', form, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-            }
-            
-            // 2. Update nama
-            const response = await api.patch('/users/me', { name: formData.name });
-            return response.data;
-        },
+    const updateMutation = useUpdateProfile({
         onSuccess: () => {
             setMessage({ type: 'success', text: 'Profil berhasil diperbarui' });
-            queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
         },
-        onError: (err: unknown) => {
-            setMessage({ type: 'error', text: getErrorMessage(err) });
+        onError: (err: any) => {
+            setMessage({ type: 'error', text: err.response?.data?.message || err.message || 'Gagal memperbarui profil' });
+        }
+    });
+
+    const deleteAvatarMutation = useDeleteAvatar({
+        onSuccess: () => {
+            setPreviewUrl(null);
+            setAvatarFile(null);
+            setMessage({ type: 'success', text: 'Foto profil berhasil dihapus' });
+        },
+        onError: (err: any) => {
+            setMessage({ type: 'error', text: err.response?.data?.message || err.message || 'Gagal menghapus foto profil' });
         }
     });
 
@@ -101,7 +90,7 @@ export const Profile = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setMessage({ type: '', text: '' });
-        mutation.mutate();
+        updateMutation.mutate({ name: formData.name, avatarFile });
     };
 
     return (
@@ -186,15 +175,7 @@ export const Profile = () => {
                                                 buttonsStyling: false
                                             }).then(async (result) => {
                                                 if (result.isConfirmed) {
-                                                    try {
-                                                        await api.patch('/users/me', { avatarUrl: '' });
-                                                        setPreviewUrl(null);
-                                                        setAvatarFile(null);
-                                                        queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
-                                                        setMessage({ type: 'success', text: 'Foto profil berhasil dihapus' });
-                                                    } catch (error) {
-                                                        setMessage({ type: 'error', text: 'Gagal menghapus foto profil' });
-                                                    }
+                                                        deleteAvatarMutation.mutate();
                                                 }
                                             });
                                         }}
@@ -226,8 +207,8 @@ export const Profile = () => {
                                     onChange={handleChange}
                                     required
                                 />
-                                <Button type="submit" fullWidth disabled={mutation.isPending || isFetching}>
-                                    {mutation.isPending ? 'Menyimpan...' : 'Simpan Perubahan'}
+                                <Button type="submit" fullWidth disabled={updateMutation.isPending || isFetching}>
+                                    {updateMutation.isPending ? 'Menyimpan...' : 'Simpan Perubahan'}
                                 </Button>
                             </form>
                         </div>

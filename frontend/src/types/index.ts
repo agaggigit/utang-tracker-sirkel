@@ -9,6 +9,8 @@ export interface Group {
     id: string;
     name: string;
     joinCode: string;
+    inviteCode?: string;
+    joinApprovalRequired?: boolean;
     hostId: string;
     host?: User;
     memberships?: GroupMembership[];
