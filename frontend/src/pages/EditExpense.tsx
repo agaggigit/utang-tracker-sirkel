@@ -8,6 +8,8 @@ import { SkeletonForm } from '../components/ui/Skeleton';
 import { getErrorMessage } from '../utils/errorHandler';
 import type { ExpenseShare } from '../types';
 import { useExpenses } from '../hooks/useExpenses';
+import { useGroups } from '../hooks/useGroups';
+import { getToken } from '../utils/token';
 
 // Tipe data untuk daftar anggota yang bisa dipilih
 interface Member {
@@ -66,7 +68,8 @@ export const EditExpense = () => {
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = getToken();
+                if (!token) throw new Error("Tidak ada token");
                 
                 // 1. Ambil data expense
                 const expenseRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/expenses/${expenseId}`, {

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getToken } from './utils/token';
 
 // Buat instance axios dengan base URL dari environment variable
 const api = axios.create({
@@ -11,8 +12,8 @@ const api = axios.create({
 // Interceptor untuk MENAMBAHKAN token ke setiap request yang keluar
 api.interceptors.request.use(
   (config) => {
-    // Ambil token dari localStorage
-    const token = localStorage.getItem('token');
+    // Ambil token dari storage
+    const token = getToken();
     
     // Jika token ada, selipkan ke header Authorization
     if (token) {

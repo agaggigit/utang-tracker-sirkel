@@ -10,6 +10,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../hooks/useNotifications';
 import { useTheme } from '../contexts/ThemeContext';
 import type { Notification, GroupMembership } from '../types';
+import { removeToken } from '../utils/token';
 
 const MySwal = withReactContent(Swal);
 
@@ -48,7 +49,7 @@ export const Dashboard = () => {
             cancelButtonText: "Batal"
         }).then((result) => {
             if (result.isConfirmed) {
-                localStorage.removeItem('token');
+                removeToken();
                 navigate('/login');
             }
         });

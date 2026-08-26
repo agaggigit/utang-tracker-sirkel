@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { getErrorMessage } from '../utils/errorHandler';
 import { useExpenses } from '../hooks/useExpenses';
+import { getToken } from '../utils/token';
 
 const MySwal = withReactContent(Swal);
 
@@ -30,7 +31,7 @@ export const ExpenseDetail = () => {
     const [reviewPayment, setReviewPayment] = useState<{ id: string, amount: string | number, note?: string, from: { name: string, email: string } } | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (token) {
             setCurrentUserId(JSON.parse(atob(token.split('.')[1])).userId);
         }

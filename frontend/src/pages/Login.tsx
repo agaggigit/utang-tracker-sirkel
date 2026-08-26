@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
+import { setToken, getToken } from '../utils/token';
 
 export const Login = () => {
     const navigate = useNavigate();
@@ -14,6 +15,14 @@ export const Login = () => {
     });
 
     const [errorMsg, setErrorMsg] = useState('');
+    const [rememberMe, setRememberMe] = useState(true);
+
+    // Langsung pindah ke dashboard jika sudah punya token
+    useEffect(() => {
+        if (getToken()) {
+            navigate('/dashboard');
+        }
+    }, [navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -25,7 +34,7 @@ export const Login = () => {
     const loginMutation = useAuth().useLogin({
         onSuccess: (data) => {
             // MISI RAHASIA: Simpan "Kunci" (Token JWT) dari Backend ke Brankas Browser
-            localStorage.setItem('token', data.token);
+            setToken(data.token, rememberMe);
             toast.success('Login Berhasil!');
             navigate('/dashboard');
         },
@@ -36,7 +45,7 @@ export const Login = () => {
 
     const googleLoginMutation = useAuth().useGoogleLoginMutation({
         onSuccess: (data) => {
-            localStorage.setItem('token', data.token);
+            setToken(data.token, rememberMe);
             navigate('/dashboard');
         },
         onError: (err: any) => {
@@ -93,6 +102,19 @@ export const Login = () => {
                     onChange={handleChange}
                     required
                 />
+
+                <div className="flex items-center gap-2 mb-6">
+                    <input 
+                        type="checkbox" 
+                        id="rememberMe" 
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 cursor-pointer"
+                    />
+                    <label htmlFor="rememberMe" className="text-sm text-text-muted cursor-pointer select-none">
+                        Ingat Saya
+                    </label>
+                </div>
 
                 <Button type="submit" fullWidth disabled={isSubmitting}>
                     {loginMutation.isPending ? 'Mengecek data...' : 'Masuk'}

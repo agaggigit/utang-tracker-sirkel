@@ -11,6 +11,7 @@ import { getErrorMessage } from '../utils/errorHandler';
 import { SkeletonList } from '../components/ui/Skeleton';
 import { GroupActivityDropdown } from '../components/ui/GroupActivityDropdown';
 import { useExpenses } from '../hooks/useExpenses';
+import { getToken } from '../utils/token';
 
 const formatDateHeader = (dateString: string) => {
     const date = new Date(dateString);
@@ -37,7 +38,7 @@ export const GroupExpenses = () => {
     const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
     const [isClosingSheet, setIsClosingSheet] = useState(false);
 
-    const token = localStorage.getItem('token');
+    const token = getToken();
     const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).userId : '';
 
     const applyFilters = () => {

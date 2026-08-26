@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bell, CheckCircle, Clock, XCircle, ArrowRight } from 'lucide-react';
+import { getToken } from '../../utils/token';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
@@ -25,7 +26,7 @@ export function GroupActivityDropdown({ groupId }: { groupId: string }) {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
-    const token = localStorage.getItem('token');
+    const token = getToken();
     const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).userId : '';
 
     useEffect(() => {

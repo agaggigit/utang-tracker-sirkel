@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin }  from '@react-oauth/google';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
+import { setToken, getToken } from '../utils/token';
 
 export const Register = () => {
     // --- 1. STATE (Tempat menyimpan apa yang diketik user) ---
@@ -17,6 +18,13 @@ export const Register = () => {
     });
 
     const [errorMsg, setErrorMsg] = useState('');
+
+    // Langsung pindah ke dashboard jika sudah punya token
+    useEffect(() => {
+        if (getToken()) {
+            navigate('/dashboard');
+        }
+    }, [navigate]);
 
     // Fungsi untuk mencatat setiap kali user mengetik di kotak input
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +62,7 @@ export const Register = () => {
 
     const googleLoginMutation = useAuth().useGoogleLoginMutation({
         onSuccess: (data) => {
-            localStorage.setItem('token', data.token);
+            setToken(data.token, true); // by default remember after register
             navigate('/dashboard');
         },
         onError: (err: any) => {
