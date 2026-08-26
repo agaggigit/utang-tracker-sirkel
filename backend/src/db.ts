@@ -10,7 +10,10 @@ if (!connectionString) {
     throw new Error("FATAL ERROR: DATABASE_URL belum diatur di file .env");
 }
 
-const pool = new Pool({ connectionString });
+const pool = new Pool({ 
+    connectionString,
+    max: 1 // Vercel (Serverless) hanya menangani 1 request per instance, jadi max 1 koneksi sudah cukup dan mencegah error "max clients"
+});
 const adapter = new PrismaPg(pool);
 
 export const prisma = new PrismaClient({ adapter })
