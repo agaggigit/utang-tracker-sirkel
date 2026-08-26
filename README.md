@@ -121,6 +121,10 @@ Gunakan akun berikut jika kamu ingin langsung menguji coba tanpa perlu registras
 - **Email:** `test04@test04.com`
 - **Password:** `test04@@`
 
+#### Account 5
+- **Email:** `testhp@testhp.com`
+- **Password:** `testhp@@`
+
 #### Group 1 (Contoh Data)
 - **Host:** Login menggunakan Akun Google Pribadi (atau test akun di atas)
 - **Name:** Sirkel1NoHostPerm
