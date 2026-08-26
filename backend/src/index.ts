@@ -82,7 +82,12 @@ app.get('/api/me', authenticate, (req, res) => {
 
 app.use(errorHandler);
 
-// Menjalankan server
-app.listen(port, () => {
-  console.log(`Server berjalan di http://localhost:${port}`);
-});
+// Menjalankan server hanya jika tidak di lingkungan serverless (seperti Vercel)
+if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
+  app.listen(port, () => {
+    console.log(`Server berjalan di http://localhost:${port}`);
+  });
+}
+
+// Mengekspor app agar bisa dibaca oleh Vercel
+export default app;
