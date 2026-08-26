@@ -197,12 +197,14 @@ export const GroupExpenses = () => {
                 {/* --- 3. PANEL STATS (Kanan) --- */}
                 <div className="flex flex-col gap-6 lg:sticky lg:top-8">
                     {/* --- TOMBOL CATAT TAGIHAN BARU --- */}
-                    <Button 
-                        onClick={() => navigate(`/groups/${groupId}/expenses/create`)}
-                        className="w-full text-[1.05rem] p-4 flex justify-center items-center gap-2 shadow-md mb-6"
-                    >
-                        <Plus size={20} /> Catat Tagihan Baru
-                    </Button>
+                    {expenses.length > 0 && (
+                        <Button 
+                            onClick={() => navigate(`/groups/${groupId}/expenses/create`)}
+                            className="w-full text-[1.05rem] p-4 flex justify-center items-center gap-2 shadow-md mb-6"
+                        >
+                            <Plus size={20} /> Catat Tagihan Baru
+                        </Button>
+                    )}
 
                     {/* --- BANNER RINGKASAN UTANG --- */}
                     {!isBalanceLoading && balanceData && (

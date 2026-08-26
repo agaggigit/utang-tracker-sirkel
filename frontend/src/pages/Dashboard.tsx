@@ -153,7 +153,7 @@ export const Dashboard = () => {
                             {/* DAFTAR GRUP YANG DIMILIKI */}
                             <div className="flex flex-col gap-4">
                                 {user?.memberships?.map((membership: GroupMembership & { role: string; hasUnpaidDebt?: boolean }) => (
-                                    <div key={membership.group?.id} className="p-5 bg-surface border border-border rounded-xl flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
+                                    <div key={membership.group?.id} className="p-5 bg-surface border border-border rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-sm hover:shadow-md transition-shadow gap-4 sm:gap-0">
                                         <div>
                                             <h3 className="m-0 text-[1.15rem] font-bold text-text-main">{membership.group?.name || 'Grup'}</h3>
                                             <p className="m-0 mt-1 text-[0.85rem] text-text-muted">Peranmu: {membership.role}</p>
@@ -163,7 +163,7 @@ export const Dashboard = () => {
                                                 </p>
                                             )}
                                         </div>
-                                        <Button onClick={() => membership.group?.id && navigate('/groups/' + membership.group.id + '/expenses')}>Buka Sirkel</Button>
+                                        <Button className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base" onClick={() => membership.group?.id && navigate('/groups/' + membership.group.id + '/expenses')}>Buka Sirkel</Button>
                                     </div>
                                 ))}
                             </div>

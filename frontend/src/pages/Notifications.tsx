@@ -98,7 +98,7 @@ export const Notifications = () => {
 
                         {/* --- LIST JOIN REQUESTS (YANG SUDAH ADA SEBELUMNYA) --- */}
                         {joinRequests.map((notif: JoinRequest & { group: {name: string}, requestedAt: string }) => (
-                            <div key={notif.id} className="flex justify-between items-center py-5 px-6 bg-surface rounded-lg border border-border shadow-sm transition-all duration-200">
+                            <div key={notif.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-5 px-6 bg-surface rounded-lg border border-border shadow-sm transition-all duration-200 gap-4 sm:gap-0">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[1.2rem] shadow-sm shrink-0">
                                         {notif.user.name.charAt(0).toUpperCase()}
@@ -114,8 +114,8 @@ export const Notifications = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <div>
-                                    <Button onClick={() => navigate(`/groups/${notif.groupId}`)}>
+                                <div className="w-full sm:w-auto">
+                                    <Button className="w-full sm:w-auto" onClick={() => navigate(`/groups/${notif.groupId}`)}>
                                         Buka Sirkel
                                     </Button>
                                 </div>

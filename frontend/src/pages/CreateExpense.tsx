@@ -224,7 +224,7 @@ export const CreateExpense = () => {
                                             }}
                                             className="p-3 w-full border-2 border-dashed border-border rounded-lg text-base bg-transparent text-primary transition-all duration-200 outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 cursor-pointer font-bold text-center appearance-none"
                                         >
-                                            <option value="" disabled>+ Klik untuk Tambah Anggota yang Ditagih...</option>
+                                            <option value="" disabled>+ Tambah Anggota...</option>
                                             {members.filter(m => !shares.some(s => s.userId === m.id)).map(m => (
                                                 <option key={m.id} value={m.id}>{m.name}</option>
                                             ))}

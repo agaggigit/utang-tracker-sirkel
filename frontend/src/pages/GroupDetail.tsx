@@ -150,7 +150,7 @@ export const GroupDetail = () => {
                             ) : (
                                 <div className="flex flex-col gap-4">
                                     {requests.map((req: JoinRequest) => (
-                                        <div key={req.id} className="flex justify-between items-center py-4 px-6 bg-background rounded-xl border border-gray-200">
+                                        <div key={req.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 px-6 bg-background rounded-xl border border-gray-200 gap-4 sm:gap-0">
                                             <div className="flex items-center gap-4">
                                                 <Avatar name={req.user.name} imageUrl={req.user.avatarUrl} />
                                                 <div>
@@ -158,11 +158,11 @@ export const GroupDetail = () => {
                                                     <p className="m-0 text-[0.85rem] text-gray-500">Menunggu Persetujuan</p>
                                                 </div>
                                             </div>
-                                            <div className="flex gap-2">
-                                                <Button variant="outline" onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'rejected' })} className="border-error text-error" disabled={approvalMutation.isPending}>
+                                            <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                                                <Button variant="outline" onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'rejected' })} className="border-error text-error flex-1 sm:flex-none" disabled={approvalMutation.isPending}>
                                                     Tolak
                                                 </Button>
-                                                <Button onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'approved' })} disabled={approvalMutation.isPending}>
+                                                <Button onClick={() => approvalMutation.mutate({ requestId: req.id, status: 'approved' })} className="flex-1 sm:flex-none" disabled={approvalMutation.isPending}>
                                                     Terima
                                                 </Button>
                                             </div>
