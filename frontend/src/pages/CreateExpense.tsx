@@ -92,6 +92,8 @@ export const CreateExpense = () => {
     const createExpenseMutation = useCreateExpense(groupId, {
         onSuccess: () => {
             toast.success("Berhasil mencatat tagihan!");
+            // Panggil sinyal untuk menampilkan pop-up instalasi PWA
+            window.dispatchEvent(new Event('trigger-pwa-prompt'));
             navigate(`/groups/${groupId}/expenses`);
         },
         onError: (err: any) => {
