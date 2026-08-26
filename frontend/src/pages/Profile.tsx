@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { Trash2, ArrowLeft, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-
+import { ImageCropper } from '../components/ui/ImageCropper';
 
 const MySwal = withReactContent(Swal);
 
@@ -21,6 +21,8 @@ export const Profile = () => {
     
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isCropperOpen, setIsCropperOpen] = useState(false);
+    const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 
     const { useProfile, useUpdateProfile, useDeleteAvatar } = useAuth();
 
@@ -53,9 +55,34 @@ export const Profile = () => {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setAvatarFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); // Buat preview lokal
+            // Validasi ukuran file (Maksimal 20MB)
+            if (file.size > 20 * 1024 * 1024) {
+                MySwal.fire({
+                    icon: 'error',
+                    title: 'File Terlalu Besar',
+                    text: 'Ukuran foto maksimal adalah 20MB.',
+                    confirmButtonText: 'Mengerti',
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                    },
+                    buttonsStyling: false
+                });
+                return;
+            }
+
+            // Siapkan gambar untuk di-crop
+            setImageToCrop(URL.createObjectURL(file));
+            setIsCropperOpen(true);
+            
+            // Reset input file value agar onchange bisa ter-trigger jika memilih file yang sama lagi
+            e.target.value = '';
         }
+    };
+
+    const handleCropComplete = (croppedFile: File) => {
+        setAvatarFile(croppedFile);
+        setPreviewUrl(URL.createObjectURL(croppedFile));
+        setIsCropperOpen(false);
     };
 
     // --- MENGUBAH DATA (KETIKA MENGETIK) ---
@@ -262,6 +289,16 @@ export const Profile = () => {
 
                 </div>
             </div>
+
+            {/* KOMPONEN MODAL CROP */}
+            {imageToCrop && (
+                <ImageCropper
+                    isOpen={isCropperOpen}
+                    imageSrc={imageToCrop}
+                    onClose={() => setIsCropperOpen(false)}
+                    onCropCompleteAction={handleCropComplete}
+                />
+            )}
         </div>
     );
 }

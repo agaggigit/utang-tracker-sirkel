@@ -2,7 +2,9 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '../db';
 import { authenticate } from '../middleware/auth';
 import { uploadAvatar } from '../middleware/upload';
+import { supabase } from '../lib/supabase';
 import { z } from 'zod';
+import path from 'path';
 
 const router = Router();
 
@@ -101,9 +103,32 @@ router.post('/me/avatar', authenticate, uploadAvatar.single('avatar'), async (re
             return res.status(400).json({ message: "File gambar tidak ditemukan" });
         }
 
-        // Simpan relative path ke database
-        // Misalnya: file.filename adalah "avatar-1234.jpg"
-        const avatarUrl = `/public/uploads/avatars/${file.filename}`;
+        // Generate nama unik untuk file
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        const fileName = `avatar-${uniqueSuffix}${ext}`;
+
+        // Unggah ke Supabase Storage (bucket: 'avatars' atau sesuaikan dengan nama aslinya)
+        const { data, error } = await supabase
+            .storage
+            .from('Avatar') // Menggunakan nama bucket 'Avatar' sesuai screenshot user
+            .upload(fileName, file.buffer, {
+                contentType: file.mimetype,
+                upsert: false
+            });
+
+        if (error) {
+            console.error("Supabase Upload Error:", error);
+            return res.status(500).json({ message: "Gagal mengunggah gambar ke cloud storage" });
+        }
+
+        // Dapatkan Public URL dari Supabase
+        const { data: publicUrlData } = supabase
+            .storage
+            .from('Avatar')
+            .getPublicUrl(fileName);
+
+        const avatarUrl = publicUrlData.publicUrl;
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },
