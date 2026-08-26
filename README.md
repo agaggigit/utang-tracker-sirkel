@@ -126,8 +126,13 @@ Gunakan akun berikut jika kamu ingin langsung menguji coba tanpa perlu registras
 - **Password:** `testhp@@`
 
 #### Group 1 (Contoh Data)
-- **Host:** Login menggunakan Akun Google Pribadi (atau test akun di atas)
+- **Host:** Login menggunakan Akun Google Pribadi
 - **Name:** Sirkel1NoHostPerm
 - **Code:** `07a372cb`
+
+#### Group 2 (Contoh Data)
+- **Host:** testhp
+- **Name:** Nyoba di hp
+- **Code:** `b2d5513c`
 
 ---
