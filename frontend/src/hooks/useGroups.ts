@@ -37,7 +37,7 @@ export const useGroups = () => {
     const useJoinGroup = (options?: { onSuccess?: (data: any) => void, onError?: (err: unknown) => void }) => {
         return useMutation({
             mutationFn: async (inviteCode: string) => {
-                const response = await api.post(`/groups/join/${inviteCode}`);
+                const response = await api.post(`/groups/join`, { inviteCode });
                 return response.data;
             },
             onSuccess: (data) => {
