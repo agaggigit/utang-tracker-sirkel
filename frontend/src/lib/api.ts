@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from './utils/token';
+import { getToken } from '../utils/token';
 
 // Buat instance axios dengan base URL dari environment variable
 const api = axios.create({
