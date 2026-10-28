@@ -1,6 +1,6 @@
 type Transaction = { id: string; description: string; amount: number; iOweThem: boolean };
 
-type DebtValue = {
+type PersonBalance = {
     userId: string;
     name: string;
     amount: number;
@@ -26,15 +26,10 @@ type ExpenseInput = {
 };
 
 export function computeBalances(expenses: ExpenseInput[], currentUserId: string) {
-    // Map untuk menampung balance per pasangan user (hanya dari sudut pandang current user)
-    const balances = new Map<string, { 
-        userId: string, 
-        name: string, 
-        netAmount: number,
-        transactions: Transaction[]
-    }>();
-    // netAmount positif = mereka utang ke aku
-    // netAmount negatif = aku utang ke mereka
+    // Map untuk menampung utang orang lain ke current user
+    const owedToMeMap = new Map<string, PersonBalance>();
+    // Map untuk menampung utang current user ke orang lain
+    const iOweMap = new Map<string, PersonBalance>();
 
     for (const exp of expenses) {
         if (exp.paidBy === currentUserId) {
@@ -42,39 +37,31 @@ export function computeBalances(expenses: ExpenseInput[], currentUserId: string)
             for (const share of exp.shares) {
                 if (share.userId === currentUserId) continue; // utang diriku sendiri diabaikan
                 
-                const b = balances.get(share.userId) || { userId: share.userId, name: share.user.name, netAmount: 0, transactions: [] };
-                b.netAmount += share.shareAmount;
+                const b = owedToMeMap.get(share.userId) || { userId: share.userId, name: share.user.name, amount: 0, transactions: [] };
+                b.amount += share.shareAmount;
                 b.transactions.push({ id: exp.id, description: exp.description, amount: share.shareAmount, iOweThem: false });
-                balances.set(share.userId, b);
+                owedToMeMap.set(share.userId, b);
             }
         } else {
             // Tagihan ini ditalangi orang lain
             const myShare = exp.shares.find(s => s.userId === currentUserId);
             if (myShare) {
                 // Aku berutang ke orang ini
-                const b = balances.get(exp.paidBy) || { userId: exp.paidBy, name: exp.paidByUser.name, netAmount: 0, transactions: [] };
-                b.netAmount -= myShare.shareAmount;
+                const b = iOweMap.get(exp.paidBy) || { userId: exp.paidBy, name: exp.paidByUser.name, amount: 0, transactions: [] };
+                b.amount += myShare.shareAmount;
                 b.transactions.push({ id: exp.id, description: exp.description, amount: myShare.shareAmount, iOweThem: true });
-                balances.set(exp.paidBy, b);
+                iOweMap.set(exp.paidBy, b);
             }
         }
     }
 
-    const iOwe: DebtValue[] = [];
-    const owedToMe: DebtValue[] = [];
-    let totalIOwe = 0;
-    let totalOwedToMe = 0;
+    const owedToMe = Array.from(owedToMeMap.values());
+    const iOwe = Array.from(iOweMap.values());
 
-    balances.forEach((b) => {
-        if (b.netAmount > 0) {
-            owedToMe.push({ userId: b.userId, name: b.name, amount: b.netAmount, transactions: b.transactions });
-            totalOwedToMe += b.netAmount;
-        } else if (b.netAmount < 0) {
-            const amount = Math.abs(b.netAmount);
-            iOwe.push({ userId: b.userId, name: b.name, amount, transactions: b.transactions });
-            totalIOwe += amount;
-        }
-    });
+    let totalOwedToMe = 0;
+    for (const b of owedToMe) totalOwedToMe += b.amount;
+    let totalIOwe = 0;
+    for (const b of iOwe) totalIOwe += b.amount;
 
     return {
         iOwe,
